@@ -50,3 +50,18 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Ignore Refindpkg and Build items
+Refindpkg/
+Build/
+000-Output/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
