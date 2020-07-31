@@ -1,7 +1,12 @@
 # Ignore Refindpkg and Build items
-Refindpkg/
 Build/
+Build-OLD/
+Build-TMP/
+Build-REL/
+Build-DBG/
 000-BOOTx64-Files/
+RefindPkg/
+RefindPkg-OLD/
 
 # OS generated files #
 ######################
