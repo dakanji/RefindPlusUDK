@@ -29,6 +29,16 @@ OUTPUT_DIR="${BUILD_DIR}/000-BOOTx64-Files"
 GLOBAL_FILE="${BUILD_DIR}/RefindPkg/refind/global.h"
 GLOBAL_FILE_TMP_REL="${BUILD_DIR}/RefindPkg/refind/global-REL.txt"
 GLOBAL_FILE_TMP_DBG="${BUILD_DIR}/RefindPkg/refind/global-DBG.txt"
+if [ ! -f "${GLOBAL_FILE_TMP_REL}" ] ; then
+    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_REL} file"
+    echo ''
+    exit 1
+fi
+if [ ! -f "${GLOBAL_FILE_TMP_DBG}" ] ; then
+    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_DBG} file"
+    echo ''
+    exit 1
+fi
 if [ -d "${BUILD_DIR}/RefindPkg-OLD" ] ; then
     rm -fr "${BUILD_DIR}/RefindPkg-OLD"
 fi
@@ -70,12 +80,6 @@ echo '------------------------------------------'
 if [ -d "${BUILD_DIR}/Build-TMP" ] ; then
     rm -fr "${BUILD_DIR}/Build-TMP"
 fi
-if [ ! -f "${GLOBAL_FILE_TMP_REL}" ] ; then
-    popd > /dev/null || exit 1
-    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_REL} file"
-    echo ''
-    exit 1
-fi
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
 fi
@@ -94,14 +98,6 @@ echo '## RefindBuilder - Building DBG Version ##'
 echo '------------------------------------------'
 if [ -d "${BUILD_DIR}/Build-DBG" ] ; then
     rm -fr "${BUILD_DIR}/Build-DBG"
-fi
-if [ ! -f "${GLOBAL_FILE_TMP_DBG}" ] ; then
-    popd > /dev/null || exit 1
-    rm -fr "${OUTPUT_DIR}"
-    rm -fr "${BUILD_DIR}/Build-TMP"
-    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_DBG} file"
-    echo ''
-    exit 1
 fi
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
