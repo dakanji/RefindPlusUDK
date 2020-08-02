@@ -1,5 +1,6 @@
 # Ignore Refindpkg and Build items
-Build/
+/Build
+!/Python/build/*
 Build-OLD/
 Build-TMP/
 Build-REL/
