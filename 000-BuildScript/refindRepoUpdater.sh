@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
 
-# --------------------- #
-# USER EDIT SECTION START
+# ------------------------- #
+ # USER EDIT SECTION START #
 
 # IMPORTANT: Only change the line below if you have actually setup a branch with your own edits
 #            Otherwise leave as is
 EDIT_BRANCH='BRANCH_WITH_YOUR_EDITS'
 
-# USER EDIT SECTION END
-# --------------------- #
+  # USER EDIT SECTION END #
+# ------------------------- #
 
 
-# Update GOPFix Branch
+## ERROR HANDLER ##
+runErr() { # $1: message
+    # Declare Local Variables
+    local errMessage
+
+    errMessage="${1:-Runtime Error ... Exiting}"
+    echo ''
+    echo "${errMessage}"
+    echo ''
+    echo ''
+    exit 1
+}
+trap runErr ERR
+
+
+## UPDATE GOPFIX BRANCH ##
 clear
 echo '## RefindRepoUpdater ##'
 echo '-----------------------'
@@ -23,7 +38,7 @@ $ git pull upstream GOPFix
 $ git push
 
 
-# Update Edits Branch if Specified
+## UPDATE EDITS BRANCH (IF SPECIFIED) ##
 if [ ${EDIT_BRANCH} != 'BRANCH_WITH_YOUR_EDITS' ] ; then
     EDITS_SPECIFIED='YES'
     git checkout "${EDIT_BRANCH}"
@@ -32,7 +47,7 @@ if [ ${EDIT_BRANCH} != 'BRANCH_WITH_YOUR_EDITS' ] ; then
 fi
 
 
-# Clean Up
+## CLEAN UP ##
 popd > /dev/null || exit 1
 echo ''
 echo "Synced Branch: 'GOPFix'"

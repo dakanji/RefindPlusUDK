@@ -1,12 +1,27 @@
 #!/usr/bin/env bash
 
-# --------------------- #
-# USER EDIT SECTION START
+# ------------------------- #
+ # USER EDIT SECTION START #
 
-GITHUB_USERNAME="YOUR_GITHUB_USER_NAME"
+GITHUB_USERNAME="dakanji"
 
-# USER EDIT SECTION END
-# --------------------- #
+  # USER EDIT SECTION END #
+# ------------------------- #
+
+
+## ERROR HANDLER ##
+runErr() { # $1: message
+    # Declare Local Variables
+    local errMessage
+
+    errMessage="${1:-Runtime Error ... Exiting}"
+    echo ''
+    echo "${errMessage}"
+    echo ''
+    echo ''
+    exit 1
+}
+trap runErr ERR
 
 
 # Set things up and move into build folder
@@ -26,25 +41,25 @@ XCODE_DIR_DBG="${BUILD_DIR}/Build/Refind/DEBUG_XCODE5"
 XCODE_DIR_TMP="${BUILD_DIR}/Build-DBG/Refind/RELEASE_XCODE5"
 BINARY_DIR="${XCODE_DIR_REL}/X64"
 OUTPUT_DIR="${BUILD_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${BUILD_DIR}/RefindPkg/refind/global.h"
-GLOBAL_FILE_TMP_REL="${BUILD_DIR}/RefindPkg/refind/global-REL.txt"
-GLOBAL_FILE_TMP_DBG="${BUILD_DIR}/RefindPkg/refind/global-DBG.txt"
+GLOBAL_FILE="${BUILD_DIR}/RefindPkg/refind/globalExtra.h"
+GLOBAL_FILE_TMP_REL="${BUILD_DIR}/RefindPkg/refind/globalExtra-REL.txt"
+GLOBAL_FILE_TMP_DBG="${BUILD_DIR}/RefindPkg/refind/globalExtra-DBG.txt"
 pushd ${BUILD_DIR} > /dev/null || exit 1
+git checkout rudk
 if [ -d "${BUILD_DIR}/RefindPkg-OLD" ] ; then
     rm -fr "${BUILD_DIR}/RefindPkg-OLD"
 fi
-if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
-    mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
-fi
-git checkout rudk
-git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
-pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
-# See: https://stackoverflow.com/a/10312587/891636
-git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
-git fetch --all
-git pull --all
-git checkout ${EDIT_BRANCH}
-popd > /dev/null || exit 1
+#if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
+#    mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
+#fi
+#git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
+#pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
+## See: https://stackoverflow.com/a/10312587/891636
+#git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
+#git fetch --all
+#git pull --all
+#git checkout ${EDIT_BRANCH}
+#popd > /dev/null || exit 1
 
 
 # Basic clean up
