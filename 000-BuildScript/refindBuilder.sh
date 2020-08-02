@@ -3,7 +3,7 @@
 # ------------------------- #
  # USER EDIT SECTION START #
 
-GITHUB_USERNAME="dakanji"
+GITHUB_USERNAME="YOUR_GITHUB_USER_NAME"
 
   # USER EDIT SECTION END #
 # ------------------------- #
@@ -49,17 +49,17 @@ git checkout rudk
 if [ -d "${BUILD_DIR}/RefindPkg-OLD" ] ; then
     rm -fr "${BUILD_DIR}/RefindPkg-OLD"
 fi
-#if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
-#    mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
-#fi
-#git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
-#pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
-## See: https://stackoverflow.com/a/10312587/891636
-#git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
-#git fetch --all
-#git pull --all
-#git checkout ${EDIT_BRANCH}
-#popd > /dev/null || exit 1
+if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
+    mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
+fi
+git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
+pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
+# See: https://stackoverflow.com/a/10312587/891636
+git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
+git fetch --all
+git pull --all
+git checkout ${EDIT_BRANCH}
+popd > /dev/null || exit 1
 
 
 # Basic clean up
