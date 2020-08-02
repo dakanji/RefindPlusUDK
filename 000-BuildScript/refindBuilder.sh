@@ -29,23 +29,13 @@ OUTPUT_DIR="${BUILD_DIR}/000-BOOTx64-Files"
 GLOBAL_FILE="${BUILD_DIR}/RefindPkg/refind/global.h"
 GLOBAL_FILE_TMP_REL="${BUILD_DIR}/RefindPkg/refind/global-REL.txt"
 GLOBAL_FILE_TMP_DBG="${BUILD_DIR}/RefindPkg/refind/global-DBG.txt"
-if [ ! -f "${GLOBAL_FILE_TMP_REL}" ] ; then
-    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_REL} file"
-    echo ''
-    exit 1
-fi
-if [ ! -f "${GLOBAL_FILE_TMP_DBG}" ] ; then
-    echo "ERROR: Could not locate required ${GLOBAL_FILE_TMP_DBG} file"
-    echo ''
-    exit 1
-fi
+pushd ${BUILD_DIR} > /dev/null || exit 1
 if [ -d "${BUILD_DIR}/RefindPkg-OLD" ] ; then
     rm -fr "${BUILD_DIR}/RefindPkg-OLD"
 fi
 if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
     mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
 fi
-pushd ${BUILD_DIR} > /dev/null || exit 1
 git checkout rudk
 git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
 pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
