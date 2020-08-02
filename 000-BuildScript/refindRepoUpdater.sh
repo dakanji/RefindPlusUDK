@@ -26,19 +26,28 @@ runErr() { # $1: message
 trap runErr ERR
 
 
-## UPDATE GOPFIX BRANCH ##
+## UPDATE RUDK BRANCH ##
 clear
 echo '## RefindRepoUpdater ##'
 echo '-----------------------'
-EDITS_SPECIFIED='NO'
+BASE_DIR="${HOME}/Documents/RefindGOPFix/edk2"
+pushd ${BASE_DIR} > /dev/null || exit 1
+git checkout rudk
+git pull upstream rudk
+git push
+popd > /dev/null || exit 1
+
+
+## UPDATE GOPFIX BRANCH ##
 BASE_DIR="${HOME}/Documents/RefindGOPFix/WorkingFolder"
 pushd ${BASE_DIR} > /dev/null || exit 1
-$ git checkout GOPFix
-$ git pull upstream GOPFix
-$ git push
+git checkout GOPFix
+git pull upstream GOPFix
+git push
 
 
 ## UPDATE EDITS BRANCH (IF SPECIFIED) ##
+EDITS_SPECIFIED='NO'
 if [ ${EDIT_BRANCH} != 'BRANCH_WITH_YOUR_EDITS' ] ; then
     EDITS_SPECIFIED='YES'
     git checkout "${EDIT_BRANCH}"
