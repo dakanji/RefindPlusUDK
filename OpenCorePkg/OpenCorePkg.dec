@@ -19,6 +19,60 @@
   PACKAGE_VERSION   = 1.0
   DEC_SPECIFICATION = 0x00010005
 
+[Includes]
+  Include/AMI
+  Include/Acidanthera
+  Include/Apple
+  Include/Generic
+  Include/Intel
+  Include/Microsoft
+  Include/VMware
+
+[Includes.AArch64]
+  # Include/AMI/AArch64
+  # Include/Acidanthera/AArch64
+  Include/Apple/AArch64
+  # Include/Generic/AArch64
+  # Include/Intel/AArch64
+  # Include/Microsoft/AArch64
+  # Include/VMware/AArch64
+
+[Includes.Arm]
+  # Include/AMI/Arm
+  # Include/Acidanthera/Arm
+  Include/Apple/Arm
+  # Include/Generic/Arm
+  # Include/Intel/Arm
+  # Include/Microsoft/Arm
+  # Include/VMware/Arm
+
+[Includes.Ebc]
+  # Include/AMI/Ebc
+  # Include/Acidanthera/Ebc
+  Include/Apple/Ebc
+  # Include/Generic/Ebc
+  # Include/Intel/Ebc
+  # Include/Microsoft/Ebc
+  # Include/VMware/Ebc
+
+[Includes.Ia32]
+  # Include/AMI/Ia32
+  # Include/Acidanthera/Ia32
+  Include/Apple/Ia32
+  # Include/Generic/Ia32
+  # Include/Intel/Ia32
+  # Include/Microsoft/Ia32
+  # Include/VMware/Ia32
+
+[Includes.X64]
+  # Include/AMI/X64
+  # Include/Acidanthera/X64
+  Include/Apple/X64
+  # Include/Generic/X64
+  # Include/Intel/X64
+  # Include/Microsoft/X64
+  # Include/VMware/X64
+
 [Guids]
   ## Include/Acidanthera/Guid/OcVariable.h
   gOcVendorVariableGuid                      = { 0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 }}
@@ -383,6 +437,9 @@
   ## Include/Apple/Guid/AppleLoginWindow.h
   gAppleEfiLoginWindowExitGuid               = { 0x01AAACBA, 0x34AC, 0x42E3, { 0x98, 0x47, 0x66, 0x83, 0x7D, 0xAC, 0x5F, 0x5E }}
 
+  ## Include/Intel/Guid/BlockIoVendor.h
+  gBlockIoVendorGuid                         = { 0xCF31FAC5, 0xC24E, 0x11D2,  {0x85, 0xF3, 0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B }}
+
   ## Include/Intel/Guid/DataHubRecords.h
   gEfiCacheSubClassGuid                      = { 0x7f0013a7, 0xdc79, 0x4b22, { 0x80, 0x99, 0x11, 0xf7, 0x5f, 0xdc, 0x82, 0x9d }}
 
@@ -589,5 +646,242 @@
   gAppleSystemInfoProtocolGuid               = { 0x82ED9A9E, 0xCCBB, 0x4CD2, { 0x8A, 0x94, 0xF4, 0xE3, 0x55, 0x9A, 0xF9, 0x11 }}
 
   ##  Include/VMware/Protocol/VMwareHda.h
-  gVMwareHdaProtocolGuid                     = { 0x94E46BC2, 0x9127, 0x11DF, { 0xBF, 0xCE, 0xE7, 0x83, 0xCA, 0x2A, 0x34, 0xBE }}
+  gVMwareHdaProtocolGuid            = { 0x94E46BC2, 0x9127, 0x11DF, { 0xBF, 0xCE, 0xE7, 0x83, 0xCA, 0x2A, 0x34, 0xBE }}
 
+[PcdsFeatureFlag]
+  ## Indicates if Apple Thunderbolt NHI protocol is called during device property export.<BR><BR>
+  ##   TRUE  - Apple Thunderbolt NHI protocol will be called.<BR>
+  ##   FALSE - Apple Thunderbolt NHI protocol will not be called.<BR>
+  ## @Prompt Inform Thunderbolt devices about device property export.
+  gOpenCorePkgTokenSpaceGuid.PcdEnableAppleThunderboltSync|FALSE|BOOLEAN|0x00000000
+
+  ## Indicates if NVRAM properties are used to initialize device property database.<BR><BR>
+  ##   TRUE  - NVRAM properties initialize device property database.<BR>
+  ##   FALSE - NVRAM properties do not initialize device property database.<BR>
+  ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
+  gOpenCorePkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
+
+  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot
+  ## Services event is triggered.<BR><BR>
+  ##   TRUE  - USB KeyBoard Driver will disconnect itself.<BR>
+  ##   FALSE - USB KeyBoard Driver will not disconnect itself.<BR>
+  ## @Prompt Disconnect the USB KeyBoard Driver when exitting Boot Services.
+  gOpenCorePkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver|TRUE|BOOLEAN|0x00000002
+
+  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.
+  ## Services event is triggered.<BR><BR>
+  ##   TRUE  - USB KeyBoard Driver will registers a protocol installation notify.<BR>
+  ##   FALSE - USB KeyBoard Driver will registers a protocol installation notify.<BR>
+  ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
+  gOpenCorePkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver|TRUE|BOOLEAN|0x00000003
+
+  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.
+  ## Services event is triggered.<BR><BR>
+  ##   TRUE  - USB KeyBoard Driver will disconnect other drivers.<BR>
+  ##   FALSE - USB KeyBoard Driver will not disconnect other drivers.<BR>
+  ## @Prompt Disconnect other drivers for the USB KeyBoard Driver to take precedence over them.
+  gOpenCorePkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence|TRUE|BOOLEAN|0x00000004
+
+[PcdsFixedAtBuild]
+  ## Defines the Console Control initialization mode set on entry.<BR><BR>
+  ##   0 - EfiConsoleControlScreenText<BR>
+  ##   1 - EfiConsoleControlScreenGraphics<BR>
+  ##   2 - EfiConsoleControlScreenMaxValue (does nothing)<BR>
+  ## @Prompt Initialize the console to the specified mode on entry.
+  gOpenCorePkgTokenSpaceGuid.PcdConsoleControlEntryMode|0|UINT8|0x00000100
+
+  ## Defines the allowed OcCryptoLib RSA moduli by OR'ing the two's potencies in bytes.<BR><BR>
+  ## @Prompt Allow these RSA moduli for cryptographic usage.
+  gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli|0x300|UINT16|0x00000500
+
+  ## Defines the allowed OcCryptoLib signature hashing algorihtms by OR'ing the
+  ##  types' Bit indices.<BR><BR>
+  ##   Bit 0 - OcSigHashTypeSha256
+  ##   Bit 1 - OcSigHashTypeSha384
+  ##   Bit 2 - OcSigHashTypeSha512
+  ## @Prompt Allow these signature hashing algorithms for cryptographic usage.
+  gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes|0x07|UINT16|0x00000501
+
+[LibraryClasses]
+  ##  @libraryclass
+  OcAcpiLib|Include/Acidanthera/Library/OcAcpiLib.h
+
+  ##  @libraryclass
+  OcAfterBootCompatLib|Include/Acidanthera/Library/OcAfterBootCompatLib.h
+
+  ##  @libraryclass
+  OcApfsLib|Include/Acidanthera/Library/OcApfsLib.h
+
+  ##  @libraryclass
+  OcAppleBootPolicyLib|Include/Acidanthera/Library/OcAppleBootPolicyLib.h
+
+  ##  @libraryclass
+  OcAppleChunklistLib|Include/Acidanthera/Library/OcAppleChunklistLib.h
+
+  ##  @libraryclass
+  OcAppleDiskImageLib|Include/Acidanthera/Library/OcAppleDiskImageLib.h
+
+  ##  @libraryclass
+  OcAppleEventLib|Include/Acidanthera/Library/OcAppleEventLib.h
+
+  ##  @libraryclass
+  OcAppleImageConversionLib|Include/Acidanthera/Library/OcAppleImageConversionLib.h
+
+  ##  @libraryclass
+  OcAppleImageVerificationLib|Include/Acidanthera/Library/OcAppleImageVerificationLib.h
+
+  ##  @libraryclass
+  OcAppleImg4Lib|Include/Acidanthera/Library/OcAppleImg4Lib.h
+
+  ##  @libraryclass
+  OcAppleKernelLib|Include/Acidanthera/Library/OcAppleKernelLib.h
+
+  ##  @libraryclass
+  OcAppleKeyMapLib|Include/Acidanthera/Library/OcAppleKeyMapLib.h
+
+  ##  @libraryclass
+  OcAppleKeysLib|Include/Acidanthera/Library/OcAppleKeysLib.h
+
+  ##  @libraryclass
+  OcAppleRamDiskLib|Include/Acidanthera/Library/OcAppleRamDiskLib.h
+
+  ##  @libraryclass
+  OcAppleSecureBootLib|Include/Acidanthera/Library/OcAppleSecureBootLib.h
+
+  ##  @libraryclass
+  OcAppleUserInterfaceThemeLib|Include/Acidanthera/Library/OcAppleUserInterfaceThemeLib.h
+
+  ##  @libraryclass
+  OcAudioLib|Include/Acidanthera/Library/OcAudioLib.h
+
+  ##  @libraryclass
+  OcBootManagementLib|Include/Acidanthera/Library/OcBootManagementLib.h
+
+  ##  @libraryclass
+  OcBootServicesTableLib|Include/Acidanthera/Library/OcBootServicesTableLib.h
+
+  ##  @libraryclass
+  OcCompressionLib|Include/Acidanthera/Library/OcCompressionLib.h
+
+  ##  @libraryclass
+  OcConfigurationLib|Include/Acidanthera/Library/OcConfigurationLib.h
+
+  ##  @libraryclass
+  OcConsoleLib|Include/Acidanthera/Library/OcConsoleLib.h
+
+  ##  @libraryclass
+  OcCpuLib|Include/Acidanthera/Library/OcCpuLib.h
+
+  ##  @libraryclass
+  OcCryptoLib|Include/Acidanthera/Library/OcCryptoLib.h
+
+  ##  @libraryclass
+  OcDataHubLib|Include/Acidanthera/Library/OcDataHubLib.h
+
+  ##  @libraryclass
+  OcDebugLogLib|Include/Acidanthera/Library/OcDebugLogLib.h
+
+  ##  @libraryclass
+  OcDevicePathLib|Include/Acidanthera/Library/OcDevicePathLib.h
+
+  ##  @libraryclass
+  OcDevicePropertyLib|Include/Acidanthera/Library/OcDevicePropertyLib.h
+
+  ##  @libraryclass
+  OcDeviceTreeLib|Include/Acidanthera/Library/OcDeviceTreeLib.h
+
+  ##  @libraryclass
+  OcFileLib|Include/Acidanthera/Library/OcFileLib.h
+
+  ##  @libraryclass
+  OcFirmwarePasswordLib|Include/Acidanthera/Library/OcFirmwarePasswordLib.h
+
+  ##  @libraryclass
+  OcFirmwareVolumeLib|Include/Acidanthera/Library/OcFirmwareVolumeLib.h
+
+  ##  @libraryclass
+  OcGuardLib|Include/Acidanthera/Library/OcGuardLib.h
+
+  ##  @libraryclass
+  OcHashServicesLib|Include/Acidanthera/Library/OcHashServicesLib.h
+
+  ##  @libraryclass
+  OcHdaDevicesLib|Include/Acidanthera/Library/OcHdaDevicesLib.h
+
+  ##  @libraryclass
+  OcHeciLib|Include/Acidanthera/Library/OcHeciLib.h
+
+  ##  @libraryclass
+  OcInputLib|Include/Acidanthera/Library/OcInputLib.h
+
+  ##  @libraryclass
+  OcMachoLib|Include/Acidanthera/Library/OcMachoLib.h
+
+  ##  @libraryclass
+  OcMemoryLib|Include/Acidanthera/Library/OcMemoryLib.h
+
+  ##  @libraryclass
+  OcMiscLib|Include/Acidanthera/Library/OcMiscLib.h
+
+  ##  @libraryclass
+  OcOSInfoLib|Include/Acidanthera/Library/OcOSInfoLib.h
+
+  ##  @libraryclass
+  OcPngLib|Include/Acidanthera/Library/OcPngLib.h
+
+  ##  @libraryclass
+  OcRngLib|Include/Acidanthera/Library/OcRngLib.h
+
+  ##  @libraryclass
+  OcRtcLib|Include/Acidanthera/Library/OcRtcLib.h
+
+  ##  @libraryclass
+  OcSerializeLib|Include/Acidanthera/Library/OcSerializeLib.h
+
+  ##  @libraryclass
+  OcSmbiosLib|Include/Acidanthera/Library/OcSmbiosLib.h
+
+  ##  @libraryclass
+  OcSmcLib|Include/Acidanthera/Library/OcSmcLib.h
+
+  ##  @libraryclass
+  OcStorageLib|Include/Acidanthera/Library/OcStorageLib.h
+
+  ##  @libraryclass
+  OcStringLib|Include/Acidanthera/Library/OcStringLib.h
+
+  ##  @libraryclass
+  OcTemplateLib|Include/Acidanthera/Library/OcTemplateLib.h
+
+  ##  @libraryclass
+  TimerLib|Include/Acidanthera/Library/OcTimerLib.h
+
+  ##  @libraryclass
+  OcUnicodeCollationEngGenericLib|Include/Acidanthera/Library/OcUnicodeCollationEngGenericLib.h
+
+  ##  @libraryclass
+  OcVirtualFsLib|Include/Acidanthera/Library/OcVirtualFsLib.h
+
+  ##  @libraryclass
+  OcXmlLib|Include/Acidanthera/Library/OcXmlLib.h
+
+  ##  @libraryclass
+  UefiBootServicesTableLib|Include/Acidanthera/Library/UefiBootServicesTableLib.h
+
+  ##  @libraryclass
+  AppleCpuExtensionsLib|Include/Apple/Library/AppleCpuExtensionsLib.h
+
+  ##  @libraryclass
+  AppleDataHubLib|Include/Apple/Library/AppleDataHubLib.h
+
+  ##  @libraryclass
+  AppleEventLib|Include/Apple/Library/AppleEventLib.h
+
+  ##  @libraryclass
+  AppleInterruptLib|Include/Apple/Library/AppleInterruptLib.h
+
+  ##  @libraryclass
+  AppleSmbiosLib|Include/Apple/Library/AppleSmbiosLib.h
+
+  ##  @libraryclass
+  BiodIdLib|Include/Apple/Library/BiodIdLib.h
