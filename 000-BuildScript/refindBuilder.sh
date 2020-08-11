@@ -3,7 +3,7 @@
 # ------------------------- #
  # USER EDIT SECTION START #
 
-GITHUB_USERNAME="YOUR_GITHUB_USER_NAME"
+GITHUB_USERNAME="YOUR_GITHUB_USERNAME"
 
   # USER EDIT SECTION END #
 # ------------------------- #
@@ -29,7 +29,7 @@ clear
 echo '## RefindBuilder - Setting Up ##'
 echo '--------------------------------'
 EDIT_BRANCH="${1:-GOPFix}"
-BASE_DIR="${HOME}/Documents/RefindGOPFix"
+BASE_DIR="${HOME}/Documents/RefindPlus"
 BUILD_DIR="${BASE_DIR}/edk2"
 if [ ! -d "${BUILD_DIR}" ] ; then
     echo "ERROR: Could not locate ${BUILD_DIR}"
@@ -52,7 +52,7 @@ fi
 if [ -d "${BUILD_DIR}/RefindPkg" ] ; then
     mv "${BUILD_DIR}/RefindPkg" "${BUILD_DIR}/RefindPkg-OLD"
 fi
-git clone "https://github.com/${GITHUB_USERNAME}/Refind-GOPFix.git" RefindPkg
+git clone "https://github.com/${GITHUB_USERNAME}/RefindPlus.git" RefindPkg
 pushd "${BUILD_DIR}/RefindPkg" > /dev/null || exit 1
 # See: https://stackoverflow.com/a/10312587/891636
 git branch -r | grep -v '\->' | while read remote; do git branch --track "${remote#origin/}" "$remote"; done
