@@ -9,6 +9,17 @@ GITHUB_USERNAME="YOUR_GITHUB_USERNAME"
 # ------------------------- #
 
 
+# Provide custom colors
+msg_info() {
+	echo -e "\033[0;33m$1\033[0m"
+}
+msg_status() {
+	echo -e "\033[0;32m$1\033[0m"
+}
+msg_error() {
+	echo -e "\033[0;31m$1\033[0m"
+}
+
 ## ERROR HANDLER ##
 runErr() { # $1: message
     # Declare Local Variables
@@ -16,23 +27,22 @@ runErr() { # $1: message
 
     errMessage="${1:-Runtime Error ... Exiting}"
     echo ''
-    echo "${errMessage}"
+    msg_error "${errMessage}"
     echo ''
     echo ''
     exit 1
 }
 trap runErr ERR
 
-
 # Set things up and move into build folder
 clear
-echo '## RefindBuilder - Setting Up ##'
-echo '--------------------------------'
+msg_info '## RefindBuilder - Setting Up ##'
+msg_info '--------------------------------'
 EDIT_BRANCH="${1:-GOPFix}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 BUILD_DIR="${BASE_DIR}/edk2"
 if [ ! -d "${BUILD_DIR}" ] ; then
-    echo "ERROR: Could not locate ${BUILD_DIR}"
+    msg_error "ERROR: Could not locate ${BUILD_DIR}"
     echo ''
     exit 1
 fi
@@ -64,8 +74,8 @@ popd > /dev/null || exit 1
 
 # Basic clean up
 clear
-echo '## RefindBuilder - Initial Clean Up ##'
-echo '--------------------------------------'
+msg_status '## RefindPlusBuilder - Initial Clean Up ##'
+msg_status '------------------------------------------'
 if [ -d "${BUILD_DIR}/Build-OLD" ] ; then
     rm -fr "${BUILD_DIR}/Build-OLD"
 fi
@@ -80,8 +90,8 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Build release version
 clear
-echo '## RefindBuilder - Building REL Version ##'
-echo '------------------------------------------'
+msg_status '## RefindPlusBuilder - Building REL Version ##'
+msg_status '----------------------------------------------'
 if [ -d "${BUILD_DIR}/Build-TMP" ] ; then
     rm -fr "${BUILD_DIR}/Build-TMP"
 fi
@@ -99,8 +109,8 @@ fi
 
 # Build debug version
 clear
-echo '## RefindBuilder - Building DBG Version ##'
-echo '------------------------------------------'
+msg_status '## RefindPlusBuilder - Building DBG Version ##'
+msg_status '----------------------------------------------'
 if [ -d "${BUILD_DIR}/Build-DBG" ] ; then
     rm -fr "${BUILD_DIR}/Build-DBG"
 fi
@@ -120,6 +130,7 @@ if [ -d "${BUILD_DIR}/Build-DBG" ] ; then
     rm -fr "${BUILD_DIR}/Build-DBG"
 fi
 
+
 # Tidy up and return to original location
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
@@ -127,8 +138,8 @@ fi
 cp "${GLOBAL_FILE_TMP_REL}" "${GLOBAL_FILE}"
 popd > /dev/null || exit 1
 echo ''
-echo "Output rEFInd EFI Files (BOOTx64): '${OUTPUT_DIR}'"
-echo "Output rEFInd EFI Files (Others - DBG): '${XCODE_DIR_DBG}/X64'"
-echo "Output rEFInd EFI Files (Others - REL): '${XCODE_DIR_REL}/X64'"
+msg_status "RefindPlus EFI Files (BOOTx64): '${OUTPUT_DIR}'"
+msg_status "RefindPlus EFI Files (Others - DBG): '${XCODE_DIR_DBG}/X64'"
+msg_status "RefindPlus EFI Files (Others - REL): '${XCODE_DIR_REL}/X64'"
 echo ''
 echo ''
