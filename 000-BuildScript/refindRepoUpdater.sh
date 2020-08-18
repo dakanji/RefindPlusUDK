@@ -30,7 +30,7 @@ trap runErr ERR
 clear
 echo '## RefindRepoUpdater ##'
 echo '-----------------------'
-BASE_DIR="${HOME}/Documents/RefindGOPFix/edk2"
+BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 pushd ${BASE_DIR} > /dev/null || exit 1
 git checkout rudk
 git reset --hard a94082b4e5e42a1cfdcbab0516f9ecdbb596d201
@@ -41,7 +41,7 @@ popd > /dev/null || exit 1
 
 
 ## UPDATE GOPFIX BRANCH ##
-BASE_DIR="${HOME}/Documents/RefindGOPFix/WorkingFolder"
+BASE_DIR="${HOME}/Documents/RefindPlus/Working"
 pushd ${BASE_DIR} > /dev/null || exit 1
 git checkout GOPFix
 git reset --hard a2cc87f019c4de3a1237e2dc23f432c27cec5ec6
