@@ -11,13 +11,13 @@ GITHUB_USERNAME="YOUR_GITHUB_USERNAME"
 
 # Provide custom colors
 msg_info() {
-	echo -e "\033[0;33m$1\033[0m"
+    echo -e "\033[0;33m$1\033[0m"
 }
 msg_status() {
-	echo -e "\033[0;32m$1\033[0m"
+    echo -e "\033[0;32m$1\033[0m"
 }
 msg_error() {
-	echo -e "\033[0;31m$1\033[0m"
+    echo -e "\033[0;31m$1\033[0m"
 }
 
 ## ERROR HANDLER ##
@@ -38,6 +38,7 @@ trap runErr ERR
 clear
 msg_info '## RefindBuilder - Setting Up ##'
 msg_info '--------------------------------'
+sleep 1
 EDIT_BRANCH="${1:-GOPFix}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 BUILD_DIR="${BASE_DIR}/edk2"
@@ -74,8 +75,9 @@ popd > /dev/null || exit 1
 
 # Basic clean up
 clear
-msg_status '## RefindPlusBuilder - Initial Clean Up ##'
-msg_status '------------------------------------------'
+msg_info '## RefindPlusBuilder - Initial Clean Up ##'
+msg_info '------------------------------------------'
+sleep 1
 if [ -d "${BUILD_DIR}/Build-OLD" ] ; then
     rm -fr "${BUILD_DIR}/Build-OLD"
 fi
@@ -90,8 +92,9 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Build release version
 clear
-msg_status '## RefindPlusBuilder - Building REL Version ##'
-msg_status '----------------------------------------------'
+msg_info '## RefindPlusBuilder - Building REL Version ##'
+msg_info '----------------------------------------------'
+sleep 1
 if [ -d "${BUILD_DIR}/Build-TMP" ] ; then
     rm -fr "${BUILD_DIR}/Build-TMP"
 fi
@@ -105,12 +108,17 @@ if [ -d "${BUILD_DIR}/Build" ] ; then
     cp "${BINARY_DIR}/refind.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
     mv "${BUILD_DIR}/Build" "${BUILD_DIR}/Build-TMP"
 fi
+echo ''
+msg_info 'Completed REL Build ...Preparing DBG Build'
+echo ''
+sleep 3
 
 
 # Build debug version
 clear
-msg_status '## RefindPlusBuilder - Building DBG Version ##'
-msg_status '----------------------------------------------'
+msg_info '## RefindPlusBuilder - Building DBG Version ##'
+msg_info '----------------------------------------------'
+sleep 1
 if [ -d "${BUILD_DIR}/Build-DBG" ] ; then
     rm -fr "${BUILD_DIR}/Build-DBG"
 fi
@@ -129,6 +137,9 @@ fi
 if [ -d "${BUILD_DIR}/Build-DBG" ] ; then
     rm -fr "${BUILD_DIR}/Build-DBG"
 fi
+echo ''
+msg_info 'Completed DBG Build'
+echo ''
 
 
 # Tidy up and return to original location
