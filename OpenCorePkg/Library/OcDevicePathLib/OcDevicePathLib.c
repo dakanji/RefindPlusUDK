@@ -11,6 +11,8 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
+//DA-TAG: Added
+#include "../../../RefindPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include <Uefi.h>
 
@@ -357,7 +359,7 @@ InternalExpandNewPath (
     //
     // The suffix is handled implicitly (by OcGetNextLoadOptionDevicePath).
     // Keep in mind that with this logic our broken node may expand to an
-    // arbitrary number of nodes now. 
+    // arbitrary number of nodes now.
     //
     ExpandedNode = (EFI_DEVICE_PATH_PROTOCOL *) (
       (UINTN) ExpandedPath + PrefixSize
@@ -521,7 +523,7 @@ OcFixAppleBootDevicePathNode (
           switch (Node.Acpi->UID) {
             case 0x1:
               Node.Acpi->UID = 0;
-              return 1;            
+              return 1;
 
             case 0x10:
             case 0x40:
@@ -582,7 +584,7 @@ OcFixAppleBootDevicePathNode (
             );
           return 1;
         }
-        
+
         if (EISA_ID_TO_NUM (Node.ExtendedAcpi->CID) == 0x0A03
          && EISA_ID_TO_NUM (Node.ExtendedAcpi->HID) != 0x0A08) {
           Node.ExtendedAcpi->CID = BitFieldWrite32 (
