@@ -65,6 +65,27 @@ IsAsciiSpace (
   IN CHAR8  Char
   );
 
+/** Check if character is a number.
+
+  @param[in] Char  The ascii character to check if is number.
+
+  @retval  TRUE, if character is a number.
+**/
+BOOLEAN
+IsAsciiNumber (
+  IN CHAR8  Char
+  );
+
+/**
+  Convert path with mixed slashes to UEFI slashes (\\).
+
+  @param[in,out]  String      Path.
+**/
+VOID
+AsciiUefiSlashes (
+  IN OUT CHAR8    *String
+  );
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String  A pointer to the ascii string to convert to unicode.
@@ -84,6 +105,8 @@ AsciiStrCopyToUnicode (
   @param[out]  Buffer      Destination buffer.
   @param[in]   BufferSize  Destination buffer size in bytes.
   @param[in]   Value       Value to convert.
+
+  @retval TRUE on fit
 **/
 BOOLEAN
 AsciiUint64ToLowerHex (
@@ -112,6 +135,21 @@ OcAsciiSafeSPrint (
   IN  UINTN         BufferSize,
   IN  CONST CHAR8   *FormatString,
   ...
+  );
+
+/** Check if ASCII string ends with another ASCII string.
+
+  @param[in]  String        A pointer to a Null-terminated ASCII string.
+  @param[in]  SearchString  A pointer to a Null-terminated ASCII string
+                            to compare against String.
+
+  @retval  TRUE if String ends with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcAsciiEndsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString
   );
 
 /**
@@ -267,6 +305,21 @@ OcUnicodeSafeSPrint (
   IN  UINTN         BufferSize,
   IN  CONST CHAR16  *FormatString,
   ...
+  );
+
+/** Check if Unicode string ends with another Unicode string.
+
+  @param[in]  String        A pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString  A pointer to a Null-terminated Unicode string
+                            to compare against String.
+
+  @retval  TRUE if String ends with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcUnicodeEndsWith (
+  IN CONST CHAR16     *String,
+  IN CONST CHAR16     *SearchString
   );
 
 /**

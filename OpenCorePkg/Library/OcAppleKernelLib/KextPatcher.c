@@ -24,6 +24,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcXmlLib.h>
 
+#include "MkextInternal.h"
 #include "PrelinkedInternal.h"
 
 EFI_STATUS
@@ -42,6 +43,23 @@ PatcherInitContextFromPrelinked (
 
   CopyMem (Context, &Kext->Context, sizeof (*Context));
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PatcherInitContextFromMkext(
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT MKEXT_CONTEXT      *Mkext,
+  IN     CONST CHAR8        *Name
+  )
+{
+  MKEXT_KEXT  *Kext;
+
+  Kext = InternalCachedMkextKext (Mkext, Name);
+  if (Kext == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  return PatcherInitContextFromBuffer (Context, &Mkext->Mkext[Kext->BinaryOffset], Kext->BinarySize);
 }
 
 EFI_STATUS
@@ -79,8 +97,10 @@ PatcherInitContextFromBuffer (
     return EFI_NOT_FOUND;
   }
 
-  Context->VirtualBase = Segment->VirtualAddress - Segment->FileOffset;
-  Context->VirtualKmod = 0;
+  Context->VirtualBase   = Segment->VirtualAddress - Segment->FileOffset;
+  Context->VirtualKmod   = 0;
+  Context->KxldState     = NULL;
+  Context->KxldStateSize = 0;
 
   Status = InternalConnectExternalSymtab (
     &Context->MachContext,
@@ -105,27 +125,58 @@ PatcherGetSymbolAddress (
 {
   MACH_NLIST_64  *Symbol;
   CONST CHAR8    *SymbolName;
+  UINT64         SymbolAddress;
   UINT32         Offset;
   UINT32         Index;
 
-  Index = 0;
+  Index  = 0;
+  Offset = 0;
   while (TRUE) {
+    //
+    // Try the usual way first via SYMTAB.
+    //
     Symbol = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
     if (Symbol == NULL) {
+      //
+      // If we have KxldState, use it.
+      //
+      if (Index == 0 && Context->KxldState != NULL) {
+        SymbolAddress = InternalKxldSolveSymbol (
+          Context->KxldState,
+          Context->KxldStateSize,
+          Name
+          );
+        //
+        // If we have a symbol, get its ondisk offset.
+        //
+        if (SymbolAddress != 0
+          && MachoSymbolGetDirectFileOffset64 (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
+          //
+          // Proceed to success.
+          //
+          break;
+        }
+      }
+
       return EFI_NOT_FOUND;
     }
 
     SymbolName = MachoGetSymbolName64 (&Context->MachContext, Symbol);
+    if (SymbolName != NULL && AsciiStrCmp (Name, SymbolName) == 0) {
+      //
+      // Once we have a symbol, get its ondisk offset.
+      //
+      if (MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
+        //
+        // Proceed to success.
+        //
+        break;
+      }
 
-    if (SymbolName && AsciiStrCmp (Name, SymbolName) == 0) {
-      break;
+      return EFI_INVALID_PARAMETER;
     }
 
     Index++;
-  }
-
-  if (!MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
-    return EFI_INVALID_PARAMETER;
   }
 
   *Address = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + Offset;
@@ -219,6 +270,7 @@ PatcherBlockKext (
   )
 {
   UINT64           KmodOffset;
+  UINT64           StartAddr;
   UINT64           TmpOffset;
   KMOD_INFO_64_V1  *KmodInfo;
   UINT8            *PatchAddr;
@@ -232,14 +284,16 @@ PatcherBlockKext (
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
   KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
+  StartAddr  = KcFixupValue (KmodInfo->StartAddr, NULL);;
+
   if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
-    || KmodOffset > MachoGetFileSize (&Context->MachContext)
-    || KmodInfo->StartAddr == 0
-    || Context->VirtualBase > KmodInfo->StartAddr) {
+    || TmpOffset > MachoGetFileSize (&Context->MachContext)
+    || StartAddr == 0
+    || Context->VirtualBase > StartAddr) {
     return EFI_INVALID_PARAMETER;
   }
 
-  TmpOffset = KmodInfo->StartAddr - Context->VirtualBase;
+  TmpOffset = StartAddr - Context->VirtualBase;
   if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
     return EFI_BUFFER_TOO_SMALL;
   }

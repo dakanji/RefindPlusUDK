@@ -33,6 +33,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
+STATIC CHAR8    mCurrentSmbiosProductName[48];
+
 STATIC
 VOID
 OcPlatformUpdateDataHub (
@@ -352,6 +354,14 @@ OcPlatformUpdateSmbios (
     }
   }
 
+  if (Data.SystemProductName != NULL) {
+    DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
+    Status = AsciiStrCpyS (mCurrentSmbiosProductName, sizeof (mCurrentSmbiosProductName), Data.SystemProductName);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OC: Failed to copy new SMBIOS product name %a\n", Data.SystemProductName));
+    }
+  }
+
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
@@ -561,6 +571,7 @@ OcLoadPlatformSupport (
   EFI_STATUS             Status;
   OC_SMBIOS_TABLE        SmbiosTable;
   BOOLEAN                ExposeOem;
+  CONST CHAR8            *SmbiosProductName;
 
   if (Config->PlatformInfo.Automatic) {
     GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
@@ -580,6 +591,13 @@ OcLoadPlatformSupport (
     if (!EFI_ERROR (Status)) {
       if (ExposeOem) {
         OcSmbiosExposeOemInfo (&SmbiosTable);
+      }
+
+      SmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
+      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), SmbiosProductName));
+      Status = AsciiStrCpyS (mCurrentSmbiosProductName, sizeof (mCurrentSmbiosProductName), SmbiosProductName);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OC: Failed to copy SMBIOS product name %a\n", SmbiosProductName));
       }
 
       if (Config->PlatformInfo.UpdateSmbios) {
@@ -610,4 +628,18 @@ OcLoadPlatformSupport (
   if (Config->PlatformInfo.UpdateNvram) {
     OcPlatformUpdateNvram (Config, UsedMacInfo);
   }
+}
+
+BOOLEAN
+OcPlatformIs64BitSupported (
+  IN UINT32     KernelVersion
+  )
+{
+#if defined(MDE_CPU_IA32)
+  return FALSE;
+#elif defined(MDE_CPU_X64)
+  return IsMacModel64BitCompatible (mCurrentSmbiosProductName, KernelVersion);
+#else
+#error "Unsupported architecture"
+#endif
 }

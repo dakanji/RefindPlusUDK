@@ -39,6 +39,7 @@
   OpenCoreAcpi.c
   OpenCoreDevProps.c
   OpenCoreKernel.c
+  OpenCoreKernelPatch.c
   OpenCoreMisc.c
   OpenCoreNvram.c
   OpenCorePlatform.c
@@ -76,8 +77,10 @@
   OcAppleImageConversionLib
   OcAudioLib
   OcInputLib
+  OcAppleImg4Lib
   OcAppleKernelLib
   OcAppleKeyMapLib
+  OcAppleSecureBootLib
   OcAppleUserInterfaceThemeLib
   OcBootManagementLib
   OcConfigurationLib

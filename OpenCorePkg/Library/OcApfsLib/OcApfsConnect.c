@@ -18,6 +18,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
 #include <Library/OcAppleImageVerificationLib.h>
+#include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDriverConnectionLib.h>
@@ -239,6 +240,9 @@ ApfsStartDriver (
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
   EFI_HANDLE                 ImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  EFI_IMAGE_LOAD             LoadImage;
+  APPLE_SECURE_BOOT_PROTOCOL *SecureBoot;
+  UINT8                      Policy;
 
   Status = VerifyApplePeImageSignature (
     DriverBuffer,
@@ -272,8 +276,26 @@ ApfsStartDriver (
     DevicePath = NULL;
   }
 
+  SecureBoot = OcAppleSecureBootGetProtocol ();
+  ASSERT (SecureBoot != NULL);
+  Status = SecureBoot->GetPolicy (
+    SecureBoot,
+    &Policy
+    );
+  //
+  // Load directly when we have Apple Secure Boot.
+  // - Either normal.
+  // - Or during DMG loading.
+  //
+  if ((!EFI_ERROR (Status) && Policy != AppleImg4SbModeDisabled)
+    || (OcAppleSecureBootGetDmgLoading (&Policy) && Policy != AppleImg4SbModeDisabled)) {
+    LoadImage = OcImageLoaderLoad;
+  } else {
+    LoadImage = gBS->LoadImage;
+  }
+
   ImageHandle = NULL;
-  Status = gBS->LoadImage (
+  Status = LoadImage (
     FALSE,
     gImageHandle,
     DevicePath,
@@ -328,6 +350,13 @@ ApfsStartDriver (
     gBS->UnloadImage (ImageHandle);
     return Status;
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCJS: Connecting %a APFS driver on handle %p\n",
+    mGlobalConnect ? "globally" : "normally",
+    PrivateData->LocationInfo.ControllerHandle
+    ));
 
   if (mGlobalConnect) {
     //
@@ -434,7 +463,8 @@ OcApfsConfigure (
 
 EFI_STATUS
 OcApfsConnectDevice (
-  IN EFI_HANDLE  Handle
+  IN EFI_HANDLE  Handle,
+  IN BOOLEAN     VerifyPolicy
   )
 {
   EFI_STATUS             Status;
@@ -452,6 +482,7 @@ OcApfsConnectDevice (
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_VERBOSE, "OCJS: FS already connected\n"));
     return EFI_ALREADY_STARTED;
   }
 
@@ -465,6 +496,7 @@ OcApfsConnectDevice (
     (VOID **) &BlockIo
     );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, BlockIo error - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 
@@ -475,18 +507,30 @@ OcApfsConnectDevice (
   // - Which have non-POT block size.
   //
   if (BlockIo->Media == NULL
-    || !BlockIo->Media->LogicalPartition
-    || BlockIo->Media->BlockSize == 0
+    || !BlockIo->Media->LogicalPartition) {
+    return EFI_UNSUPPORTED;
+  }
+
+  if (BlockIo->Media->BlockSize == 0
     || (BlockIo->Media->BlockSize & (BlockIo->Media->BlockSize - 1)) != 0) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCJS: Cannot connect, BlockIo malformed: %d %u\n",
+      BlockIo->Media->LogicalPartition,
+      BlockIo->Media->BlockSize
+      ));
     return EFI_UNSUPPORTED;
   }
 
   //
   // Filter out handles, which do not respect OpenCore policy.
   //
-  Status = ApfsCheckOpenCoreScanPolicy (Handle);
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (VerifyPolicy) {
+    Status = ApfsCheckOpenCoreScanPolicy (Handle);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, Policy error - %r\n", Status));
+      return Status;
+    }
   }
 
   //
@@ -499,6 +543,7 @@ OcApfsConnectDevice (
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, unsupported BDS\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -512,6 +557,7 @@ OcApfsConnectDevice (
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, already handled\n"));
     return EFI_UNSUPPORTED;
   }
 

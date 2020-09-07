@@ -135,7 +135,8 @@ choose_debugger() {
 choose_debugger
 
 if [ "${EFI_DEBUGGER}" = "GDB" ] || [ "${EFI_DEBUGGER}" = "gdb" ]; then
-  "${GDB}" -ex "target remote ${EFI_HOST}:${EFI_PORT}" \
+  "${GDB}" -ex "set arch i386:x86-64:intel" \
+    -ex "target remote ${EFI_HOST}:${EFI_PORT}" \
     -ex "source Scripts/gdb_uefi.py" \
     -ex "set pagination off" \
     -ex "reload-uefi" \

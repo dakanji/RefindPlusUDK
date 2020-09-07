@@ -14,6 +14,7 @@ buildutil() {
     "TestImg4"
     "TestKextInject"
     "TestMacho"
+    "TestPeCoff"
     "TestRsaPreprocess"
     "TestSmbios"
   )
@@ -29,6 +30,7 @@ buildutil() {
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
     echo "Building ${util}..."
+    make clean || exit 1
     make -j "$cores" || exit 1
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
@@ -88,15 +90,15 @@ package() {
   # Mark binaries to be recognisable by OcBootManagementLib.
   bootsig="${selfdir}/Library/OcBootManagementLib/BootSignature.bin"
   efiOCBMs=(
-    "BOOTx64.efi"
+    "Bootstrap.efi"
     "OpenCore.efi"
     )
   for efiOCBM in "${efiOCBMs[@]}"; do
     dd if="${bootsig}" \
        of="${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
   done
-  cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
-  cp BOOTx64.efi tmp/EFI/OC/Bootstrap/Bootstrap.efi || exit 1
+  cp Bootstrap.efi tmp/EFI/BOOT/BOOTx64.efi || exit 1
+  cp Bootstrap.efi tmp/EFI/OC/Bootstrap/ || exit 1
 
   efiTools=(
     "BootKicker.efi"

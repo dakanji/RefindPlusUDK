@@ -15,6 +15,7 @@
 #ifndef OPEN_CORE_H
 #define OPEN_CORE_H
 
+#include <Library/OcAppleKernelLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
@@ -30,7 +31,7 @@
   OpenCore version reported to log and NVRAM.
   OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits.
 **/
-#define OPEN_CORE_VERSION          "0.6.0"
+#define OPEN_CORE_VERSION          "0.6.1"
 
 /**
   OpenCore build type reported to log and NVRAM.
@@ -117,6 +118,44 @@ OcLoadKernelSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config,
   IN OC_CPU_INFO         *CpuInfo
+  );
+
+/**
+  Apply kernel quirk.
+**/
+EFI_STATUS
+OcKernelApplyQuirk (
+  IN     KERNEL_QUIRK_NAME  Quirk,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN     UINT32             DarwinVersion,
+  IN OUT VOID               *Context,
+  IN OUT PATCHER_CONTEXT    *KernelPatcher
+  );
+
+/**
+  Apply kernel patch.
+**/
+VOID
+OcKernelApplyPatches (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     OC_CPU_INFO       *CpuInfo,
+  IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
+  IN     KERNEL_CACHE_TYPE CacheType,
+  IN     VOID              *Context,
+  IN OUT UINT8             *Kernel,
+  IN     UINT32            Size
+  );
+
+/**
+  Apply kernel block patch.
+**/
+VOID
+OcKernelBlockKexts (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
+  IN     PRELINKED_CONTEXT *Context
   );
 
 /**
@@ -295,6 +334,17 @@ OcMiscBoot (
 VOID
 OcMiscUefiQuirksLoaded (
   IN OC_GLOBAL_CONFIG   *Config
+  );
+
+/**
+  Determine platform support for 64-bit kernel mode based
+  on kernel version.
+
+  @param[in]  KernelVersion   Kernel version.
+**/
+BOOLEAN
+OcPlatformIs64BitSupported (
+  IN UINT32     KernelVersion
   );
 
 #endif // OPEN_CORE_H

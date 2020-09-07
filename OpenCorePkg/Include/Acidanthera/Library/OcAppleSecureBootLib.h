@@ -17,6 +17,20 @@
 #include <Protocol/AppleImg4Verification.h>
 
 /**
+  Bootstrap NVRAM and library values for secure booting.
+
+  @param[in] Model          Secure boot model (without ap suffix in lower-case).
+  @param[in] Ecid           Enclave identifier, optional.
+
+  @retval EFI_SUCCESS  On success.
+**/
+EFI_STATUS
+OcAppleSecureBootBootstrapValues (
+  IN CONST CHAR8  *Model,
+  IN UINT64       Ecid  OPTIONAL
+  );
+
+/**
   Install and initialise the Apple Secure Boot protocol.
 
   @param[in] Reinstall          Replace any installed protocol.
@@ -26,7 +40,6 @@
 
   @returns Installed or located protocol.
   @retval NULL  There was an error locating or installing the protocol.
-
 **/
 APPLE_SECURE_BOOT_PROTOCOL *
 OcAppleSecureBootInstallProtocol (
@@ -34,6 +47,56 @@ OcAppleSecureBootInstallProtocol (
   IN UINT8    SbPolicy,
   IN UINT8    SbWinPolicy OPTIONAL,
   IN BOOLEAN  SbWinPolicyValid
+  );
+
+/**
+  Obtain initialised Apple Secure Boot protocol.
+
+  @returns initialised protocol.
+**/
+APPLE_SECURE_BOOT_PROTOCOL *
+OcAppleSecureBootGetProtocol (
+  VOID
+  );
+
+/**
+  Report DMG loading to Apple Secure Boot protocol.
+
+  @param[in]  LoadingDmg  TRUE after loading DMG.
+**/
+VOID
+OcAppleSecureBootSetDmgLoading (
+  IN BOOLEAN  LoadingDmg
+  );
+
+/**
+  Get DMG loading status on Apple Secure Boot protocol.
+
+  @param[out]  RealPolicy  Actual secure boot policy, optional.
+
+  @retval TRUE when loading DMG.
+**/
+BOOLEAN
+OcAppleSecureBootGetDmgLoading (
+  OUT UINT8  *RealPolicy  OPTIONAL
+  );
+
+/**
+  Perform image verification at path.
+
+  @param[in] DevicePath     Path to the image.
+  @param[in] SourceBuffer   Image contents.
+  @param[in] SourceSize     Image size.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_SECURITY_VIOLATION when corrupted signature (should abort and die).
+  @retval EFI_ERROR when other errors happened (can continue with UEFI loader).
+**/
+EFI_STATUS
+OcAppleSecureBootVerify (
+  IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath,
+  IN  VOID                         *SourceBuffer,
+  IN  UINTN                        SourceSize
   );
 
 #endif // OC_APPLE_SECURE_BOOT_LIB_H

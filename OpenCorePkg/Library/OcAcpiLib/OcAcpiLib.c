@@ -19,6 +19,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 
 #include <IndustryStandard/AcpiAml.h>
@@ -561,6 +562,19 @@ AcpiInitContext (
       Index
       ));
 
+    //
+    // Unlock table if in lower memory.
+    //
+    if ((UINTN)Context->Tables[DstIndex] < BASE_1MB) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCA: Unlocking table %08x at %p\n",
+        Context->Tables[DstIndex]->Signature,
+        Context->Tables[DstIndex]
+        ));
+      LegacyRegionUnlock ((UINT32)(UINTN)Context->Tables[DstIndex], Context->Tables[DstIndex]->Length);
+    }
+
     if (Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
       Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *) Context->Tables[DstIndex];
 
@@ -693,11 +707,21 @@ AcpiApplyContext (
     Table += ALIGN_VALUE (RsdtSize, sizeof (UINT64));
   }
 
+  //
+  // Checksum is to be the first 0-19 bytes of RSDP.
+  // ExtendedChecksum is the entire table, only if newer than ACPI 1.0.
+  //
   Context->Rsdp->Checksum = 0;
   Context->Rsdp->Checksum = CalculateCheckSum8 (
-    (UINT8 *) Context->Rsdp,
-    Context->Xsdt != NULL ? Context->Rsdp->Length : 20
+    (UINT8 *) Context->Rsdp, 20
     );
+
+  if (Context->Xsdt != NULL) {
+    Context->Rsdp->ExtendedChecksum = 0;
+    Context->Rsdp->ExtendedChecksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Rsdp, Context->Rsdp->Length
+      );
+  }
 
   return EFI_SUCCESS;
 }

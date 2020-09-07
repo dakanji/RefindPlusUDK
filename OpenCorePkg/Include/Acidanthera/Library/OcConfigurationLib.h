@@ -172,9 +172,11 @@
 ///
 #define OC_KERNEL_ADD_ENTRY_FIELDS(_, __) \
   _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -193,6 +195,7 @@
 ///
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
   _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -212,9 +215,17 @@
   OC_DECLARE (OC_KERNEL_EMULATE)
 
 ///
+/// KernelSpace forced loaded kexts.
+///
+#define OC_KERNEL_FORCE_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_KERNEL_ADD_ENTRY, _, __)
+  OC_DECLARE (OC_KERNEL_FORCE_ARRAY)
+
+///
 /// KernelSpace patches.
 ///
 #define OC_KERNEL_PATCH_ENTRY_FIELDS(_, __) \
+  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Base             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , Count            ,     , 0                           , ()                   ) \
@@ -244,6 +255,7 @@
   _(BOOLEAN                     , AppleXcpmForceBoost         ,     , FALSE  , ()) \
   _(BOOLEAN                     , CustomSmbiosGuid            ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableIoMapper             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DisableLinkeditJettison     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableRtcChecksum          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DummyPowerManagement        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
@@ -255,12 +267,23 @@
   _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ())
   OC_DECLARE (OC_KERNEL_QUIRKS)
 
+///
+/// KernelSpace operation scheme.
+///
+#define OC_KERNEL_SCHEME_FIELDS(_, __) \
+  _(OC_STRING                   , KernelArch       ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , KernelCache      ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING)) \
+  _(BOOLEAN                     , FuzzyMatch       ,     , FALSE  , ())
+  OC_DECLARE (OC_KERNEL_SCHEME)
+
 #define OC_KERNEL_CONFIG_FIELDS(_, __) \
   _(OC_KERNEL_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_KERNEL_ADD_ARRAY, _, __)     , OC_DESTR (OC_KERNEL_ADD_ARRAY)) \
   _(OC_KERNEL_BLOCK_ARRAY       , Block            ,     , OC_CONSTR2 (OC_KERNEL_BLOCK_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_BLOCK_ARRAY)) \
   _(OC_KERNEL_EMULATE           , Emulate          ,     , OC_CONSTR2 (OC_KERNEL_EMULATE, _, __)       , OC_DESTR (OC_KERNEL_EMULATE)) \
+  _(OC_KERNEL_FORCE_ARRAY       , Force            ,     , OC_CONSTR2 (OC_KERNEL_FORCE_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_FORCE_ARRAY)) \
   _(OC_KERNEL_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_KERNEL_PATCH_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_PATCH_ARRAY)) \
-  _(OC_KERNEL_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_KERNEL_QUIRKS, _, __)        , OC_DESTR (OC_KERNEL_QUIRKS))
+  _(OC_KERNEL_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_KERNEL_QUIRKS, _, __)        , OC_DESTR (OC_KERNEL_QUIRKS)) \
+  _(OC_KERNEL_SCHEME            , Scheme           ,     , OC_CONSTR2 (OC_KERNEL_SCHEME, _, __)        , OC_DESTR (OC_KERNEL_SCHEME))
   OC_DECLARE (OC_KERNEL_CONFIG)
 
 /**
@@ -310,6 +333,7 @@ typedef enum {
 #define OC_MISC_SECURITY_FIELDS(_, __) \
   _(OC_STRING                   , BootProtect                 ,      , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Vault                       ,      , OC_STRING_CONSTR ("Secure", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , DmgLoading                  ,      , OC_STRING_CONSTR ("Signed", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
   _(BOOLEAN                     , AllowSetDefault             ,      , FALSE                   , ()) \
@@ -318,6 +342,8 @@ typedef enum {
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
   _(UINT8                       , PasswordHash                , [64] , {0}                     , ()) \
   _(OC_DATA                     , PasswordSalt                ,      , OC_EDATA_CONSTR (_, __) , OC_DESTR (OC_DATA)) \
+  _(OC_STRING                   , SecureBootModel             ,      , OC_STRING_CONSTR ("Default", _, __), OC_DESTR (OC_STRING) ) \
+  _(UINT64                      , ApECID                      ,      , 0                       , ()) \
   _(UINT64                      , HaltLevel                   ,      , 0x80000000              , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
@@ -480,7 +506,7 @@ typedef enum {
   _(UINT64                      , MinVersion         ,     , 0                             , ()) \
   _(UINT32                      , MinDate            ,     , 0                             , ()) \
   _(BOOLEAN                     , EnableJumpstart    ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , GlobalConnect       ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , GlobalConnect      ,     , FALSE                         , ()) \
   _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ()) \
   _(BOOLEAN                     , JumpstartHotPlug   ,     , FALSE                         , ())
   OC_DECLARE (OC_UEFI_APFS)
@@ -540,8 +566,10 @@ typedef enum {
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleFramebufferInfo        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleImg4Verification       ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleRtcRam                 ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleSecureBoot             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleSmcIo                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleUserInterfaceTheme     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DataHub                     ,     , FALSE  , ()) \

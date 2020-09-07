@@ -188,9 +188,6 @@ OcShowSimpleBootMenu (
       gST->ConOut->OutputString (gST->ConOut, Code);
       gST->ConOut->OutputString (gST->ConOut, L". ");
       gST->ConOut->OutputString (gST->ConOut, BootEntries[Index]->Name);
-      if (BootEntries[Index]->IsFolder) {
-        gST->ConOut->OutputString (gST->ConOut, OC_MENU_DISK_IMAGE);
-      }
       if (BootEntries[Index]->IsExternal) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
       }
@@ -508,6 +505,8 @@ OcRunBootPicker (
 
   SaidWelcome = FALSE;
 
+  OcImageLoaderActivate ();
+
   //
   // Reset NVRAM right away if requested by a key combination.
   // This function should not return under normal conditions.
@@ -575,7 +574,7 @@ OcRunBootPicker (
     //
     if (BootContext == NULL) {
       if (Context->HideAuxiliary) {
-        DEBUG ((DEBUG_WARN, "OCB: System has no boot entries, retrying with auxiliary\n"));
+        DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, retrying with auxiliary\n"));
         Context->PickerCommand = OcPickerShowPicker;
         Context->HideAuxiliary = FALSE;
         continue;

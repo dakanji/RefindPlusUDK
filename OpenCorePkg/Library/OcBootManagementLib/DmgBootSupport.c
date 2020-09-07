@@ -16,6 +16,7 @@
 
 #include <Guid/FileInfo.h>
 
+#include <Library/OcAppleSecureBootLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
@@ -110,7 +111,7 @@ STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetDiskImageBootFile (
   OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN  UINT32                      Policy,
+  IN  OC_DMG_LOADING_SUPPORT      DmgLoading,
   IN  UINTN                       DmgFileSize,
   IN  VOID                        *ChunklistBuffer OPTIONAL,
   IN  UINT32                      ChunklistBufferSize OPTIONAL
@@ -127,19 +128,19 @@ InternalGetDiskImageBootFile (
   ASSERT (Context != NULL);
   ASSERT (DmgFileSize > 0);
 
-  if (ChunklistBuffer == NULL) {
-    if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
+  if (DmgLoading == OcDmgLoadingAppleSigned) {
+    if (ChunklistBuffer == NULL) {
       DEBUG ((DEBUG_WARN, "OCB: Missing DMG signature, aborting\n"));
       return NULL;
     }
-  } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
+
     ASSERT (ChunklistBufferSize > 0);
 
     Result = OcAppleChunklistInitializeContext (
-                &ChunklistContext,
-                ChunklistBuffer,
-                ChunklistBufferSize
-                );
+      &ChunklistContext,
+      ChunklistBuffer,
+      ChunklistBufferSize
+      );
     if (!Result) {
       DEBUG ((
         DEBUG_INFO,
@@ -148,29 +149,24 @@ InternalGetDiskImageBootFile (
       return NULL;
     }
 
-    if ((Policy & OC_LOAD_REQUIRE_TRUSTED_KEY) != 0) {
-      Result = FALSE;
-      //
-      // FIXME: Properly abstract OcAppleKeysLib.
-      //
-      if ((Policy & OC_LOAD_TRUST_APPLE_V1_KEY) != 0) {
-        Result = OcAppleChunklistVerifySignature (
-                   &ChunklistContext,
-                   PkDataBase[0].PublicKey
-                   );
-      }
+    //
+    // FIXME: Properly abstract OcAppleKeysLib.
+    //
+    Result = OcAppleChunklistVerifySignature (
+      &ChunklistContext,
+      PkDataBase[0].PublicKey
+      );
 
-      if (!Result && ((Policy & OC_LOAD_TRUST_APPLE_V2_KEY) != 0)) {
-        Result = OcAppleChunklistVerifySignature (
-                   &ChunklistContext,
-                   PkDataBase[1].PublicKey
-                   );
-      }
+    if (!Result) {
+      Result = OcAppleChunklistVerifySignature (
+        &ChunklistContext,
+        PkDataBase[1].PublicKey
+        );
+    }
 
-      if (!Result) {
-        DEBUG ((DEBUG_WARN, "OCB: DMG is not trusted, aborting\n"));
-        return NULL;
-      }
+    if (!Result) {
+      DEBUG ((DEBUG_WARN, "OCB: DMG is not trusted, aborting\n"));
+      return NULL;
     }
 
     Result = OcAppleDiskImageVerifyData (
@@ -179,10 +175,6 @@ InternalGetDiskImageBootFile (
                );
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCB: DMG has been altered\n"));
-      //
-      // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
-      //        is not set.
-      //
       return NULL;
     }
   }
@@ -324,7 +316,7 @@ InternalFindDmgChunklist (
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     UINT32                      Policy
+  IN     OC_DMG_LOADING_SUPPORT      DmgLoading
   )
 {
   EFI_DEVICE_PATH_PROTOCOL *DevPath;
@@ -475,14 +467,20 @@ InternalLoadDmg (
 
   DevPath = InternalGetDiskImageBootFile (
               Context,
-              Policy,
+              DmgLoading,
               DmgFileSize,
               ChunklistBuffer,
               ChunklistFileSize
               );
   Context->DevicePath = DevPath;
 
-  if (DevPath == NULL) {
+  if (DevPath != NULL) {
+    //
+    // If we succeeded, we need to disable Apple Secure Boot, as DMG images
+    // are currently only verified with the chunklist.
+    //
+    OcAppleSecureBootSetDmgLoading (TRUE);
+  } else {
     DEBUG ((DEBUG_INFO, "OCB: Failed to retrieve boot file from DMG\n"));
 
     OcAppleDiskImageFreeFile (Context->DmgContext);
@@ -510,5 +508,10 @@ InternalUnloadDmg (
     OcAppleDiskImageFreeContext (DmgLoadContext->DmgContext);
     FreePool (DmgLoadContext->DmgContext);
     DmgLoadContext->DevicePath = NULL;
+    //
+    // This code should never execute, as with Apple Secure Boot
+    // it should always reboot on failure, but just in case.
+    //
+    OcAppleSecureBootSetDmgLoading (FALSE);
   }
 }

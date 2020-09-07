@@ -27,6 +27,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define MAX_KEXT_DEPEDENCIES 16
 
+//
+// Aligned maximum virtual address size with 0x prefix and \0 terminator.
+//
+#define KEXT_OFFSET_STR_LEN    24
+
+//
+// Kernel quirks array.
+//
+extern KERNEL_QUIRK gKernelQuirks[];
+
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
@@ -258,6 +268,7 @@ InternalConnectExternalSymtab (
 #define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
 
 #define KERNEL_ADDRESS_MASK 0xFFFFFFFF00000000ULL
+#define KERNEL_ADDRESS_KEXT 0xFFFFFF7F00000000ULL
 #define KERNEL_ADDRESS_BASE 0xFFFFFF8000000000ULL
 #define KERNEL_FIXUP_OFFSET BASE_1MB
 
@@ -415,6 +426,63 @@ InternalPrelinkKext64 (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
   IN     UINT64             LoadAddress
+  );
+
+/**
+  Build symbol table from KXLD state.
+
+  @param[in,out] Kext        Kext dependency.
+  @param[in]     Context     Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedSymbolTable (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Build virtual tables from KXLD state.
+
+  @param[in,out] Kext      Kext dependency.
+  @param[in]     Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedVtables (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Update KXLD state in the resulting image.
+
+  @param[in,out] Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateRebuild (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Solve symbol through KXLD state.
+
+  @param[in] KxldState       KXLD state.
+  @param[in] KxldStateSize   KXLD state size.
+  @param[in] Name            Symbol name.
+
+  @retval Address on success.
+  @retval 0 on failure.
+**/
+UINT64
+InternalKxldSolveSymbol (
+  IN CONST VOID    *KxldState,
+  IN UINT32        KxldStateSize,
+  IN CONST CHAR8   *Name
   );
 
 #endif // PRELINKED_INTERNAL_H

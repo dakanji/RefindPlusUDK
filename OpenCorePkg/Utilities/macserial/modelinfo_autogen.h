@@ -116,6 +116,8 @@ typedef enum {
   iMac18_3, // Intel Core i5-7600K @ 3.80 GHz
   iMac19_1, // Intel Core i9-9900K @ 3.60 GHz
   iMac19_2, // Intel Core i5-8500 @ 3.00 GHz
+  iMac20_1, // Intel Core i5-10500 @ 3.10 GHz
+  iMac20_2, // Intel Core i9-10910 @ 3.60 GHz
   iMac4_1, // Intel Core Duo T2400 @ 1.83 GHz
   iMac4_2, // Intel Core Duo T2400 @ 1.83 GHz
   iMac5_1, // Intel Core 2 Duo T7200 @ 2.00 GHz
@@ -127,7 +129,7 @@ typedef enum {
   iMacPro1_1, // Intel Xeon W-2140B CPU @ 3.20 GHz
 } AppleModel;
 
-#define APPLE_MODEL_MAX 119
+#define APPLE_MODEL_MAX 121
 
 static PLATFORMDATA ApplePlatformData[] = {
   { "MacBook1,1", "W80A041AU9B" },
@@ -232,14 +234,16 @@ static PLATFORMDATA ApplePlatformData[] = {
   { "iMac14,3", "D25LHACKF8J3" },
   { "iMac14,4", "D25LHACKFY0T" },
   { "iMac15,1", "C02Q6HACFY10" },
-  { "iMac16,1", "C02QQHACGF1J" },
-  { "iMac16,2", "C02PNHACGG7G" },
+  { "iMac16,1", "C02S8CB5GF1J" },
+  { "iMac16,2", "DGKQQ173GG7F" },
   { "iMac17,1", "C02QFHACGG7L" },
   { "iMac18,1", "C02TDHACH7JY" },
   { "iMac18,2", "C02TDHACJ1G5" },
   { "iMac18,3", "C02TDHACJ1GJ" },
   { "iMac19,1", "C02Y90H3JV3Q" },
   { "iMac19,2", "C02Y93YXJWDX" },
+  { "iMac20,1", "C02D38RCPN5T" },
+  { "iMac20,2", "C02D201H046M" },
   { "iMac4,1", "W8608HACU2P" },
   { "iMac4,2", "W8627HACV2H" },
   { "iMac5,1", "CK637HACX1A" },
@@ -355,14 +359,16 @@ static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {
   /* iMac14,3       */ {"F8J3", "F8J8", "FPDW"},
   /* iMac14,4       */ {"FY0T", "FY0V", "FY65", "FY69", "G56J", "G56K", "G5W4", "G5W5", "G5W6", "G8L2"},
   /* iMac15,1       */ {"FY10", "FY11", "FY14", "FY68", "FY6F", "GCTM", "GDQY", "GDR3", "GDR4", "GDR5", "GDR6", "GDR7", "GDR8", "GDR9", "GDRC", "GFFQ", "GJDM", "GJDN", "GJDP", "GJDQ", "FY13", "FY6D", "GL1Q", "GL1R", "GL1T", "GL1V", "GL1W", "GV7V", "GPJN", "H682", "H5DN", "FY67"},
-  /* iMac16,1       */ {"GF1J"},
-  /* iMac16,2       */ {"GG7G", "GG78", "GG7F", "GG7H", "H0P7", "H1F3", "H1F5", "H1F7", "H1F8", "H1F9", "H25N", "H8L0", "H8L1", "H8L2", "H8L3", "H15R", "H28H", "H8KY", "GG7C", "H0KF", "H3RJ", "HLWV", "H1WR", "HYGQ", "HQ9W", "H2KW", "HHMG", "GF1L", "GF1M", "GF1K", "H0N6", "H1DX", "J0DJ", "J0DH", "J0DG", "H8KX", "GG77", "GG79", "GG7D", "H0P6", "H1DY", "HQ9V", "HQ9T", "H1F2", "H1F1", "H25M"},
+  /* iMac16,1       */ {"GF1J", "HQ9V", "HQ9W", "HQ9T", "H0N6", "H8KX", "H1WR", "GF1L", "GF1M", "GF1K", "J0DJ", "J0DH", "J0DG", "GG77", "GG79", "GG7G", "GG7D", "H0P6", "H25M", "HYGQ", "HHMG", "H2KW", "H1DY", "H1DX", "H1F2", "H1F1"},
+  /* iMac16,2       */ {"GG7F", "H15R", "H3RJ", "H8KY", "H25N", "GG7C", "GG7H", "H0P7", "H8L0", "H8L1", "H8L2", "H8L3", "H0KF", "H28H", "GG78", "HLWV", "H1F3", "H1F7", "H1F5", "H1F9", "H1F8"},
   /* iMac17,1       */ {"GG7L", "GG7J", "GG7N", "GG7R", "GG7T", "GG7V", "GG80", "GG81", "GG82", "GQ17", "GQ18", "H0Q3", "H0Q4", "H0Q5", "H3GP", "H3GQ", "H3GR", "H3GT", "H3GV", "H3GW", "H8L5", "H8L6", "H3H4", "H3HJ", "HJRN", "H1H9", "H4JM", "H2YQ", "J0DK", "GG7Q", "HN8P", "H3H9", "H3H8", "H3H7", "H3H6", "H3H5", "H3H3", "H3H2", "H3H1", "H3H0", "H3HH", "H3HD", "H3HC", "HMMQ", "H3HG", "H3HF", "H3GX", "H3GY", "H3GN"},
   /* iMac18,1       */ {"H7JY", "H7VF", "JGDR", "MCD9", "MCD7", "KQFL", "MCD8", "H7K0", "H7VG", "JFRR"},
   /* iMac18,2       */ {"J1G5", "J9X5", "J9X4", "LQHG", "JGDT", "J1GC", "J1GF", "J1GD", "J1G8", "J1G9", "J1G6", "J1G7", "J608", "JKF9", "JFPW", "L7H6", "JP10"},
   /* iMac18,3       */ {"J1GJ", "J1GQ", "J1GG", "J9XC", "J9X7", "J9X6", "J9X9", "JNGD", "JNGF", "JCCR", "JCCT", "JT72", "J9X8", "JM3R", "JM3V", "J1GR", "J1GP", "J1GV", "J1GT", "J1GK", "J1GH", "J1GN", "J1GL", "J1GM", "JCND", "JC5L", "JX8H", "J2GJ", "J609", "J60C"},
   /* iMac19,1       */ {"JV3Q", "JV3P", "JV40", "JV41", "JV42", "JV43", "MC9K", "MC9J", "MX7W", "JV3N", "JV3T", "JV3W", "JV3R", "JV3Y", "JV3X", "MW2R", "MW2P", "MW2Q", "MW2V", "MW2W", "MW2T", "MQQP", "NY2G", "P1WV", "MMTC"},
   /* iMac19,2       */ {"JWDW", "JWDX", "MQ87", "MC9M", "MC9L", "MRVM", "MPM0", "MW28", "JWDY", "MMTK", "MMTL", "MTML", "MCC1", "JWF3", "JWF2", "JWF1", "JWF0", "JWF4", "N6JT", "N9LN", "N07H"},
+  /* iMac20,1       */ {"PN5T", "PN5Y", "PN5X", "PN5W", "PN5V", "PN78", "PN7D", "PN77", "PN7C"},
+  /* iMac20,2       */ {"046M", "046N", "046L", "046T", "090Y"},
   /* iMac4,1        */ {"U2P", "V67", "V4Q", "VX0", "V4P", "V4R", "X0U", "U2S", "VH0", "VH2", "VW4", "WXN", "VGM", "VGC", "V66", "V4U", "V4N", "VV4", "VHP", "VH1", "VV6", "V4M", "U2N", "U2R", "VGB", "VGZ"},
   /* iMac4,2        */ {"V2H", "W8K", "WCV", "WAE", "WD4", "W9E", "X11", "V2J", "WKT"},
   /* iMac5,1        */ {"X1A", "X9G", "Y3U", "Y9B", "X29", "WRS", "WSD", "YAE", "X0E", "Y3R", "X9E", "XCR", "XCY", "XA4", "WRX", "X6S", "VUV", "VUW", "YDW", "X9Y", "Y3X", "YAG", "WVR", "WV8", "Y3W", "Y3V", "WAR", "X2W", "Y6K", "YLJ", "Y97", "X6Q", "WRR", "X9F", "Y94", "X1W", "WRW", "AC1", "XLF", "VUX", "VUY"},
@@ -486,6 +492,8 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* iMac18,3       */ {"J0PG", "J0PH", "J0PJ", "J0PC", "J0PD", "J0PF", "HX77", "HX78", "HX79", "HX7C", "HX7D", "HX7F", "HNL6", "HNL7", "HNL8"},
   /* iMac19,1       */ {"LNV9", "KDP0", "KDN8"},
   /* iMac19,2       */ {"KGQG"},
+  /* iMac20,1       */ {"PHCD"},
+  /* iMac20,2       */ {"0000"},
   /* iMac4,1        */ {"000"},
   /* iMac4,2        */ {"000"},
   /* iMac5,1        */ {"000"},
@@ -609,6 +617,8 @@ static uint32_t AppleModelYear[][APPLE_MODEL_YEAR_MAX] = {
   /* iMac18,3       */ {2017, 2018, 2019},
   /* iMac19,1       */ {2019, 2020},
   /* iMac19,2       */ {2019, 2020},
+  /* iMac20,1       */ {2020},
+  /* iMac20,2       */ {2020},
   /* iMac4,1        */ {2006},
   /* iMac4,2        */ {2006},
   /* iMac5,1        */ {2006, 2007},
@@ -731,6 +741,8 @@ static uint32_t ApplePreferredModelYear[] = {
   /* iMac18,3       */ 0,
   /* iMac19,1       */ 0,
   /* iMac19,2       */ 0,
+  /* iMac20,1       */ 0,
+  /* iMac20,2       */ 0,
   /* iMac4,1        */ 0,
   /* iMac4,2        */ 0,
   /* iMac5,1        */ 0,
@@ -5383,6 +5395,11 @@ static APPLE_MODEL_DESC AppleModelDesc[] = {
  {"ZP8", "AirPort Express 802.11n (1st Generation)"},
  {"ZTM", "AirPort Time Capsule 802.11n (1st Generation)"},
  {"ZTN", "AirPort Time Capsule 802.11n (1st Generation)"},
+ {"046L", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"046M", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"046N", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"046T", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"090Y", "iMac (Retina 5K, 27-inch, 2020)"},
  {"AY5W", "MacBook Pro (17-inch, Late 2011)"},
  {"DC79", "MacBook Pro (17-inch, Mid 2010)"},
  {"DC7C", "MacBook Pro (17-inch, Mid 2010)"},
@@ -9662,6 +9679,15 @@ static APPLE_MODEL_DESC AppleModelDesc[] = {
  {"PLXW", "Mac Pro (2019)"},
  {"PLXX", "Mac Pro (2019)"},
  {"PLXY", "Mac Pro (2019)"},
+ {"PN5T", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5V", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5W", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5X", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5Y", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN77", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN78", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN7C", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN7D", "iMac (Retina 5K, 27-inch, 2020)"},
  {"ST61", "MacBook Pro (13-inch, Early 2011)"},
 };
 

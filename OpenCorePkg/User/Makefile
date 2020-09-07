@@ -23,7 +23,7 @@ else
 endif
 
 #
-# Primary architecture. 
+# Primary architecture.
 #
 UDK_ARCH ?= X64
 
@@ -108,11 +108,11 @@ ifneq ($(STANDALONE),1)
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o GlobalVar.o UserMath.o UserMisc.o Pcd.o
+	OBJS    += BaseMemoryLib.o BootServices.o GlobalVar.o UserMath.o UserMisc.o Pcd.o OcDummy.o
 	#
 	# OcGuardLib targets.
 	#
-	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
+	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
 	#
 	# OcSerializeLib targets.
 	#
@@ -136,7 +136,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMachoLib targets.
 	#
-	OBJS    += CxxSymbols.o Header.o Symbols.o Relocations.o
+	OBJS    += CxxSymbols.o Fat.o Header.o Symbols.o Relocations.o
 	#
 	# OcAppleKeysLib targets.
 	#

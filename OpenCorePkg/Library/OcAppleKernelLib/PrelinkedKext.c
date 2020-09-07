@@ -58,8 +58,13 @@ InternalCreatePrelinkedKext (
   UINT64                   CalculatedSourceSize;
   UINT64                   SourceEnd;
   MACH_SEGMENT_COMMAND_64  *BaseSegment;
+  UINT64                   KxldState;
+  UINT64                   KxldOffset;
+  UINT32                   KxldStateSize;
   UINT32                   ContainerOffset;
   BOOLEAN                  Found;
+  BOOLEAN                  HasExe;
+  BOOLEAN                  IsKpi;
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
@@ -69,6 +74,8 @@ InternalCreatePrelinkedKext (
   VirtualKmod       = 0;
   SourceBase        = 0;
   SourceSize        = 0;
+  KxldState         = 0;
+  KxldStateSize     = 0;
 
   Found       = Identifier == NULL;
 
@@ -121,10 +128,27 @@ InternalCreatePrelinkedKext (
       if (!PlistIntegerValue (KextPlistValue, &SourceSize, sizeof (SourceSize), TRUE)) {
         break;
       }
+    } else if (Prelinked != NULL && KxldState == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_ADDR_KEY) == 0) {
+      if (!PlistIntegerValue (KextPlistValue, &KxldState, sizeof (KxldState), TRUE)) {
+        break;
+      }
+    } else if (Prelinked != NULL && KxldStateSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_SIZE_KEY) == 0) {
+      if (!PlistIntegerValue (KextPlistValue, &KxldStateSize, sizeof (KxldStateSize), TRUE)) {
+        break;
+      }
     }
 
-    if (KextIdentifier != NULL && BundleLibraries64 != NULL && CompatibleVersion != NULL
-      && (Prelinked == NULL || (Prelinked != NULL && VirtualBase != 0 && VirtualKmod != 0 && SourceBase != 0 && SourceSize != 0))) {
+    if (KextIdentifier != NULL
+      && BundleLibraries64 != NULL
+      && CompatibleVersion != NULL
+      && (Prelinked == NULL
+        || (Prelinked != NULL
+          && VirtualBase != 0
+          && VirtualKmod != 0
+          && SourceBase != 0
+          && SourceSize != 0
+          && KxldState != 0
+          && KxldStateSize != 0))) {
       break;
     }
   }
@@ -132,9 +156,20 @@ InternalCreatePrelinkedKext (
   //
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
-  if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase
-    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize == 0 || SourceSize > MAX_UINT32))) {
+  if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase) {
     return NULL;
+  }
+
+  //
+  // KPIs on 10.6.8 may not have executables, but for all other types they are required.
+  //
+  if (Prelinked != NULL) {
+    HasExe = VirtualBase != 0 && SourceBase != 0 && SourceSize != 0 && SourceSize <= MAX_UINT32;
+    IsKpi  = VirtualBase == 0 && SourceBase == 0 && SourceSize == 0
+      && KxldState != 0 && KxldStateSize != 0 && !Prelinked->IsKernelCollection;
+    if (!IsKpi && !HasExe) {
+      return NULL;
+    }
   }
 
   if (Prelinked != NULL && Prelinked->IsKernelCollection) {
@@ -151,7 +186,7 @@ InternalCreatePrelinkedKext (
     }
   }
 
-  if (Prelinked != NULL) {
+  if (Prelinked != NULL && HasExe) {
     if (Prelinked->IsKernelCollection) {
       BaseSegment = Prelinked->RegionSegment;
     } else {
@@ -180,6 +215,7 @@ InternalCreatePrelinkedKext (
   }
 
   if (Prelinked != NULL
+    && HasExe
     && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
     FreePool (NewKext);
     return NULL;
@@ -192,6 +228,30 @@ InternalCreatePrelinkedKext (
   NewKext->Context.VirtualBase  = VirtualBase;
   NewKext->Context.VirtualKmod  = VirtualKmod;
 
+  //
+  // Provide pointer to 10.6.8 KXLD state.
+  //
+  if (Prelinked != NULL
+    && KxldState != 0
+    && KxldStateSize != 0
+    && Prelinked->PrelinkedStateKextsAddress != 0
+    && Prelinked->PrelinkedStateKextsAddress <= KxldState
+    && Prelinked->PrelinkedStateKextsSize >= KxldStateSize) {
+    KxldOffset = KxldState - Prelinked->PrelinkedStateKextsAddress;
+    if (KxldOffset <= Prelinked->PrelinkedStateKextsSize - KxldStateSize) {
+      NewKext->Context.KxldState = (UINT8 *)Prelinked->PrelinkedStateKexts + KxldOffset;
+      NewKext->Context.KxldStateSize = KxldStateSize;
+    }
+  }
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCAK: %a got KXLD %p %u\n",
+    NewKext->Identifier,
+    NewKext->Context.KxldState,
+    NewKext->Context.KxldStateSize
+    ));
+
   return NewKext;
 }
 
@@ -202,8 +262,14 @@ InternalScanCurrentPrelinkedKextLinkInfo (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  if (Kext->LinkEditSegment == NULL) {
-    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting __LINKEDIT for %a\n", Kext->Identifier));
+  //
+  // Prefer KXLD state when available.
+  //
+  if (Kext->Context.KxldState != NULL) {
+    return;
+  }
+
+  if (Kext->LinkEditSegment == NULL && Kext->NumberOfSymbols == 0) {
     if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
       Kext->LinkEditSegment = Context->LinkEditSegment;
     } else {
@@ -212,10 +278,16 @@ InternalScanCurrentPrelinkedKextLinkInfo (
         "__LINKEDIT"
         );
     }    
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCAK: Requesting __LINKEDIT for %a - %p at %p\n",
+      Kext->Identifier,
+      Kext->LinkEditSegment,
+      (UINT8 *) MachoGetMachHeader64 (&Kext->Context.MachContext) - Context->Prelinked
+      ));
   }
 
-  if (Kext->SymbolTable == NULL) {
-    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting SymbolTable for %a\n", Kext->Identifier));
+  if (Kext->SymbolTable == NULL && Kext->NumberOfSymbols == 0) {
     Kext->NumberOfSymbols = MachoGetSymbolTable (
                    &Kext->Context.MachContext,
                    &Kext->SymbolTable,
@@ -227,6 +299,12 @@ InternalScanCurrentPrelinkedKextLinkInfo (
                    NULL,
                    NULL
                    );
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCAK: Requesting SymbolTable for %a - %u\n",
+      Kext->Identifier,
+      Kext->NumberOfSymbols
+      ));
   }
 }
 
@@ -280,18 +358,19 @@ InternalScanBuildLinkedSymbolTable (
       continue;
     }
 
+    //
+    // Undefined symbols will be resolved via the KPI's dependencies and
+    // hence do not need to be included (again).
+    //
+    if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+      ++NumDiscardedSyms;
+      continue;
+    }
+
     Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
     Result = MachoSymbolNameIsCxx (Name);
 
     if (ResolveSymbols) {
-      //
-      // Undefined symbols will be resolved via the KPI's dependencies and
-      // hence do not need to be included (again).
-      //
-      if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
-        ++NumDiscardedSyms;
-        continue;
-      }
       //
       // Resolve indirect symbols via the KPI's dependencies (kernel).
       //
@@ -366,6 +445,7 @@ InternalScanBuildLinkedVtables (
   UINT32                           NumEntriesTemp;
   UINT32                           Index;
   UINT32                           VtableMaxSize;
+  UINT32                           ResultingSize;
   CONST UINT64                     *VtableData;
   PRELINKED_VTABLE                 *LinkedVtables;
 
@@ -417,13 +497,17 @@ InternalScanBuildLinkedVtables (
 
     VtableLookups[Index].Vtable.Data = VtableData;
 
-    NumEntries += NumEntriesTemp;
+    if (OcOverflowAddU32 (NumEntries, NumEntriesTemp, &NumEntries)) {
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
 
-  LinkedVtables = AllocatePool (
-                    (NumVtables * sizeof (*LinkedVtables))
-                      + (NumEntries * sizeof (*LinkedVtables->Entries))
-                    );
+  if (OcOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
+    || OcOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize)) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  LinkedVtables = AllocatePool (ResultingSize);
   if (LinkedVtables == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -661,6 +745,68 @@ InternalCachedPrelinkedKernel (
   NewKext->Context.VirtualBase  = Segment->VirtualAddress - Segment->FileOffset;
   NewKext->Context.VirtualKmod  = 0;
 
+  if (!Prelinked->IsKernelCollection) {
+    //
+    // Find optional __PRELINK_STATE segment, present in 10.6.8
+    //
+    Prelinked->PrelinkedStateSegment = MachoGetSegmentByName64 (
+      &Prelinked->PrelinkedMachContext,
+      PRELINK_STATE_SEGMENT
+      );
+
+    if (Prelinked->PrelinkedStateSegment != NULL) {
+      Prelinked->PrelinkedStateSectionKernel = MachoGetSectionByName64 (
+        &Prelinked->PrelinkedMachContext,
+        Prelinked->PrelinkedStateSegment,
+        PRELINK_STATE_SECTION_KERNEL
+        );
+      Prelinked->PrelinkedStateSectionKexts = MachoGetSectionByName64 (
+        &Prelinked->PrelinkedMachContext,
+        Prelinked->PrelinkedStateSegment,
+        PRELINK_STATE_SECTION_KEXTS
+        );
+
+      if (Prelinked->PrelinkedStateSectionKernel != NULL
+        && Prelinked->PrelinkedStateSectionKexts != NULL
+        && Prelinked->PrelinkedStateSectionKernel->Size > 0
+        && Prelinked->PrelinkedStateSectionKexts->Size > 0) {
+        Prelinked->PrelinkedStateKernelSize = (UINT32) Prelinked->PrelinkedStateSectionKernel->Size;
+        Prelinked->PrelinkedStateKextsSize = (UINT32) Prelinked->PrelinkedStateSectionKexts->Size;
+        Prelinked->PrelinkedStateKernel = AllocateCopyPool (
+          Prelinked->PrelinkedStateKernelSize,
+          &Prelinked->Prelinked[Prelinked->PrelinkedStateSectionKernel->Offset]
+          );
+        Prelinked->PrelinkedStateKexts = AllocateCopyPool (
+          Prelinked->PrelinkedStateKextsSize,
+          &Prelinked->Prelinked[Prelinked->PrelinkedStateSectionKexts->Offset]
+          );
+      }
+
+      if (Prelinked->PrelinkedStateKernel != NULL
+        && Prelinked->PrelinkedStateKexts != NULL) {
+        Prelinked->PrelinkedStateKextsAddress = Prelinked->PrelinkedStateSectionKexts->Address;
+        NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
+        NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAK: Ignoring unused PK state __kernel %p __kexts %p\n",
+          Prelinked->PrelinkedStateSectionKernel,
+          Prelinked->PrelinkedStateSectionKexts
+          ));
+        if (Prelinked->PrelinkedStateKernel != NULL) {
+          FreePool (Prelinked->PrelinkedStateKernel);
+        }
+        if (Prelinked->PrelinkedStateKexts != NULL) {
+          FreePool (Prelinked->PrelinkedStateKexts);
+        }
+        Prelinked->PrelinkedStateSectionKernel = NULL;
+        Prelinked->PrelinkedStateSectionKexts = NULL;
+        Prelinked->PrelinkedStateSegment = NULL;
+      }
+    }
+  }
+
   InsertTailList (&Prelinked->PrelinkedKexts, &NewKext->Link);
 
   return NewKext;
@@ -759,7 +905,7 @@ InternalScanPrelinkedKext (
       //
       if (Context->IsKernelCollection
         && AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0) {
-        DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC mode\n", DependencyId, Kext->Identifier));
+        DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC/state mode\n", DependencyId, Kext->Identifier));
         continue;
       }
 
@@ -809,14 +955,38 @@ InternalScanPrelinkedKext (
   // Collect data to enable linking against this KEXT.
   //
   if (Dependency) {
-    Status = InternalScanBuildLinkedSymbolTable (Kext, Context);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
+    if (Kext->Context.KxldState != NULL) {
+      //
+      // Use KXLD state as is for 10.6.8 kernel.
+      //
+      Status = InternalKxldStateBuildLinkedSymbolTable (
+        Kext,
+        Context
+        );
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
 
-    Status = InternalScanBuildLinkedVtables (Kext, Context);
-    if (EFI_ERROR (Status)) {
-      return Status;
+      Status = InternalKxldStateBuildLinkedVtables (
+        Kext,
+        Context
+        );
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+    } else {
+      //
+      // Use normal LINKEDIT building for newer kernels and all kexts.
+      //
+      Status = InternalScanBuildLinkedSymbolTable (Kext, Context);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      Status = InternalScanBuildLinkedVtables (Kext, Context);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
     }
   }
 

@@ -12,14 +12,43 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Uefi.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcAppleKernelLib.h>
 #include <Library/OcMacInfoLib.h>
+#include <Library/OcStringLib.h>
 
 #include "MacInfoInternal.h"
 
 STATIC CONST UINT32 mDevicePathsSupported = 1;
+
+STATIC
+CONST MAC_INFO_64BIT_COMPAT_ENTRY gMac64BitModels[] = {
+  {
+    "Macmini", 0, 3
+  },
+  {
+    "MacBookAir", 0, 2
+  },
+  {
+    "MacBookPro", 4, 3
+  },
+  {
+    "MacBook", 0, 5
+  },
+  {
+    "iMac", 8, 7
+  },
+  {
+    "MacPro", 3, 3
+  },
+  {
+    "Xserve", 2, 2
+  }
+};
 
 STATIC
 CONST MAC_INFO_INTERNAL_ENTRY *
@@ -114,4 +143,64 @@ GetMacInfo (
   if (InternalEntry->PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
     MacInfo->Smbios.PlatformFeature      = &InternalEntry->PlatformFeature;
   }
+}
+
+BOOLEAN
+IsMacModel64BitCompatible (
+  IN CONST CHAR8    *ProductName,
+  IN UINT32         KernelVersion
+  )
+{
+  EFI_STATUS                      Status;
+  UINT32                          Index;
+  UINTN                           CurrentModelLength;
+  UINTN                           SystemModelLength;
+  CONST CHAR8                     *SystemModelSuffix;
+  CHAR8                           *SystemModelSeparator;
+  UINT64                          SystemModelMajor;
+
+  ASSERT (ProductName != NULL);
+
+  //
+  // <= 10.5 is always 32-bit, and >= 10.8 is always 64-bit.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, 0, KERNEL_VERSION_LEOPARD_MAX)) {
+    return FALSE;
+  } else if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    return TRUE;
+  }
+
+  SystemModelLength = AsciiStrLen (ProductName);
+
+  for (Index = 0; Index < ARRAY_SIZE (gMac64BitModels); Index++) {
+    //
+    // Ensure name is at least as big as what we have in the table, plus a number character.
+    //
+    CurrentModelLength = AsciiStrLen (gMac64BitModels[Index].ModelName);
+    if (SystemModelLength <= CurrentModelLength + 1) {
+      continue;
+    }
+
+    if (AsciiStrnCmp (ProductName, gMac64BitModels[Index].ModelName, CurrentModelLength) == 0) {
+      SystemModelSuffix = &ProductName[CurrentModelLength];
+      if (!IsAsciiNumber (SystemModelSuffix[0])) {
+        continue;
+      }
+
+      SystemModelSeparator = AsciiStrStr (SystemModelSuffix, ",");
+      Status = AsciiStrDecimalToUint64S (SystemModelSuffix, &SystemModelSeparator, &SystemModelMajor);
+      if (!EFI_ERROR (Status)) {
+        if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
+          return gMac64BitModels[Index].SnowLeoMin64 != 0 && SystemModelMajor >= gMac64BitModels[Index].SnowLeoMin64;
+        } else if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX)) {
+          return gMac64BitModels[Index].LionMin64 != 0 && SystemModelMajor >= gMac64BitModels[Index].LionMin64;
+        }
+      }
+    }
+  }
+
+  //
+  // Default behavior allows 64-bit on both 10.6 and 10.7 if the model is not found.
+  //
+  return TRUE;
 }

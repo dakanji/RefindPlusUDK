@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 
 #include <Library/BaseLib.h>
@@ -695,6 +696,7 @@ OcMiscBoot (
   OC_PICKER_CONTEXT      *Context;
   OC_PICKER_CMD          PickerCommand;
   OC_PICKER_MODE         PickerMode;
+  OC_DMG_LOADING_SUPPORT DmgLoading;
   UINTN                  ContextSize;
   UINT32                 Index;
   UINT32                 EntryIndex;
@@ -702,6 +704,7 @@ OcMiscBoot (
   UINTN                  BlessOverrideSize;
   CHAR16                 **BlessOverride;
   CONST CHAR8            *AsciiPicker;
+  CONST CHAR8            *AsciiDmg;
 
   AsciiPicker = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
 
@@ -712,8 +715,21 @@ OcMiscBoot (
   } else if (AsciiStrCmp (AsciiPicker, "Apple") == 0) {
     PickerMode = OcPickerModeApple;
   } else {
-    DEBUG ((DEBUG_WARN, "OC: Unknown PickirMode: %a, using builtin\n", AsciiPicker));
+    DEBUG ((DEBUG_WARN, "OC: Unknown PickerMode: %a, using builtin\n", AsciiPicker));
     PickerMode = OcPickerModeBuiltin;
+  }
+
+  AsciiDmg = OC_BLOB_GET (&Config->Misc.Security.DmgLoading);
+
+  if (AsciiStrCmp (AsciiDmg, "Disabled") == 0) {
+    DmgLoading = OcDmgLoadingDisabled;
+  } else if (AsciiStrCmp (AsciiDmg, "Any") == 0) {
+    DmgLoading = OcDmgLoadingAnyImage;
+  } else if (AsciiStrCmp (AsciiDmg, "Signed") == 0) {
+    DmgLoading = OcDmgLoadingAppleSigned;
+  } else {
+    DEBUG ((DEBUG_WARN, "OC: Unknown DmgLoading: %a, using Signed\n", AsciiDmg));
+    DmgLoading = OcDmgLoadingAppleSigned;
   }
 
   //
@@ -804,7 +820,7 @@ OcMiscBoot (
   }
 
   Context->ScanPolicy            = Config->Misc.Security.ScanPolicy;
-  Context->LoadPolicy            = OC_LOAD_DEFAULT_POLICY;
+  Context->DmgLoading            = DmgLoading;
   Context->TimeoutSeconds        = Config->Misc.Boot.Timeout;
   Context->TakeoffDelay          = Config->Misc.Boot.TakeoffDelay;
   Context->StartImage            = StartImage;
@@ -816,6 +832,9 @@ OcMiscBoot (
   Context->PrivilegeContext      = Privilege;
   Context->RequestPrivilege      = OcShowSimplePasswordRequest;
   Context->ShowMenu              = OcShowSimpleBootMenu;
+  Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
+  Context->GetEntryIcon          = OcGetBootEntryIcon;
+  Context->GetKeyIndex           = OcGetAppleKeyIndex;
   Context->PickerMode            = PickerMode;
   Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
   Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;
@@ -824,7 +843,12 @@ OcMiscBoot (
     Context->TitleSuffix      = OcMiscGetVersionString ();
   }
 
-  if (Config->Misc.Boot.ShowPicker) {
+  Status = OcHandleRecoveryRequest (
+    &Context->RecoveryInitiator
+    );
+  if (!EFI_ERROR (Status)) {
+    PickerCommand = Context->PickerCommand = OcPickerBootAppleRecovery;
+  } else if (Config->Misc.Boot.ShowPicker) {
     PickerCommand = Context->PickerCommand = OcPickerShowPicker;
   } else {
     PickerCommand = Context->PickerCommand = OcPickerDefault;
@@ -873,15 +897,13 @@ OcMiscBoot (
   }
 
   if (Interface != NULL) {
-    Status = Interface->ShowInteface (Interface, Storage, Context);
-    DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
-  } else {
-    Status = EFI_UNSUPPORTED;
+    Status = Interface->PopulateContext (Interface, Storage, Context);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
+    }
   }
 
-  if (EFI_ERROR (Status)) {
-    Status = OcRunBootPicker (Context);
-  }
+  Status = OcRunBootPicker (Context);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));

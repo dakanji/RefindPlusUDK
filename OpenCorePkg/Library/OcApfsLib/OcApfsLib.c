@@ -14,9 +14,14 @@
 
 #include "OcApfsInternal.h"
 #include <Library/OcApfsLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
 #include <Protocol/BlockIo.h>
+#include <Protocol/PartitionInfo.h>
 
 STATIC VOID *mApfsNewPartitionsEventKey;
 
@@ -42,7 +47,7 @@ ApfsNewPartitionArrived (
       &Handle
       );
     if (!EFI_ERROR (Status)) {
-      OcApfsConnectDevice (Handle);
+      OcApfsConnectDevice (Handle, TRUE);
     } else {
       break;
     }
@@ -82,22 +87,19 @@ ApfsMonitorNewPartitions (
 }
 
 EFI_STATUS
-OcApfsConnectDevices (
-  IN BOOLEAN  Monitor
+OcApfsConnectParentDevice (
+  IN EFI_HANDLE  Handle  OPTIONAL,
+  IN BOOLEAN     VerifyPolicy
   )
 {
-  EFI_STATUS  Status;
-  EFI_STATUS  Status2;
-  UINTN       HandleCount;
-  EFI_HANDLE  *HandleBuffer;
-  UINTN       Index;
-
-  if (Monitor) {
-    Status = ApfsMonitorNewPartitions ();
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCJS: Failed to setup drive monitoring - %r\n", Status));
-    }
-  }
+  EFI_STATUS       Status;
+  EFI_STATUS       Status2;
+  UINTN            HandleCount;
+  EFI_HANDLE       *HandleBuffer;
+  EFI_DEVICE_PATH  *ParentDevicePath;
+  EFI_DEVICE_PATH  *ChildDevicePath;
+  UINTN            Index;
+  UINTN            PrefixLength;
 
   HandleCount = 0;
   Status = gBS->LocateHandleBuffer (
@@ -108,18 +110,84 @@ OcApfsConnectDevices (
     &HandleBuffer
     );
 
+  ParentDevicePath = NULL;
+  PrefixLength = 0;
+  if (Handle != NULL) {
+    Status2 = gBS->HandleProtocol (
+      Handle,
+      &gEfiDevicePathProtocolGuid,
+      (VOID **) &ParentDevicePath
+      );
+    if (!EFI_ERROR (Status2)) {
+      PrefixLength = GetDevicePathSize (ParentDevicePath) - END_DEVICE_PATH_LENGTH;
+    } else {
+      DEBUG ((DEBUG_INFO, "OCJS: No parent device path - %r\n", Status2));
+      ParentDevicePath = NULL;
+    }
+  }
+
   if (!EFI_ERROR (Status)) {
     Status = EFI_NOT_FOUND;
 
     for (Index = 0; Index < HandleCount; ++Index) {
+      if (ParentDevicePath != NULL && PrefixLength > 0) {
+        Status2 = gBS->HandleProtocol (
+          HandleBuffer[Index],
+          &gEfiDevicePathProtocolGuid,
+          (VOID **) &ChildDevicePath
+          );
+        if (EFI_ERROR (Status2)) {
+          DEBUG ((DEBUG_INFO, "OCJS: No child device path - %r\n", Status2));
+          continue;
+        }
+
+        if (CompareMem (ParentDevicePath, ChildDevicePath, PrefixLength) == 0) {
+          DEBUG ((DEBUG_INFO, "OCJS: Matched device path\n"));
+        } else {
+          continue;
+        }
+      }
+
       Status2 = OcApfsConnectDevice (
-        HandleBuffer[Index]
+        HandleBuffer[Index],
+        VerifyPolicy
         );
       if (!EFI_ERROR (Status2)) {
         Status = Status2;
       }
     }
+
+    FreePool (HandleBuffer);
+  } else {
+    DEBUG ((DEBUG_INFO, "OCJS: BlockIo buffer error - %r\n", Status));
   }
 
   return Status;
+}
+
+EFI_STATUS
+OcApfsConnectDevices (
+  IN BOOLEAN  Monitor
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *PartitionInfoInterface;
+
+  DEBUG_CODE_BEGIN ();
+  Status = gBS->LocateProtocol (
+    &gEfiPartitionInfoProtocolGuid,
+    NULL,
+    &PartitionInfoInterface
+    );
+  DEBUG ((DEBUG_INFO, "OCJS: PartitionInfo is %r\n", Status));
+  DEBUG_CODE_END ();
+
+  if (Monitor) {
+    Status = ApfsMonitorNewPartitions ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCJS: Failed to setup drive monitoring - %r\n", Status));
+    }
+  }
+
+  return OcApfsConnectParentDevice (NULL, TRUE);
 }

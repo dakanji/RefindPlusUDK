@@ -53,8 +53,16 @@ int main(int argc, char** argv) {
 
   long long a = current_timestamp();
 
+  PcdGet8 (PcdDebugPropertyMask) |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
+
   OC_GLOBAL_CONFIG   Config;
-  OcConfigurationInit (&Config, b, f);
+  EFI_STATUS         Status;
+  Status = OcConfigurationInit (&Config, b, f);
+
+  if (Status != EFI_SUCCESS) {
+    printf("Invalid config\n");
+    return -1;
+  }
 
   DEBUG ((DEBUG_ERROR, "Done checking %a in %llu ms\n", argc > 1 ? argv[1] : "./config.plist", current_timestamp() - a));
 

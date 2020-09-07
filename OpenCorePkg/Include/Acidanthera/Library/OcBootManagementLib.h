@@ -44,7 +44,6 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_MENU_RELOADING            L"Reloading"
 #define OC_MENU_TIMEOUT              L"Timeout"
 #define OC_MENU_OK                   L"OK"
-#define OC_MENU_DISK_IMAGE           L" (dmg)"
 #define OC_MENU_EXTERNAL             L" (external)"
 
 /**
@@ -115,6 +114,28 @@ typedef enum OC_PICKER_MODE_ {
   OcPickerModeExternal,
   OcPickerModeApple,
 } OC_PICKER_MODE;
+
+/**
+  macOS Kernel capabilities.
+  Written in pairs of kernel and user capabilities.
+
+  On IA32 firmware:
+  10.4-10.5 - K32_U32 | K32_U64.
+  10.6      - K32_U32 | K32_U64.
+  10.7+     - K32_U64.
+
+  On X64 firmware:
+  10.4-10.5 - K32_U32 | K32_U64.
+  10.6      - K32_U32 | K32_U64 | K64_U64.
+  10.7+     - K32_U64 | K64_U64.
+**/
+#define OC_KERN_CAPABILITY_K32_U32        BIT0 ///< Supports K32 and U32 (10.4~10.6)
+#define OC_KERN_CAPABILITY_K32_U64        BIT1 ///< Supports K32 and U64 (10.4~10.7)
+#define OC_KERN_CAPABILITY_K64_U64        BIT2 ///< Supports K64 and U64 (10.6+)
+
+#define OC_KERN_CAPABILITY_K32_K64_U64    (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)
+#define OC_KERN_CAPABILITY_K32_U32_U64    (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64)
+#define OC_KERN_CAPABILITY_ALL            (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_K64_U64)
 
 /**
   Action to perform as part of executing a system boot entry.
@@ -364,65 +385,13 @@ typedef struct OC_BOOT_CONTEXT_ {
   OC_SCAN_ALLOW_DEVICE_PCI)
 
 /**
-  OcLoadBootEntry Mode policy bits allow to configure OcLoadBootEntry behaviour.
+  OcLoadBootEntry DMG loading policy rules.
 **/
-
-/**
-  Thin EFI image loading (normal PE) is allowed.
-**/
-#define OC_LOAD_ALLOW_EFI_THIN_BOOT  BIT0
-/**
-  FAT EFI image loading (Apple FAT PE) is allowed.
-  These can be found on macOS 10.8 and below.
-**/
-#define OC_LOAD_ALLOW_EFI_FAT_BOOT   BIT1
-/**
-  One level recursion into dmg file is allowed.
-  It is assumed that dmg contains a single volume and a single blessed entry.
-  Loading dmg from dmg is not allowed in any case.
-**/
-#define OC_LOAD_ALLOW_DMG_BOOT       BIT2
-/**
-  Abort loading on invalid Apple-like signature.
-  If file is signed with Apple-like signature, and it is mismatched, then abort.
-  @warn Unsigned files or UEFI-signed files will skip this check.
-  @warn It is ignored what certificate was used for signing.
-**/
-#define OC_LOAD_VERIFY_APPLE_SIGN    BIT8
-/**
-  Abort loading on missing Apple-like signature.
-  If file is not signed with Apple-like signature (valid or not) then abort.
-  @warn Unsigned files or UEFI-signed files will not load with this check.
-  @warn Without OC_LOAD_VERIFY_APPLE_SIGN corrupted binaries may still load.
-**/
-#define OC_LOAD_REQUIRE_APPLE_SIGN   BIT9
-/**
-  Abort loading on untrusted key (otherwise may warn).
-  @warn Unsigned files or UEFI-signed files will skip this check.
-**/
-#define OC_LOAD_REQUIRE_TRUSTED_KEY  BIT10
-/**
-  Trust specified (as OcLoadBootEntry argument) custom keys.
-**/
-#define OC_LOAD_TRUST_CUSTOM_KEY     BIT16
-/**
-  Trust Apple CFFD3E6B public key.
-  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
-**/
-#define OC_LOAD_TRUST_APPLE_V1_KEY   BIT17
-/**
-  Trust Apple E50AC288 public key.
-  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
-**/
-#define OC_LOAD_TRUST_APPLE_V2_KEY   BIT18
-/**
-  Default moderate policy meant to augment secure boot facilities.
-  Loads almost everything and bypasses secure boot for Apple and Custom signed binaries.
-**/
-#define OC_LOAD_DEFAULT_POLICY ( \
-  OC_LOAD_ALLOW_EFI_THIN_BOOT | OC_LOAD_ALLOW_DMG_BOOT      | OC_LOAD_REQUIRE_APPLE_SIGN | \
-  OC_LOAD_VERIFY_APPLE_SIGN   | OC_LOAD_REQUIRE_TRUSTED_KEY | \
-  OC_LOAD_TRUST_CUSTOM_KEY    | OC_LOAD_TRUST_APPLE_V1_KEY  | OC_LOAD_TRUST_APPLE_V2_KEY)
+typedef enum {
+  OcDmgLoadingDisabled,
+  OcDmgLoadingAnyImage,
+  OcDmgLoadingAppleSigned,
+} OC_DMG_LOADING_SUPPORT;
 
 /**
   Exposed start interface with chosen boot entry but otherwise equivalent
@@ -525,6 +494,42 @@ EFI_STATUS
   );
 
 /**
+  Get label contents (e.g. '.disk_label' or '.disk_label_2x').
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_GET_ENTRY_LABEL_IMAGE) (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  UINT8                      Scale,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get icon contents (e.g. '.VolumeIcon.icns').
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_GET_ENTRY_ICON) (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get pressed key index.
+**/
+typedef
+INTN
+(EFIAPI *OC_GET_KEY_INDEX) (
+  IN OUT OC_PICKER_CONTEXT                  *Context,
+  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+     OUT BOOLEAN                            *SetDefault  OPTIONAL
+  );
+
+/**
   Picker behaviour action.
 **/
 typedef enum {
@@ -544,9 +549,9 @@ struct OC_PICKER_CONTEXT_ {
   //
   UINT32                     ScanPolicy;
   //
-  // Load policy (e.g. OC_LOAD_DEFAULT_POLICY).
+  // DMG loading mode (e.g. OcDmgLoadingAppleSigned).
   //
-  UINT32                     LoadPolicy;
+  OC_DMG_LOADING_SUPPORT     DmgLoading;
   //
   // Default entry selection timeout (pass 0 to ignore).
   //
@@ -585,6 +590,14 @@ struct OC_PICKER_CONTEXT_ {
   //
   EFI_HANDLE                 LoaderHandle;
   //
+  // Get entry label image.
+  //
+  OC_GET_ENTRY_LABEL_IMAGE   GetEntryLabelImage;
+  //
+  // Get entry icon.
+  //
+  OC_GET_ENTRY_ICON          GetEntryIcon;
+  //
   // Entry display routine.
   //
   OC_SHOW_MENU               ShowMenu;
@@ -592,6 +605,10 @@ struct OC_PICKER_CONTEXT_ {
   // Privilege escalation requesting routine.
   //
   OC_REQ_PRIVILEGE           RequestPrivilege;
+  //
+  // Get pressed key index.
+  //
+  OC_GET_KEY_INDEX           GetKeyIndex;
   //
   // Context to pass to RequestPrivilege, optional.
   //
@@ -647,6 +664,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
   //
+  // Recovery initiator if present.
+  //
+  EFI_DEVICE_PATH_PROTOCOL   *RecoveryInitiator;
+  //
   // Custom boot order updated during scanning allocated from pool.
   // Preserved here to avoid situations with losing BootNext on rescan.
   //
@@ -699,6 +720,7 @@ struct OC_PICKER_CONTEXT_ {
   @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
+EFIAPI
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,
@@ -717,6 +739,7 @@ OcGetBootEntryLabelImage (
   @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
+EFIAPI
 OcGetBootEntryIcon (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,
@@ -874,6 +897,20 @@ OcActivateHibernateWake (
   );
 
 /**
+  Handle recovery detection for later loading.
+  Recovery handling is required to choose the right operating system.
+
+  @param[out]  Initiator  Recovery initiator device path, optional.
+
+  @retval EFI_SUCCESS        Recovery boot is required.
+  @retval EFI_NOT_FOUND      System should boot normally.
+**/
+EFI_STATUS
+OcHandleRecoveryRequest (
+  OUT EFI_DEVICE_PATH_PROTOCOL  **Initiator  OPTIONAL
+  );
+
+/**
   Read and expand Apple panic log if present.
 
   @param[out]  PanicSize    Size of the panic log on success.
@@ -938,6 +975,7 @@ OcLoadPickerHotKeys (
   @returns OC_INPUT_INVALID when unknown key is pressed.
 **/
 INTN
+EFIAPI
 OcGetAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
@@ -1061,19 +1099,21 @@ OcParseBootArgs (
 /**
   Check if boot argument is currently passed (via image options or NVRAM).
 
-  @param[in]  LoadedImage    UEFI loaded image protocol instance, optional.
-  @param[in]  GetVariable  Preferred UEFI NVRAM reader, optional.
-  @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
-  @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+  @param[in]     LoadedImage      UEFI loaded image protocol instance, optional.
+  @param[in]     GetVariable      Preferred UEFI NVRAM reader, optional.
+  @param[in]     Argument         Argument, e.g. -v, slide=, debug=, etc.
+  @param[in]     ArgumentLength   Argument length, e.g. L_STR_LEN ("-v").
+  @param[in,out] Value            Argument value allocated from pool.
 
   @retval TRUE if argument is present.
 **/
 BOOLEAN
 OcCheckArgumentFromEnv (
-  IN EFI_LOADED_IMAGE  *LoadedImage  OPTIONAL,
-  IN EFI_GET_VARIABLE  GetVariable  OPTIONAL,
-  IN CONST CHAR8       *Argument,
-  IN CONST UINTN       ArgumentLength
+  IN     EFI_LOADED_IMAGE   *LoadedImage OPTIONAL,
+  IN     EFI_GET_VARIABLE   GetVariable OPTIONAL,
+  IN     CONST CHAR8        *Argument,
+  IN     CONST UINTN        ArgumentLength,
+  IN OUT CHAR8              **Value OPTIONAL
   );
 
 /**
@@ -1082,14 +1122,16 @@ OcCheckArgumentFromEnv (
   @param[in]  CommandLine     Argument command line, e.g. for boot.efi.
   @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
   @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+  @param[out] ValueLength     Argument value length, optional.
 
   @retval pointer to argument value or NULL.
 **/
 CONST CHAR8 *
 OcGetArgumentFromCmd (
-  IN CONST CHAR8  *CommandLine,
-  IN CONST CHAR8  *Argument,
-  IN CONST UINTN  ArgumentLength
+  IN  CONST CHAR8   *CommandLine,
+  IN  CONST CHAR8   *Argument,
+  IN  CONST UINTN   ArgumentLength,
+  OUT UINTN         *ValueLength OPTIONAL
   );
 
 /**
@@ -1120,6 +1162,24 @@ OcAppendArgumentToCmd (
   IN OUT CHAR8              *CommandLine,
   IN     CONST CHAR8        *Argument,
   IN     CONST UINTN        ArgumentLength
+  );
+
+/**
+  Append 1 or more arguments to Loaded Image protocol.
+
+  @param[in,out]  LoadedImage    Loaded Image protocol instance.
+  @param[in]      Arguments      Argument array.
+  @param[in]      ArgumentCount  Number of arguments in the array.
+  @param[in]      Replace        Whether to append to existing arguments or replace.
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+OcAppendArgumentsToLoadedImage (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     CONST CHAR8                **Arguments,
+  IN     UINT32                     ArgumentCount,
+  IN     BOOLEAN                    Replace
   );
 
 /**
@@ -1234,6 +1294,87 @@ OcRegisterBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath
+  );
+
+/**
+  Initialises custom Boot Services overrides to support direct images.
+**/
+VOID
+OcImageLoaderInit (
+  VOID
+  );
+
+/**
+  Make DirectImageLoader the default for Apple Secure Boot.
+**/
+VOID
+OcImageLoaderActivate (
+  VOID
+  );
+
+/**
+  Image loader callback triggered before LoadImage.
+**/
+typedef
+VOID
+(*OC_IMAGE_LOADER_PATCH) (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
+  IN VOID                      *SourceBuffer,
+  IN UINTN                     SourceSize
+  );
+
+/**
+  Image loader callback triggered before StartImage.
+**/
+typedef
+VOID
+(*OC_IMAGE_LOADER_CONFIGURE) (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     UINT32                     Capabilities
+  );
+
+
+/**
+  Register image loading callback.
+
+  @param[in] Patch      Callback function to call on image load.
+**/
+VOID
+OcImageLoaderRegisterPatch (
+  IN OC_IMAGE_LOADER_PATCH  Patch      OPTIONAL
+  );
+
+/**
+  Register image start callback.
+
+  @param[in] Configure  Callback function to call on image start.
+**/
+VOID
+OcImageLoaderRegisterConfigure (
+  IN OC_IMAGE_LOADER_CONFIGURE  Configure  OPTIONAL
+  );
+
+/**
+  Simplified load image routine, which bypasses UEFI and loads the image directly.
+
+  @param[in]   BootPolicy        Ignored.
+  @param[in]   ParentImageHandle The caller's image handle.
+  @param[in]   DevicePath        Ignored.
+  @param[in]   SourceBuffer      Pointer to the memory location containing image to be loaded.
+  @param[in]   SourceSize        The size in bytes of SourceBuffer.
+  @param[out]  ImageHandle       The pointer to the returned image handle created on success.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+EFIAPI
+OcImageLoaderLoad (
+  IN  BOOLEAN                  BootPolicy,
+  IN  EFI_HANDLE               ParentImageHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+  IN  VOID                     *SourceBuffer OPTIONAL,
+  IN  UINTN                    SourceSize,
+  OUT EFI_HANDLE               *ImageHandle
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

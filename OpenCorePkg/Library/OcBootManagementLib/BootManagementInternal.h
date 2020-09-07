@@ -52,7 +52,7 @@ InternalCheckScanPolicy (
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     UINT32                      Policy
+  IN     OC_DMG_LOADING_SUPPORT      DmgLoading
   );
 
 VOID
@@ -121,6 +121,7 @@ InternalDebugBootEnvironment (
   @param[out] OptionalDataSize  On output, the optional data size.
   @param[out] OptionalData      On output, a pointer to the optional data.
 
+  @returns Device path allocated from pool or NULL.
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetBootOptionData (

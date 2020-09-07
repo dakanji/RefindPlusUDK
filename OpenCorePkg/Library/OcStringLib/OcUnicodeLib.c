@@ -11,8 +11,6 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
-//DA-TAG: Added
-#include "../../../RefindPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include <Base.h>
 
@@ -272,4 +270,24 @@ OcUnicodeSafeSPrint (
   VA_END (Marker);
 
   return Status;
+}
+
+BOOLEAN
+EFIAPI
+OcUnicodeEndsWith (
+  IN CONST CHAR16     *String,
+  IN CONST CHAR16     *SearchString
+  )
+{
+  UINTN   StringLength;
+  UINTN   SearchStringLength;
+
+  ASSERT (String != NULL);
+  ASSERT (SearchString != NULL);
+
+  StringLength        = StrLen (String);
+  SearchStringLength  = StrLen (SearchString);
+
+  return StringLength >= SearchStringLength
+    && StrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
