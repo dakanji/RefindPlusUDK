@@ -25,11 +25,12 @@ runErr() { # $1: message
 }
 trap runErr ERR
 
-# Set things up and move into build folder
+
+# Set things up for build
 clear
 msg_info '## RefindBuilder - Setting Up ##'
 msg_info '--------------------------------'
-sleep 1
+sleep 2
 EDIT_BRANCH="${1:-GOPFix}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 WORK_DIR="${BASE_DIR}/Working"
@@ -41,7 +42,7 @@ if [ ! -d "${EDK2_DIR}" ] ; then
 fi
 XCODE_DIR_REL="${EDK2_DIR}/Build/Refind/RELEASE_XCODE5"
 XCODE_DIR_DBG="${EDK2_DIR}/Build/Refind/DEBUG_XCODE5"
-XCODE_DIR_TMP="${EDK2_DIR}/Build-DBG/Refind/RELEASE_XCODE5"
+XCODE_DIR_TMP="${EDK2_DIR}/.Build-TMP/Refind/RELEASE_XCODE5"
 BINARY_DIR="${XCODE_DIR_REL}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
 GLOBAL_FILE="${EDK2_DIR}/RefindPkg/refind/globalExtra.h"
@@ -49,11 +50,17 @@ GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPkg/refind/globalExtra-REL.txt"
 GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPkg/refind/globalExtra-DBG.txt"
 
 pushd ${WORK_DIR} > /dev/null || exit 1
-git checkout ${EDIT_BRANCH}
+msg_info "Checkout '${EDIT_BRANCH}' branch..."
+git checkout ${EDIT_BRANCH} > /dev/null
+msg_status '...OK'; echo ''
+sleep 2
+msg_info "Update RefindPkg..."
 rm -fr "${EDK2_DIR}/RefindPkg"
 cp -fa "${WORK_DIR}" "${EDK2_DIR}/RefindPkg"
 rm -fr "${EDK2_DIR}/RefindPkg/.gitignore"
 rm -fr "${EDK2_DIR}/RefindPkg/.git"
+msg_status '...OK'; echo ''
+sleep 2
 popd > /dev/null || exit 1
 
 
@@ -61,13 +68,29 @@ popd > /dev/null || exit 1
 clear
 msg_info '## RefindPlusBuilder - Initial Clean Up ##'
 msg_info '------------------------------------------'
-sleep 1
+sleep 2
+
+
+# Remove later #
+if [ -d "${EDK2_DIR}/Build-DBG" ] ; then
+    rm -fr "${EDK2_DIR}/Build-DBG"
+fi
+if [ -d "${EDK2_DIR}/Build-TMP" ] ; then
+    rm -fr "${EDK2_DIR}/Build-TMP"
+fi
 if [ -d "${EDK2_DIR}/Build-OLD" ] ; then
     rm -fr "${EDK2_DIR}/Build-OLD"
 fi
-if [ -d "${EDK2_DIR}/Build" ] ; then
-    mv "${EDK2_DIR}/Build" "${EDK2_DIR}/Build-OLD"
+if [ -d "${EDK2_DIR}/RefindPkg-OLD" ] ; then
+    rm -fr "${EDK2_DIR}/RefindPkg-OLD"
 fi
+# Remove later #
+
+
+if [ -d "${EDK2_DIR}/Build" ] ; then
+    rm -fr "${EDK2_DIR}/Build"
+fi
+mkdir -p "${EDK2_DIR}/Build"
 if [ -d "${OUTPUT_DIR}" ] ; then
     rm -fr "${OUTPUT_DIR}"
 fi
@@ -78,10 +101,10 @@ mkdir -p "${OUTPUT_DIR}"
 clear
 msg_info '## RefindPlusBuilder - Building REL Version ##'
 msg_info '----------------------------------------------'
-sleep 1
+sleep 2
 pushd ${EDK2_DIR} > /dev/null || exit 1
-if [ -d "${EDK2_DIR}/Build-TMP" ] ; then
-    rm -fr "${EDK2_DIR}/Build-TMP"
+if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
+    rm -fr "${EDK2_DIR}/.Build-TMP"
 fi
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
@@ -91,24 +114,23 @@ source edksetup.sh BaseTools
 build
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp "${BINARY_DIR}/refind.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
-    mv "${EDK2_DIR}/Build" "${EDK2_DIR}/Build-TMP"
+    mv "${EDK2_DIR}/Build" "${EDK2_DIR}/.Build-TMP"
 fi
 popd > /dev/null || exit 1
 echo ''
-msg_info 'Completed REL Build ...Preparing DBG Build'
+msg_info "Completed REL Build on '${EDIT_BRANCH}' Branch of RefindPlus"
+sleep 2
+msg_info "Preparing DBG Build..."
 echo ''
-sleep 3
+sleep 4
 
 
 # Build debug version
 clear
 msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
-sleep 1
+sleep 2
 pushd ${EDK2_DIR} > /dev/null || exit 1
-if [ -d "${EDK2_DIR}/Build-DBG" ] ; then
-    rm -fr "${EDK2_DIR}/Build-DBG"
-fi
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
 fi
@@ -117,16 +139,15 @@ source edksetup.sh BaseTools
 build
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp "${BINARY_DIR}/refind.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
-    mv "${EDK2_DIR}/Build" "${EDK2_DIR}/Build-DBG"
-    mv "${EDK2_DIR}/Build-TMP" "${EDK2_DIR}/Build"
-    mv "${XCODE_DIR_TMP}" "${XCODE_DIR_DBG}"
+    mv "${XCODE_DIR_REL}" "${XCODE_DIR_DBG}"
+    mv "${XCODE_DIR_TMP}" "${XCODE_DIR_REL}"
 fi
-if [ -d "${EDK2_DIR}/Build-DBG" ] ; then
-    rm -fr "${EDK2_DIR}/Build-DBG"
+if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
+    rm -fr "${EDK2_DIR}/.Build-TMP"
 fi
 popd > /dev/null || exit 1
 echo ''
-msg_info 'Completed DBG Build'
+msg_info "Completed DBG Build on '${EDIT_BRANCH}' Branch of RefindPlus"
 echo ''
 
 
