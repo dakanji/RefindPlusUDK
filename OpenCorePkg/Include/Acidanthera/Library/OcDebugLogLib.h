@@ -48,7 +48,9 @@
 #elif defined(OC_TARGET_RELEASE)
 #define DEBUG_POINTER(x) NULL
 #else
-#error "Define target macro: OC_TARGET_<TARGET>!"
+//DA-TAG: Added and Commented Out
+#define DEBUG_POINTER(x) NULL
+//#error "Define target macro: OC_TARGET_<TARGET>!"
 #endif
 
 /**
