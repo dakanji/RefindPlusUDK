@@ -15,8 +15,6 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-//DA-TAG: Added
-#include "../../../RefindPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include <Library/BaseLib.h>
 #include <Library/OcGuardLib.h>
@@ -197,7 +195,7 @@ BOOLEAN
   LoBits = MultU64x64 (ALo, BLo);
   if (AHi == 0 && BHi == 0) {
     *Result = LoBits;
-    return FALSE;
+    return FALSE; 
   }
 
   Overflow = AHi > 0 && BHi > 0;

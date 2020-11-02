@@ -11,8 +11,6 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
-//DA-TAG: Added
-#include "../../../RefindPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include <Uefi.h>
 
@@ -486,16 +484,13 @@ OcFixAppleBootDevicePathNode (
 
       case MSG_NVME_NAMESPACE_DP:
         //
-        // Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
-        // Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
-        // Here we replace it with the "right" value.
-        // Reference: https://forums.macrumors.com/posts/28169441.
+        // Workaround for MacPro5,1 using custom NVMe type.
         //
         if (RestoreContext != NULL) {
           RestoreContext->Types.SasExNvme.SubType = Node.DevPath->SubType;
         }
 
-        Node.NvmeNamespace->Header.SubType = 0x22;
+        Node.NvmeNamespace->Header.SubType = MSG_APPLE_NVME_NAMESPACE_DP;
         return 1;
 
       default:
@@ -511,7 +506,7 @@ OcFixAppleBootDevicePathNode (
 
         if (EISA_ID_TO_NUM (Node.Acpi->HID) == 0x0A03) {
           //
-          // In some firmwares UIDs for PciRoot do not match between ACPI tables and UEFI
+          // In some types of firmware, UIDs for PciRoot do not match between ACPI tables and UEFI
           // UEFI Device Paths. The former contain 0x00, 0x40, 0x80, 0xC0 values, while
           // the latter have ascending numbers.
           // Reference: https://github.com/acidanthera/bugtracker/issues/664.
@@ -552,7 +547,7 @@ OcFixAppleBootDevicePathNode (
               break;
           }
           //
-          // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
+          // Apple uses PciRoot (EISA 0x0A03) nodes while some types of firmware might use
           // PcieRoot (EISA 0x0A08).
           //
           Node.Acpi->HID = BitFieldWrite32 (
@@ -572,7 +567,7 @@ OcFixAppleBootDevicePathNode (
           RestoreContext->Types.ExtendedAcpi.CID = Node.ExtendedAcpi->CID;
         }
         //
-        // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
+        // Apple uses PciRoot (EISA 0x0A03) nodes while some types of firmware might use
         // PcieRoot (EISA 0x0A08).
         //
         if (EISA_ID_TO_NUM (Node.ExtendedAcpi->HID) == 0x0A03) {

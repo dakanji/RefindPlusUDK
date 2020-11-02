@@ -210,8 +210,11 @@
 /// Kernel emulation preferences.
 ///
 #define OC_KERNEL_EMULATE_FIELDS(_,__) \
-  _(UINT32                      , Cpuid1Data       , [4] , {0}                                          , () ) \
-  _(UINT32                      , Cpuid1Mask       , [4] , {0}                                          , () )
+  _(UINT32                      , Cpuid1Data          , [4] , {0}                         , () ) \
+  _(UINT32                      , Cpuid1Mask          , [4] , {0}                         , () ) \
+  _(BOOLEAN                     , DummyPowerManagement,     , FALSE                       , () ) \
+  _(OC_STRING                   , MaxKernel           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MinKernel           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_KERNEL_EMULATE)
 
 ///
@@ -257,10 +260,12 @@
   _(BOOLEAN                     , DisableIoMapper             ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableLinkeditJettison     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableRtcChecksum          ,     , FALSE  , ()) \
-  _(BOOLEAN                     , DummyPowerManagement        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ExtendBTFeatureFlags        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForceSecureBootScheme       ,     , FALSE  , ()) \
   _(BOOLEAN                     , IncreasePciBarSize          ,     , FALSE  , ()) \
   _(BOOLEAN                     , LapicKernelPanic            ,     , FALSE  , ()) \
+  _(BOOLEAN                     , LegacyCommpage              ,     , FALSE  , ()) \
   _(BOOLEAN                     , PanicNoKextDump             ,     , FALSE  , ()) \
   _(BOOLEAN                     , PowerTimeoutKernelPanic     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ThirdPartyDrives            ,     , FALSE  , ()) \
@@ -414,6 +419,8 @@ typedef enum {
   _(OC_STRING                   , SystemSerialNumber ,     , OC_STRING_CONSTR ("OPENCORE_SN1", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemUuid         ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("OPENCORE_MLB_SN11", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemMemoryStatus ,     , OC_STRING_CONSTR ("Auto", _, __)             , OC_DESTR (OC_STRING) ) \
+  _(UINT16                      , ProcessorType      ,     , 0                                            , () )                   \
   _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
   _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )                   \
   _(BOOLEAN                     , AdviseWindows      ,     , FALSE                                        , () )
@@ -436,9 +443,36 @@ typedef enum {
   _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )
   OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
 
+#define OC_PLATFORM_MEMORY_DEVICE_ENTRY_FIELDS(_, __) \
+  _(UINT32                      , Size                ,     , 0                                  , () )                   \
+  _(UINT16                      , Speed               ,     , 0                                  , () )                   \
+  _(OC_STRING                   , DeviceLocator       ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , BankLocator         ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Manufacturer        ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SerialNumber        ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , AssetTag            ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , PartNumber          ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICE_ENTRY)
+
+#define OC_PLATFORM_MEMORY_DEVICES_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_PLATFORM_MEMORY_DEVICE_ENTRY, _, __)
+  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICES_ARRAY)
+
+#define OC_PLATFORM_MEMORY_CONFIG_FIELDS(_, __) \
+  _(UINT8                           , FormFactor     ,     , 0x2                                                 , () ) \
+  _(UINT8                           , Type           ,     , 0x2                                                 , () ) \
+  _(UINT16                          , TypeDetail     ,     , 0x4                                                 , () ) \
+  _(UINT16                          , TotalWidth     ,     , 0xFFFF                                              , () ) \
+  _(UINT16                          , DataWidth      ,     , 0xFFFF                                              , () ) \
+  _(UINT8                           , ErrorCorrection,     , 0x3                                                 , () ) \
+  _(UINT64                          , MaxCapacity    ,     , 0                                                   , () ) \
+  _(OC_PLATFORM_MEMORY_DEVICES_ARRAY, Devices        ,     , OC_CONSTR3 (OC_PLATFORM_MEMORY_DEVICES_ARRAY, _, __), OC_DESTR (OC_PLATFORM_MEMORY_DEVICES_ARRAY))
+  OC_DECLARE (OC_PLATFORM_MEMORY_CONFIG)
+
 #define OC_PLATFORM_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_STRING                   , Bid                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Mlb                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemUuid            ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT8                       , Rom                   , [6] , {0}                              , ()                   ) \
   _(UINT64                      , FirmwareFeatures      ,     , 0                                , ()                   ) \
   _(UINT64                      , FirmwareFeaturesMask  ,     , 0                                , ()                   )
@@ -471,18 +505,19 @@ typedef enum {
   _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
   _(UINT8                        , SmcVersion            , [16] , {0}                          , ()                   ) \
-  _(UINT16                       , ProcessorType         ,  , 0                                , ()                   ) \
-  _(UINT8                        , MemoryFormFactor      ,  , 0                                , ()                   )
+  _(UINT16                       , ProcessorType         ,  , 0                                , ()                   )
   OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
 
 #define OC_PLATFORM_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , Automatic        ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , CustomMemory     ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
   _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
   _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
   _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_MEMORY_CONFIG   , Memory           ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
   _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
   _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)
@@ -553,7 +588,8 @@ typedef enum {
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
-  _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ())
+  _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///
@@ -581,7 +617,7 @@ typedef enum {
   OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 
 ///
-/// Quirks is a set of hacks for different firmwares.
+/// Quirks is a set of hacks for different types of firmware.
 ///
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \
@@ -600,6 +636,7 @@ typedef enum {
   _(UINT64                      , Address          ,     , 0       , () ) \
   _(UINT64                      , Size             ,     , 0       , () ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
+  _(OC_STRING                   , Type             ,     , OC_STRING_CONSTR ("Reserved", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_UEFI_RSVD_ENTRY)
 
