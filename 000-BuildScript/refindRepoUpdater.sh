@@ -1,16 +1,5 @@
 #!/usr/bin/env bash
 
-# ------------------------- #
- # USER EDIT SECTION START #
-
-# IMPORTANT: Only change the line below if you have actually setup a branch with your own edits
-#            Otherwise leave as is
-EDIT_BRANCH='BRANCH_WITH_YOUR_EDITS'
-
-  # USER EDIT SECTION END #
-# ------------------------- #
-
-
 ## ERROR HANDLER ##
 runErr() { # $1: message
     # Declare Local Variables
@@ -30,13 +19,15 @@ trap runErr ERR
 clear
 echo '## RefindRepoUpdater ##'
 echo '-----------------------'
+echo ''
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 pushd ${BASE_DIR} > /dev/null || exit 1
 git checkout rudk
 git reset --hard a94082b4e5e42a1cfdcbab0516f9ecdbb596d201
 git push origin HEAD -f
-git pull upstream rudk
-git push
+git pull --tags upstream rudk
+git push origin
+git push --tags origin
 popd > /dev/null || exit 1
 
 
@@ -46,27 +37,15 @@ pushd ${BASE_DIR} > /dev/null || exit 1
 git checkout GOPFix
 git reset --hard a2cc87f019c4de3a1237e2dc23f432c27cec5ec6
 git push origin HEAD -f
-git pull upstream GOPFix
-git push
-
-
-## UPDATE EDITS BRANCH (IF SPECIFIED) ##
-EDITS_SPECIFIED='NO'
-if [ ${EDIT_BRANCH} != 'BRANCH_WITH_YOUR_EDITS' ] ; then
-    EDITS_SPECIFIED='YES'
-    git checkout "${EDIT_BRANCH}"
-    git rebase GOPFix
-    git push
-fi
+git pull --tags upstream GOPFix
+git push origin
+git push --tags origin
 
 
 ## CLEAN UP ##
 popd > /dev/null || exit 1
 echo ''
 echo "Synced Branch: 'GOPFix'"
-if [ ${EDITS_SPECIFIED} == 'YES' ] ; then
-    echo "Synced Branch: '${EDIT_BRANCH}'"
-fi
 echo '-----------------------'
 echo '## RefindRepoUpdater ##'
 echo ''
