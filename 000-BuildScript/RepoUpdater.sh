@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+###
+ # RepoUpdater.sh
+ # A script to sync the RefindPlus and Refind-UDK Repos with upstream
+ #
+ # Copyright (c) 2020 Dayo Akanji
+ # MIT License
+###
+
 ## ERROR HANDLER ##
 runErr() { # $1: message
     # Declare Local Variables
@@ -17,36 +25,40 @@ trap runErr ERR
 
 ## UPDATE RUDK BRANCH ##
 clear
-echo '## RefindRepoUpdater ##'
-echo '-----------------------'
+echo '## RepoUpdater ##'
+echo '-----------------'
 echo ''
+echo "Syncing Refind-UDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
-pushd ${BASE_DIR} > /dev/null || exit 1
+pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout rudk
-git reset --hard a94082b4e5e42a1cfdcbab0516f9ecdbb596d201
+git reset --hard 510cd83f32ef78aecdc2391c752c07a278d64db3
 git push origin HEAD -f
 git pull --tags upstream rudk
 git push origin
 git push --tags origin
 popd > /dev/null || exit 1
+echo ''
+echo "Synced Refind-UDK"
+echo ''
+echo ''
 
 
 ## UPDATE GOPFIX BRANCH ##
+echo "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
-pushd ${BASE_DIR} > /dev/null || exit 1
+pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout GOPFix
-git reset --hard a2cc87f019c4de3a1237e2dc23f432c27cec5ec6
+git reset --hard 2dcb88993edd9b25bfda456d1cd5ae2eba70d3da
 git push origin HEAD -f
 git pull --tags upstream GOPFix
 git push origin
 git push --tags origin
-
-
-## CLEAN UP ##
 popd > /dev/null || exit 1
 echo ''
-echo "Synced Branch: 'GOPFix'"
-echo '-----------------------'
-echo '## RefindRepoUpdater ##'
+echo "Synced RefindPlus"
+echo ''
+echo '-----------------'
+echo '## RepoUpdater ##'
 echo ''
 echo ''

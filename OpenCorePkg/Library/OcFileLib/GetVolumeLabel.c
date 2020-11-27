@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 //DA-TAG: Added
-#include "../../../RefindPkg/Library/OCRefitLib/OCRefitLib.h"
+#include "../../../RefindPlusPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include <Uefi.h>
 

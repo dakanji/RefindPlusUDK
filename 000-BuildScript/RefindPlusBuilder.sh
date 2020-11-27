@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+###
+ # RefindPlusBuilder.sh
+ # A script to build RefindPlus
+ #
+ # Copyright (c) 2020 Dayo Akanji
+ # MIT License
+###
+
 # Provide custom colors
 msg_info() {
     echo -e "\033[0;33m$1\033[0m"
@@ -28,8 +36,8 @@ trap runErr ERR
 
 # Set things up for build
 clear
-msg_info '## RefindBuilder - Setting Up ##'
-msg_info '--------------------------------'
+msg_info '## RefindPlusBuilder - Setting Up ##'
+msg_info '------------------------------------'
 sleep 2
 EDIT_BRANCH="${1:-GOPFix}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
@@ -40,25 +48,30 @@ if [ ! -d "${EDK2_DIR}" ] ; then
     echo ''
     exit 1
 fi
-XCODE_DIR_REL="${EDK2_DIR}/Build/Refind/RELEASE_XCODE5"
-XCODE_DIR_DBG="${EDK2_DIR}/Build/Refind/DEBUG_XCODE5"
-XCODE_DIR_TMP="${EDK2_DIR}/.Build-TMP/Refind/RELEASE_XCODE5"
+XCODE_DIR_REL="${EDK2_DIR}/Build/RefindPlus/RELEASE_XCODE5"
+XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
+XCODE_DIR_TMP="${EDK2_DIR}/.Build-TMP/RefindPlus/RELEASE_XCODE5"
 BINARY_DIR="${XCODE_DIR_REL}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${EDK2_DIR}/RefindPkg/refind/globalExtra.h"
-GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPkg/refind/globalExtra-REL.txt"
-GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPkg/refind/globalExtra-DBG.txt"
+GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra.h"
+GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-REL.txt"
+GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-DBG.txt"
 
 pushd ${WORK_DIR} > /dev/null || exit 1
 msg_info "Checkout '${EDIT_BRANCH}' branch..."
 git checkout ${EDIT_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
 sleep 2
-msg_info "Update RefindPkg..."
+msg_info "Update RefindPlusPkg..."
+
+# Remove later #
 rm -fr "${EDK2_DIR}/RefindPkg"
-cp -fa "${WORK_DIR}" "${EDK2_DIR}/RefindPkg"
-rm -fr "${EDK2_DIR}/RefindPkg/.gitignore"
-rm -fr "${EDK2_DIR}/RefindPkg/.git"
+# Remove later #
+
+rm -fr "${EDK2_DIR}/RefindPlusPkg"
+cp -fa "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
+rm -fr "${EDK2_DIR}/RefindPlusPkg/.gitignore"
+rm -fr "${EDK2_DIR}/RefindPlusPkg/.git"
 msg_status '...OK'; echo ''
 sleep 2
 popd > /dev/null || exit 1
@@ -81,8 +94,8 @@ fi
 if [ -d "${EDK2_DIR}/Build-OLD" ] ; then
     rm -fr "${EDK2_DIR}/Build-OLD"
 fi
-if [ -d "${EDK2_DIR}/RefindPkg-OLD" ] ; then
-    rm -fr "${EDK2_DIR}/RefindPkg-OLD"
+if [ -d "${EDK2_DIR}/RefindPlusPkg-OLD" ] ; then
+    rm -fr "${EDK2_DIR}/RefindPlusPkg-OLD"
 fi
 # Remove later #
 
@@ -113,7 +126,7 @@ cp "${GLOBAL_FILE_TMP_REL}" "${GLOBAL_FILE}"
 source edksetup.sh BaseTools
 build
 if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp "${BINARY_DIR}/refind.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
+    cp "${BINARY_DIR}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
     mv "${EDK2_DIR}/Build" "${EDK2_DIR}/.Build-TMP"
 fi
 popd > /dev/null || exit 1
@@ -138,7 +151,7 @@ cp "${GLOBAL_FILE_TMP_DBG}" "${GLOBAL_FILE}"
 source edksetup.sh BaseTools
 build
 if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp "${BINARY_DIR}/refind.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
+    cp "${BINARY_DIR}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
     mv "${XCODE_DIR_REL}" "${XCODE_DIR_DBG}"
     mv "${XCODE_DIR_TMP}" "${XCODE_DIR_REL}"
 fi
