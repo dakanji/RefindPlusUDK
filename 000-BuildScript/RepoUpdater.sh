@@ -8,6 +8,20 @@
  # MIT License
 ###
 
+# Provide custom colours
+msg_base() {
+    echo -e "\033[0;36m$1\033[0m"
+}
+msg_info() {
+    echo -e "\033[0;33m$1\033[0m"
+}
+msg_status() {
+    echo -e "\033[0;32m$1\033[0m"
+}
+msg_error() {
+    echo -e "\033[0;31m$1\033[0m"
+}
+
 ## ERROR HANDLER ##
 runErr() { # $1: message
     # Declare Local Variables
@@ -15,7 +29,7 @@ runErr() { # $1: message
 
     errMessage="${1:-Runtime Error ... Exiting}"
     echo ''
-    echo "${errMessage}"
+    msg_error "${errMessage}"
     echo ''
     echo ''
     exit 1
@@ -25,10 +39,10 @@ trap runErr ERR
 
 ## UPDATE RUDK BRANCH ##
 clear
-echo '## RepoUpdater ##'
-echo '-----------------'
+msg_info '## RepoUpdater ##'
+msg_info '-----------------'
 echo ''
-echo "Syncing Refind-UDK"
+msg_base "Syncing Refind-UDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout rudk
@@ -39,13 +53,13 @@ git push origin
 git push --tags origin
 popd > /dev/null || exit 1
 echo ''
-echo "Synced Refind-UDK"
+msg_status "Synced Refind-UDK"
 echo ''
 echo ''
 
 
 ## UPDATE GOPFIX BRANCH ##
-echo "Syncing RefindPlus"
+msg_base "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
 pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout GOPFix
@@ -56,9 +70,9 @@ git push origin
 git push --tags origin
 popd > /dev/null || exit 1
 echo ''
-echo "Synced RefindPlus"
+msg_status "Synced RefindPlus"
 echo ''
-echo '-----------------'
-echo '## RepoUpdater ##'
+msg_info '-----------------'
+msg_info '## RepoUpdater ##'
 echo ''
 echo ''

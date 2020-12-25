@@ -8,7 +8,10 @@
  # MIT License
 ###
 
-# Provide custom colors
+# Provide custom colours
+msg_base() {
+    echo -e "\033[0;36m$1\033[0m"
+}
 msg_info() {
     echo -e "\033[0;33m$1\033[0m"
 }
@@ -58,7 +61,7 @@ GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-REL.txt"
 GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-DBG.txt"
 
 pushd ${WORK_DIR} > /dev/null || exit 1
-msg_info "Checkout '${EDIT_BRANCH}' branch..."
+msg_base "Checkout '${EDIT_BRANCH}' branch..."
 git checkout ${EDIT_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
 sleep 2
@@ -170,8 +173,8 @@ if [ -f "${GLOBAL_FILE}" ] ; then
 fi
 cp "${GLOBAL_FILE_TMP_REL}" "${GLOBAL_FILE}"
 echo ''
-msg_status "RefindPlus EFI Files (BOOTx64): '${OUTPUT_DIR}'"
-msg_status "RefindPlus EFI Files (Others - DBG): '${XCODE_DIR_DBG}/X64'"
-msg_status "RefindPlus EFI Files (Others - REL): '${XCODE_DIR_REL}/X64'"
+msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
+msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
+msg_status "RefindPlus EFI Files (Others - REL) : '${XCODE_DIR_REL}/X64'"
 echo ''
 echo ''
