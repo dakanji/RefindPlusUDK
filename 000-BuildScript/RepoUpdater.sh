@@ -32,7 +32,7 @@ echo "Syncing Refind-UDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout rudk
-git reset --hard 510cd83f32ef78aecdc2391c752c07a278d64db3
+git reset --hard c656985c0450e1e2eeffc705dd0acbabe5f00094
 git push origin HEAD -f
 git pull --tags upstream rudk
 git push origin
@@ -49,7 +49,7 @@ echo "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
 pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
 git checkout GOPFix
-git reset --hard 2dcb88993edd9b25bfda456d1cd5ae2eba70d3da
+git reset --hard 664d1b12a30766c63e705cd222bc0d5a0a58df53
 git push origin HEAD -f
 git pull --tags upstream GOPFix
 git push origin
