@@ -4,7 +4,7 @@
  # RefindPlusBuilder.sh
  # A script to build RefindPlus
  #
- # Copyright (c) 2020 Dayo Akanji
+ # Copyright (c) 2020-2021 Dayo Akanji
  # MIT License
 ###
 
@@ -56,9 +56,9 @@ XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
 XCODE_DIR_TMP="${EDK2_DIR}/.Build-TMP/RefindPlus/RELEASE_XCODE5"
 BINARY_DIR="${XCODE_DIR_REL}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra.h"
-GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-REL.txt"
-GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/refind/globalExtra-DBG.txt"
+GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/MainRP/globalExtra.h"
+GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/MainRP/globalExtra-REL.txt"
+GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/MainRP/globalExtra-DBG.txt"
 
 pushd ${WORK_DIR} > /dev/null || exit 1
 msg_base "Checkout '${EDIT_BRANCH}' branch..."
