@@ -44,7 +44,7 @@ msg_info '-----------------'
 echo ''
 msg_base "Syncing Refind-UDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
-pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
+pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout rudk
 git reset --hard c656985c0450e1e2eeffc705dd0acbabe5f00094
 git push origin HEAD -f
@@ -61,7 +61,7 @@ echo ''
 ## UPDATE GOPFIX BRANCH ##
 msg_base "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
-pushd ${BASE_DIR} > /dev/null || echo "ERROR: Could not find ${BASE_DIR} ...Exiting"; exit 1
+pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout GOPFix
 git reset --hard 664d1b12a30766c63e705cd222bc0d5a0a58df53
 git push origin HEAD -f
