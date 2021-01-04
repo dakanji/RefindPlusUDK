@@ -4,7 +4,7 @@
  # RepoUpdater.sh
  # A script to sync the RefindPlus and Refind-UDK Repos with upstream
  #
- # Copyright (c) 2020 Dayo Akanji
+ # Copyright (c) 2020-2021 Dayo Akanji
  # MIT License
 ###
 
@@ -51,7 +51,7 @@ git push origin HEAD -f
 git pull --tags upstream rudk
 git push origin
 git push --tags origin
-popd > /dev/null || exit 1
+popd > /dev/null || runErr "ERROR: Could not return to starting directory ...Exiting"
 echo ''
 msg_status "Synced Refind-UDK"
 echo ''
