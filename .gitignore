@@ -1,13 +1,9 @@
 # Ignore RefindPlusPkg and Build items
 /Build
 !/Python/build/*
-Build-OLD/
-Build-TMP/
-Build-REL/
-Build-DBG/
+.Build-TMP/
 000-BOOTx64-Files/
 RefindPlusPkg/
-RefindPlusPkg-OLD/
 000-Releases/
 
 # OS generated files #
