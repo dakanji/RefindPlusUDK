@@ -44,9 +44,11 @@ msg_info '-----------------'
 echo ''
 msg_base "Syncing Refind-UDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
+# shellcheck disable=SC1090
+source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
 pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout rudk
-git reset --hard 56c1ccd80326fa48c5ab7a9d0103b205f4df6f6c
+git reset --hard "${REFIND_UDK_SHA}"
 git push origin HEAD -f
 git pull --tags upstream rudk
 git push origin
@@ -63,7 +65,7 @@ msg_base "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
 pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout GOPFix
-git reset --hard 60644bd05a631e0e79071294ef3dca3b44ff071f
+git reset --hard "${REFINDPLUS_SHA}"
 git push origin HEAD -f
 git pull --tags upstream GOPFix
 git push origin
