@@ -52,7 +52,7 @@ git reset --hard "${REFIND_UDK_SHA}"
 git push origin HEAD -f
 git pull --tags upstream rudk
 git push origin
-git push --tags origin
+git push --tags origin -f
 popd > /dev/null || runErr "ERROR: Could not return to starting directory ...Exiting"
 echo ''
 msg_status "Synced Refind-UDK"
@@ -69,7 +69,7 @@ git reset --hard "${REFINDPLUS_SHA}"
 git push origin HEAD -f
 git pull --tags upstream GOPFix
 git push origin
-git push --tags origin
+git push --tags origin -f
 popd > /dev/null || exit 1
 echo ''
 msg_status "Synced RefindPlus"
