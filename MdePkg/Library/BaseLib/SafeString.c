@@ -1510,6 +1510,9 @@ StrToGuid (
 {
   RETURN_STATUS          Status;
   GUID                   LocalGuid;
+  UINTN                  StringIndex1;
+  UINTN                  StringIndex2;
+  UINTN                  StringIndex3;
 
   ASSERT (((UINTN) String & BIT0) == 0);
 
@@ -1522,43 +1525,50 @@ StrToGuid (
   //
   // Get aabbccdd in big-endian.
   //
-  Status = StrHexToBytes (String, 2 * sizeof (LocalGuid.Data1), (UINT8 *) &LocalGuid.Data1, sizeof (LocalGuid.Data1));
+  StringIndex1 = 2 * sizeof (LocalGuid.Data1);
+  Status = StrHexToBytes (String, StringIndex1, (UINT8 *) &LocalGuid.Data1, sizeof (LocalGuid.Data1));
 
   // coverity[var_deref_op]
-  if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data1)] != L'-') {
+  if (RETURN_ERROR (Status) || String[StringIndex1] != L'-') {
     return RETURN_UNSUPPORTED;
   }
   //
   // Convert big-endian to little-endian.
   //
-  LocalGuid.Data1 = SwapBytes32 (LocalGuid.Data1);
-  String += 2 * sizeof (LocalGuid.Data1) + 1;
+  LocalGuid.Data1  = SwapBytes32 (LocalGuid.Data1);
+  StringIndex1     = 2 * sizeof (LocalGuid.Data1);
+  StringIndex2     = 2 * sizeof (LocalGuid.Data2);
+  String          += StringIndex1 + 1;
+
 
   //
   // Get eeff in big-endian.
   //
-  Status = StrHexToBytes (String, 2 * sizeof (LocalGuid.Data2), (UINT8 *) &LocalGuid.Data2, sizeof (LocalGuid.Data2));
-  if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data2)] != L'-') {
+  Status = StrHexToBytes (String, StringIndex2, (UINT8 *) &LocalGuid.Data2, sizeof (LocalGuid.Data2));
+  if (RETURN_ERROR (Status) || String[StringIndex2] != L'-') {
     return RETURN_UNSUPPORTED;
   }
   //
   // Convert big-endian to little-endian.
   //
   LocalGuid.Data2 = SwapBytes16 (LocalGuid.Data2);
-  String += 2 * sizeof (LocalGuid.Data2) + 1;
+  StringIndex2     = 2 * sizeof (LocalGuid.Data2);
+  StringIndex3     = 2 * sizeof (LocalGuid.Data3);
+  String          += StringIndex2 + 1;
 
   //
   // Get gghh in big-endian.
   //
-  Status = StrHexToBytes (String, 2 * sizeof (LocalGuid.Data3), (UINT8 *) &LocalGuid.Data3, sizeof (LocalGuid.Data3));
-  if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data3)] != L'-') {
+  Status = StrHexToBytes (String, StringIndex3, (UINT8 *) &LocalGuid.Data3, sizeof (LocalGuid.Data3));
+  if (RETURN_ERROR (Status) || String[StringIndex3] != L'-') {
     return RETURN_UNSUPPORTED;
   }
   //
   // Convert big-endian to little-endian.
   //
-  LocalGuid.Data3 = SwapBytes16 (LocalGuid.Data3);
-  String += 2 * sizeof (LocalGuid.Data3) + 1;
+  LocalGuid.Data3  = SwapBytes16 (LocalGuid.Data3);
+  StringIndex3     = 2 * sizeof (LocalGuid.Data3);
+  String          += StringIndex3 + 1;
 
   //
   // Get iijj.
@@ -3477,6 +3487,10 @@ AsciiStrToGuid (
 {
   RETURN_STATUS          Status;
   GUID                   LocalGuid;
+  UINTN                  StringIndex1;
+  UINTN                  StringIndex2;
+  UINTN                  StringIndex3;
+
 
   //
   // None of String or Guid shall be a null pointer.
@@ -3494,34 +3508,39 @@ AsciiStrToGuid (
   //
   // Convert big-endian to little-endian.
   //
-  LocalGuid.Data1 = SwapBytes32 (LocalGuid.Data1);
-  String += 2 * sizeof (LocalGuid.Data1) + 1;
+  LocalGuid.Data1  = SwapBytes32 (LocalGuid.Data1);
+  StringIndex1     = 2 * sizeof (LocalGuid.Data1);
+  StringIndex2     = 2 * sizeof (LocalGuid.Data2);
+  String          += StringIndex1 + 1;
 
   //
   // Get eeff in big-endian.
   //
-  Status = AsciiStrHexToBytes (String, 2 * sizeof (LocalGuid.Data2), (UINT8 *) &LocalGuid.Data2, sizeof (LocalGuid.Data2));
-  if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data2)] != '-') {
+  Status = AsciiStrHexToBytes (String, StringIndex2, (UINT8 *) &LocalGuid.Data2, sizeof (LocalGuid.Data2));
+  if (RETURN_ERROR (Status) || String[StringIndex2] != '-') {
     return RETURN_UNSUPPORTED;
   }
   //
   // Convert big-endian to little-endian.
   //
   LocalGuid.Data2 = SwapBytes16 (LocalGuid.Data2);
-  String += 2 * sizeof (LocalGuid.Data2) + 1;
+  StringIndex2     = 2 * sizeof (LocalGuid.Data2);
+  StringIndex3     = 2 * sizeof (LocalGuid.Data3);
+  String          += StringIndex2 + 1;
 
   //
   // Get gghh in big-endian.
   //
-  Status = AsciiStrHexToBytes (String, 2 * sizeof (LocalGuid.Data3), (UINT8 *) &LocalGuid.Data3, sizeof (LocalGuid.Data3));
-  if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data3)] != '-') {
+  Status = AsciiStrHexToBytes (String, StringIndex3, (UINT8 *) &LocalGuid.Data3, sizeof (LocalGuid.Data3));
+  if (RETURN_ERROR (Status) || String[StringIndex3] != '-') {
     return RETURN_UNSUPPORTED;
   }
   //
   // Convert big-endian to little-endian.
   //
-  LocalGuid.Data3 = SwapBytes16 (LocalGuid.Data3);
-  String += 2 * sizeof (LocalGuid.Data3) + 1;
+  LocalGuid.Data3  = SwapBytes16 (LocalGuid.Data3);
+  StringIndex3     = 2 * sizeof (LocalGuid.Data3);
+  String          += StringIndex3 + 1;
 
   //
   // Get iijj.
@@ -3649,4 +3668,3 @@ AsciiStrHexToBytes (
   }
   return RETURN_SUCCESS;
 }
-
