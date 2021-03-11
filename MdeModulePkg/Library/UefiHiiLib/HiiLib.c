@@ -99,7 +99,7 @@ InternalHiiExtractGuidFromHiiHandle (
 
   //
   // Extract GUID
-  //
+  // coverity[var_deref_op]
   CopyGuid (Guid, &HiiPackageList->PackageListGuid);
 
   FreePool (HiiPackageList);
@@ -1344,6 +1344,7 @@ ValidateQuestionFromVfr (
             QuestionName = HiiGetString (HiiHandle, IfrOneOf->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
 
+            // coverity[var_deref_op : FALSE]
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
               // This question is not in the current configuration string. Skip it.
@@ -1912,7 +1913,7 @@ GetBlockDataInfo (
   // Parse each <RequestElement> if exists
   // Only <BlockName> format is supported by this help function.
   // <BlockName> ::= &'OFFSET='<Number>&'WIDTH='<Number>
-  //
+  // coverity[var_deref_op : FALSE]
   while (*StringPtr != 0 && StrnCmp (StringPtr, L"&OFFSET=", StrLen (L"&OFFSET=")) == 0) {
     //
     // Skip the &OFFSET= string
@@ -2151,6 +2152,7 @@ InternalHiiValidateCurrentSetting (
     StringPtr = StrStr (ConfigResp, L"PATH=");
     ASSERT (StringPtr != NULL);
 
+    // coverity[var_deref_op : FALSE]
     if (StrStr (StringPtr, L"&") != NULL) {
       NameValueType = TRUE;
     } else {
@@ -2213,6 +2215,7 @@ GetElementsFromRequest (
   TmpRequest = StrStr (ConfigRequest, L"PATH=");
   ASSERT (TmpRequest != NULL);
 
+  // coverity[var_deref_op : FALSE]
   if ((StrStr (TmpRequest, L"&OFFSET=") != NULL) || (StrStr (TmpRequest, L"&") != NULL)) {
     return TRUE;
   }
@@ -2585,6 +2588,7 @@ Done:
     FreePool (ConfigResp);
   }
 
+  // coverity[var_deref_op]
   if (ConfigAltResp != NULL) {
     FreePool (ConfigAltResp);
   }

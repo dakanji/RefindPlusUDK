@@ -1523,6 +1523,8 @@ StrToGuid (
   // Get aabbccdd in big-endian.
   //
   Status = StrHexToBytes (String, 2 * sizeof (LocalGuid.Data1), (UINT8 *) &LocalGuid.Data1, sizeof (LocalGuid.Data1));
+
+  // coverity[var_deref_op]
   if (RETURN_ERROR (Status) || String[2 * sizeof (LocalGuid.Data1)] != L'-') {
     return RETURN_UNSUPPORTED;
   }
