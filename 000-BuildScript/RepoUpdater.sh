@@ -2,7 +2,7 @@
 
 ###
  # RepoUpdater.sh
- # A script to sync the RefindPlus and Refind-UDK Repos with upstream
+ # A script to sync the RefindPlus and RefindPlusUDK Repos with upstream
  #
  # Copyright (c) 2020-2021 Dayo Akanji
  # MIT License
@@ -42,7 +42,7 @@ clear
 msg_info '## RepoUpdater ##'
 msg_info '-----------------'
 echo ''
-msg_base "Syncing Refind-UDK"
+msg_base "Syncing RefindPlusUDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 # shellcheck disable=SC1090
 source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
@@ -55,7 +55,7 @@ git push origin
 git push --tags origin -f
 popd > /dev/null || runErr "ERROR: Could not return to starting directory ...Exiting"
 echo ''
-msg_status "Synced Refind-UDK"
+msg_status "Synced RefindPlusUDK"
 echo ''
 echo ''
 
