@@ -604,7 +604,7 @@ FrameBufferBltLibVideoToVideo (
   Offset = Configure->BytesPerPixel * Offset;
   Destination = Configure->FrameBuffer + Offset;
 
-  LineStride = Configure->BytesPerPixel * Configure->PixelsPerScanLine;
+  LineStride = (INTN) (Configure->BytesPerPixel) * Configure->PixelsPerScanLine;
   if (Destination > Source) {
     //
     // Copy from last line to avoid source is corrupted by copying

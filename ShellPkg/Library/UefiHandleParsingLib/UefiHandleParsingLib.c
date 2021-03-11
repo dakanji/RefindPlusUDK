@@ -749,7 +749,7 @@ TxtOutProtocolDumpInformation(
   ASSERT_EFI_ERROR(Status);
   ASSERT (Dev != NULL && Dev->Mode != NULL);
 
-  Size = (Dev->Mode->MaxMode + 1) * 80;
+  Size = (UINTN) (Dev->Mode->MaxMode + 1) * 80;
   RetVal = AllocateZeroPool(Size);
 
   Temp = HiiGetString(mHandleParsingHiiHandle, STRING_TOKEN(STR_TXT_OUT_DUMP_HEADER), NULL);

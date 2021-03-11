@@ -529,7 +529,7 @@ MtrrLibProgramFixedMtrr (
         (*Base <
             (
               mMtrrLibFixedMtrrTable[MsrIndex].BaseAddress +
-              (8 * mMtrrLibFixedMtrrTable[MsrIndex].Length)
+              (8 * (UINT64) (mMtrrLibFixedMtrrTable[MsrIndex].Length))
             )
           )
         ) {
@@ -554,7 +554,7 @@ MtrrLibProgramFixedMtrr (
   //
   // Find the end offset in fixed MTRR and calculate byte offset of right shift
   //
-  SubLength = mMtrrLibFixedMtrrTable[MsrIndex].Length * (8 - LeftByteShift);
+  SubLength = (UINT64) (mMtrrLibFixedMtrrTable[MsrIndex].Length) * (8 - LeftByteShift);
   if (*Length >= SubLength) {
     RightByteShift = 0;
   } else {
@@ -890,7 +890,7 @@ MtrrGetMemoryAttributeByAddressWorker (
       for (Index = 0; Index < MTRR_NUMBER_OF_FIXED_MTRR; Index++) {
         if (Address >= mMtrrLibFixedMtrrTable[Index].BaseAddress &&
             Address < mMtrrLibFixedMtrrTable[Index].BaseAddress +
-            (mMtrrLibFixedMtrrTable[Index].Length * 8)) {
+            ((PHYSICAL_ADDRESS) (mMtrrLibFixedMtrrTable[Index].Length) * 8)) {
           SubIndex =
             ((UINTN) Address - mMtrrLibFixedMtrrTable[Index].BaseAddress) /
             mMtrrLibFixedMtrrTable[Index].Length;
