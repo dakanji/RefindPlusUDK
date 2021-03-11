@@ -2,6 +2,7 @@
 /Build
 !/Python/build/*
 .Build-TMP/
+cov-int/
 000-BOOTx64-Files/
 RefindPlusPkg/
 000-Releases/
