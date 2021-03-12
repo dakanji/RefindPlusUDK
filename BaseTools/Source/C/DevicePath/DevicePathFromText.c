@@ -809,6 +809,10 @@ DevPathFromTextAcpiAdr (
                                        (UINT16) sizeof (ACPI_ADR_DEVICE_PATH)
                                        );
   ASSERT (AcpiAdr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (AcpiAdr == NULL) {
+      return NULL;
+  }
 
   for (Index = 0; ; Index++) {
     DisplayDeviceStr = GetNextParamStr (&TextDeviceNode);
@@ -818,11 +822,17 @@ DevPathFromTextAcpiAdr (
     if (Index > 0) {
       Length  = DevicePathNodeLength (AcpiAdr);
       AcpiAdr = ReallocatePool (
-                  Length,
-                  Length + sizeof (UINT32),
-                  AcpiAdr
-                  );
+          Length,
+          Length + sizeof (UINT32),
+          AcpiAdr
+      );
+
       ASSERT (AcpiAdr != NULL);
+      // DA-TAG: Account for Release Builds
+      if (AcpiAdr == NULL) {
+          return NULL;
+      }
+      
       SetDevicePathNodeLength (AcpiAdr, Length + sizeof (UINT32));
     }
 

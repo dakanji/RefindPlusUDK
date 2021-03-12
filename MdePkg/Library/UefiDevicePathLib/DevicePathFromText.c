@@ -279,7 +279,7 @@ IsHexStr (
   while ((*Str != 0) && *Str == L'0') {
     Str ++;
   }
-  
+
   return (BOOLEAN) (*Str == L'x' || *Str == L'X');
 }
 
@@ -959,11 +959,16 @@ DevPathFromTextAcpiAdr (
   UINTN                 Length;
 
   AcpiAdr = (ACPI_ADR_DEVICE_PATH *) CreateDeviceNode (
-                                       ACPI_DEVICE_PATH,
-                                       ACPI_ADR_DP,
-                                       (UINT16) sizeof (ACPI_ADR_DEVICE_PATH)
-                                       );
+      ACPI_DEVICE_PATH,
+      ACPI_ADR_DP,
+      (UINT16) sizeof (ACPI_ADR_DEVICE_PATH)
+  );
+
   ASSERT (AcpiAdr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (AcpiAdr == NULL) {
+      return NULL;
+  }
 
   for (Index = 0; ; Index++) {
     DisplayDeviceStr = GetNextParamStr (&TextDeviceNode);
@@ -973,14 +978,19 @@ DevPathFromTextAcpiAdr (
     if (Index > 0) {
       Length  = DevicePathNodeLength (AcpiAdr);
       AcpiAdr = ReallocatePool (
-                  Length,
-                  Length + sizeof (UINT32),
-                  AcpiAdr
-                  );
+          Length,
+          Length + sizeof (UINT32),
+          AcpiAdr
+      );
       ASSERT (AcpiAdr != NULL);
+      // DA-TAG: Account for Release Builds
+      if (AcpiAdr == NULL) {
+          return NULL;
+      }
+      
       SetDevicePathNodeLength (AcpiAdr, Length + sizeof (UINT32));
     }
-    
+
     (&AcpiAdr->ADR)[Index] = (UINT32) Strtoi (DisplayDeviceStr);
   }
 
@@ -2757,18 +2767,18 @@ DevPathFromTextDns (
   }
 
   DeviceNodeStrPtr = DeviceNodeStr;
-  
+
   DnsServerIpCount = 0;
   while (DeviceNodeStrPtr != NULL && *DeviceNodeStrPtr != L'\0') {
     GetNextParamStr (&DeviceNodeStrPtr);
-    DnsServerIpCount ++; 
+    DnsServerIpCount ++;
   }
 
   FreePool (DeviceNodeStr);
   DeviceNodeStr = NULL;
 
   //
-  // One or more instances of the DNS server address in EFI_IP_ADDRESS, 
+  // One or more instances of the DNS server address in EFI_IP_ADDRESS,
   // otherwise, NULL will be returned.
   //
   if (DnsServerIpCount == 0) {
@@ -2814,7 +2824,7 @@ DevPathFromTextDns (
       StrToIpv6Address (DnsServerIp, NULL, &(DnsDeviceNode->DnsServerIp[DnsServerIpIndex].v6), NULL);
     }
   }
-  
+
   return (EFI_DEVICE_PATH_PROTOCOL *) DnsDeviceNode;
 }
 
