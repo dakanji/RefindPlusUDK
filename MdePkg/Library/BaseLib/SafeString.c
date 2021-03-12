@@ -1528,7 +1528,6 @@ StrToGuid (
   StringIndex1 = 2 * sizeof (LocalGuid.Data1);
   Status = StrHexToBytes (String, StringIndex1, (UINT8 *) &LocalGuid.Data1, sizeof (LocalGuid.Data1));
 
-  /* coverity[var_deref_op] */
   if (RETURN_ERROR (Status) || String[StringIndex1] != L'-') {
     return RETURN_UNSUPPORTED;
   }

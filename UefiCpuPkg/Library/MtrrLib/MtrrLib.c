@@ -553,7 +553,7 @@ MtrrLibProgramFixedMtrr (
 
   //
   // Find the end offset in fixed MTRR and calculate byte offset of right shift
-  /* coverity[var_deref_op : FALSE] */
+  //
   SubLength = (UINT64) (mMtrrLibFixedMtrrTable[MsrIndex].Length) * (8 - LeftByteShift);
   if (*Length >= SubLength) {
     RightByteShift = 0;
