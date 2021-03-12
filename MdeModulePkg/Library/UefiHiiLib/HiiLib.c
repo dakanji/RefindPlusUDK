@@ -2621,9 +2621,10 @@ Done:
     FreePool (ConfigResp);
   }
 
-  if (ConfigAltResp != NULL) {
-    FreePool (ConfigAltResp);
-  }
+  // DA-TAG: ConfigAltResp must be NULL by here
+  //if (ConfigAltResp != NULL) {
+  //    FreePool (ConfigAltResp);
+  //}
 
   if (HiiPackageList != NULL) {
     FreePool (HiiPackageList);
