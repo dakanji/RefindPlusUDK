@@ -96,7 +96,7 @@ InternalMathARShiftU64 (
 
   //
   // Arithmetic is not supported
-  // coverity[var_deref_op]
+  /* coverity[var_deref_op] */
   return (Operand >> Count) | ((INTN)Operand < 0 ? ~((UINTN)-1 >> Count) : 0);
 }
 
