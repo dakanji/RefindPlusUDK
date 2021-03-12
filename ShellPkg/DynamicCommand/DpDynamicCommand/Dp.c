@@ -12,14 +12,14 @@
   and start and end time values.
   Dp uses this information to group records in different ways.  It also uses
   timer information to calculate elapsed time for each measurement.
- 
+
   Copyright (c) 2009 - 2018, Intel Corporation. All rights reserved.
   (C) Copyright 2015-2016 Hewlett Packard Enterprise Development LP<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
   http://opensource.org/licenses/bsd-license.php
- 
+
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
@@ -676,10 +676,10 @@ InitCumulativeData (
 
 /**
   Dump performance data.
-  
+
   @param[in]  ImageHandle     The image handle.
   @param[in]  SystemTable     The system table.
-  
+
   @retval SHELL_SUCCESS            Command completed successfully.
   @retval SHELL_INVALID_PARAMETER  Command usage error.
   @retval SHELL_ABORTED            The user aborts the operation.
@@ -855,7 +855,7 @@ RunDp (
   TimerInfo.Frequency  = (UINT32)DivU64x32 (PerformanceProperty->Frequency, 1000);
   TimerInfo.StartCount = 0;
   TimerInfo.EndCount   = 0xFFFF;
-  TimerInfo.CountUp = TRUE;
+  TimerInfo.CountUp    = TRUE;
 
   //
   // Print header
@@ -870,6 +870,10 @@ RunDp (
     StringPtr = HiiGetString (mDpHiiHandle,
                   (EFI_STRING_ID) (TimerInfo.CountUp ? STRING_TOKEN (STR_DP_UP) : STRING_TOKEN (STR_DP_DOWN)), NULL);
     ASSERT (StringPtr != NULL);
+    // DA-TAG: Account for Release Builds
+    if (StringPtr == NULL) {
+        return SHELL_INVALID_PARAMETER;
+    }
     // Print Timer count range and direction
     ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_DP_TIMER_PROPERTIES), mDpHiiHandle,
                 StringPtr,
@@ -901,7 +905,7 @@ RunDp (
 ****     T &&  P  := (3) Same as Default, both are displayed
 ****************************************************************************/
   GatherStatistics (CustomCumulativeData);
-  if (CumulativeMode) {                       
+  if (CumulativeMode) {
     ProcessCumulative (CustomCumulativeData);
   } else if (AllMode) {
     if (TraceMode) {

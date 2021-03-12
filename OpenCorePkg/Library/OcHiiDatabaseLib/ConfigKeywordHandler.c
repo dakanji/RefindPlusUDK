@@ -1864,6 +1864,10 @@ ConstructRequestElement (
   //
   StringPtr = AllocateZeroPool (Length * sizeof (CHAR16));
   ASSERT (StringPtr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (StringPtr == NULL) {
+      return NULL;
+  }
 
   if (Name != NULL) {
     //
@@ -2239,6 +2243,11 @@ ExtractValueFromDriver (
   //
   StringPtr = StrStr (Result, L"&VALUE=");
   ASSERT (StringPtr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (StringPtr == NULL) {
+      return EFI_INVALID_PARAMETER;
+  }
+  
   StringEnd = StrStr (StringPtr + 1, L"&");
   if (StringEnd != NULL) {
     *StringEnd = L'\0';

@@ -1094,6 +1094,10 @@ GetValueFromRequest (
   //
   StringPtr = StrStr (ConfigElement, VarName);
   ASSERT (StringPtr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (StringPtr == NULL) {
+      return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Skip the "VarName=" string
@@ -1923,6 +1927,10 @@ GetBlockDataInfo (
 
   StringPtr = StrStr (ConfigElement, L"&OFFSET=");
   ASSERT (StringPtr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (StringPtr == NULL) {
+      return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Parse each <RequestElement> if exists
@@ -2166,6 +2174,10 @@ InternalHiiValidateCurrentSetting (
     //
     StringPtr = StrStr (ConfigResp, L"PATH=");
     ASSERT (StringPtr != NULL);
+    // DA-TAG: Account for Release Builds
+    if (StringPtr == NULL) {
+        return EFI_INVALID_PARAMETER;
+    }
 
     if (StrStr (StringPtr, L"&") != NULL) {
       NameValueType = TRUE;
@@ -2228,6 +2240,10 @@ GetElementsFromRequest (
 
   TmpRequest = StrStr (ConfigRequest, L"PATH=");
   ASSERT (TmpRequest != NULL);
+  // DA-TAG: Account for Release Builds
+  if (TmpRequest == NULL) {
+      return FALSE;
+  }
 
   if ((StrStr (TmpRequest, L"&OFFSET=") != NULL) || (StrStr (TmpRequest, L"&") != NULL)) {
     return TRUE;
@@ -2331,6 +2347,10 @@ InternalHiiIfrValueAction (
 
   StringPtr = ConfigAltResp;
   ASSERT (StringPtr != NULL);
+  // DA-TAG: Account for Release Builds
+  if (StringPtr == NULL) {
+      return FALSE;
+  }
 
   while (*StringPtr != L'\0') {
     //
