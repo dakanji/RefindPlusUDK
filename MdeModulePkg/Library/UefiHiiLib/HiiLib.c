@@ -1343,6 +1343,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrOneOf->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: Account for Release Builds
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1435,6 +1439,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrNumeric->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: Account for Release Builds
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1615,6 +1623,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrCheckBox->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: Account for Release Builds
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1711,6 +1723,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrString->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: Account for Release Builds
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             StringPtr = StrStr (RequestElement, QuestionName);
             if (StringPtr == NULL) {
