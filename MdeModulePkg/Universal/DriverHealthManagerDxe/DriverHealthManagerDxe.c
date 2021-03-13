@@ -566,6 +566,10 @@ DriverHealthManagerGetFormsetId (
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
+    // DA-TAG: Account for Release Builds
+    if (HiiPackageList == NULL) {
+        return EFI_BUFFER_TOO_SMALL;
+    }
 
     Status = mDriverHealthManagerDatabase->ExportPackageLists (mDriverHealthManagerDatabase, Handle, &BufferSize, HiiPackageList);
   }
@@ -573,6 +577,11 @@ DriverHealthManagerGetFormsetId (
     return Status;
   }
   ASSERT (HiiPackageList != NULL);
+  // DA-TAG: Account for Release Builds
+  if (HiiPackageList == NULL) {
+      return EFI_BUFFER_TOO_SMALL;
+  }
+
 
   //
   // Get Form package from this HII package List
@@ -585,7 +594,7 @@ DriverHealthManagerGetFormsetId (
       //
       // Search FormSet in this Form Package
       //
-      
+
       for (Offset2 = sizeof (EFI_HII_PACKAGE_HEADER); Offset2 < PackageHeader.Length; Offset2 += ((EFI_IFR_OP_HEADER *) OpCodeData)->Length) {
         OpCodeData = Package + Offset2;
 
@@ -888,6 +897,11 @@ DriverHealthManagerCleanDynamicString (
   BufferSize      = sizeof (EFI_HII_PACKAGE_LIST_HEADER) + FixedStringSize + sizeof (EFI_HII_PACKAGE_HEADER);
   HiiPackageList  = AllocatePool (BufferSize);
   ASSERT (HiiPackageList != NULL);
+  // DA-TAG: Account for Release Builds
+  if (HiiPackageList == NULL) {
+      return;
+  }
+
 
   HiiPackageList->PackageLength = (UINT32) BufferSize;
   CopyMem (&HiiPackageList->PackageListGuid, &gEfiCallerIdGuid, sizeof (EFI_GUID));
@@ -986,5 +1000,3 @@ DriverHealthManagerCallback (
 
   return EFI_SUCCESS;
 }
-
-

@@ -75,7 +75,15 @@ InternalHiiExtractGuidFromHiiHandle (
   EFI_HII_PACKAGE_LIST_HEADER  *HiiPackageList;
 
   ASSERT (Guid != NULL);
+  // DA-TAG: Account for Release Builds
+  if (Guid == NULL) {
+      return EFI_INVALID_PARAMETER;
+  }
   ASSERT (Handle != NULL);
+  // DA-TAG: Account for Release Builds
+  if (Handle == NULL) {
+      return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Get HII PackageList
@@ -85,10 +93,18 @@ InternalHiiExtractGuidFromHiiHandle (
 
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   ASSERT (Status != EFI_NOT_FOUND);
+  // DA-TAG: Account for Release Builds
+  if (Status == EFI_NOT_FOUND) {
+      return EFI_NOT_FOUND;
+  }
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
+    // DA-TAG: Account for Release Builds
+    if (HiiPackageList == NULL) {
+        return EFI_BUFFER_TOO_SMALL;
+    }
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   }

@@ -58,9 +58,9 @@ EFI_GUID  mTianoHiiIfrGuid              = EFI_IFR_TIANO_GUID;
 
 /**
 
-  This thunk module only handles UEFI HII packages. The caller of this function 
+  This thunk module only handles UEFI HII packages. The caller of this function
   won't be able to parse the content. Therefore, it is not supported.
-  
+
   This function will ASSERT and return EFI_UNSUPPORTED.
 
   @param This            N.A.
@@ -89,12 +89,12 @@ HiiExportDatabase (
   This function allows a program to extract a form or form package that has
   previously been registered with the EFI HII database.
 
-  In this thunk module, this function will create a IFR Package with only 
+  In this thunk module, this function will create a IFR Package with only
   one Formset. Effectively, only the GUID of the Formset is updated and return
-  in this IFR package to caller. This is enable the Framework modules which call 
+  in this IFR package to caller. This is enable the Framework modules which call
   a API named GetStringFromToken. GetStringFromToken retieves a String based on
   a String Token from a Package List known only by the Formset GUID.
-  
+
 
 
   @param This             A pointer to the EFI_HII_PROTOCOL instance.
@@ -131,7 +131,7 @@ HiiGetForms (
     *BufferLengthTemp = sizeof(FW_HII_FORMSET_TEMPLATE);
     return EFI_BUFFER_TOO_SMALL;
   }
-  
+
   Private = HII_THUNK_PRIVATE_DATA_FROM_THIS(This);
 
   ThunkContext = FwHiiHandleToThunkContext (Private, Handle);
@@ -141,9 +141,9 @@ HiiGetForms (
   }
 
   OutputFormSet = (FW_HII_FORMSET_TEMPLATE *) Buffer;
-  
+
   CopyMem (OutputFormSet, &FormSetTemplate, sizeof (FW_HII_FORMSET_TEMPLATE));
-  CopyMem (&OutputFormSet->FormSet.Guid, &ThunkContext->TagGuid, sizeof (EFI_GUID)); 
+  CopyMem (&OutputFormSet->FormSet.Guid, &ThunkContext->TagGuid, sizeof (EFI_GUID));
 
   if (ThunkContext->FormSet != NULL) {
     OutputFormSet->FormSet.Class = ThunkContext->FormSet->Class;
@@ -207,7 +207,7 @@ HiiGetDefaultImage (
 
 Done:
   FreeDefaultList (UefiDefaults);
-  
+
   return Status;
 }
 
@@ -215,7 +215,7 @@ Done:
   This function update the FormCallbackProtocol cached in Config Access
   private context data.
 
-  @param CallbackHandle  The EFI Handle on which the Framework FormCallbackProtocol is 
+  @param CallbackHandle  The EFI Handle on which the Framework FormCallbackProtocol is
                          installed.
   @param ThunkContext    The Thunk Context.
 
@@ -234,7 +234,7 @@ UpdateFormCallBack (
   EFI_HII_CONFIG_ACCESS_PROTOCOL            *ConfigAccessProtocol;
   EFI_HANDLE                                UefiDriverHandle;
   CONFIG_ACCESS_PRIVATE                     *ConfigAccessPrivate;
-  
+
   Status = gBS->HandleProtocol (
                    CallbackHandle,
                    &gEfiFormCallbackProtocolGuid,
@@ -243,7 +243,7 @@ UpdateFormCallBack (
   if (EFI_ERROR (Status)) {
     return EFI_INVALID_PARAMETER;
   }
-  
+
   Status = mHiiDatabase->GetPackageListHandle (
                                         mHiiDatabase,
                                         ThunkContext->UefiHiiHandle,
@@ -256,9 +256,9 @@ UpdateFormCallBack (
                    (VOID **) &ConfigAccessProtocol
                    );
   ASSERT_EFI_ERROR (Status);
-  
+
   ConfigAccessPrivate = CONFIG_ACCESS_PRIVATE_FROM_PROTOCOL (ConfigAccessProtocol);
-  
+
   ConfigAccessPrivate->FormCallbackProtocol = FormCallbackProtocol;
 
   return EFI_SUCCESS;
@@ -401,18 +401,18 @@ LocateLabel (
 
 /**
   Find the first EFI_FORM_LABEL in FormSets for a given EFI_HII_HANLDE defined.
-  
+
   EFI_FORM_LABEL is a specific to Tiano implementation. The current implementation
-  does not restrict labels with same label value to be duplicated in either FormSet 
+  does not restrict labels with same label value to be duplicated in either FormSet
   scope or Form scope. This function will only locate the FIRST EFI_FORM_LABEL
-  with value as the same as the input Label in the Formset registered with UefiHiiHandle. The FormSet GUID 
+  with value as the same as the input Label in the Formset registered with UefiHiiHandle. The FormSet GUID
   and Form ID is returned if such Label is found.
 
   @param Handle       Uefi Hii Handle to be searched.
   @param Label        The first Label ID to be found.
   @param FormsetGuid  The matched FormSet GUID.
   @param FormId       The matched Form ID.
-  
+
   @retval EFI_INVALID_PARAMETER If UefiHiiHandle is not a valid handle.
   @retval EFI_NOT_FOUND         The package list identified by UefiHiiHandle deos not contain FormSet or
                                 Form ID with value Label found in all Form Sets in the pacakge list.
@@ -440,6 +440,10 @@ LocateFormId (
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
+    // DA-TAG: Account for Release Builds
+    if (HiiPackageList == NULL) {
+        return EFI_BUFFER_TOO_SMALL;
+    }
 
     Status = mHiiDatabase->ExportPackageLists (mHiiDatabase, Handle, &BufferSize, HiiPackageList);
     if (EFI_ERROR (Status)) {
@@ -462,10 +466,10 @@ LocateFormId (
     }
   }
 
-  
+
 Done:
   FreePool (HiiPackageList);
-  
+
   return Status;
 }
 
@@ -507,7 +511,7 @@ HiiThunkUpdateForm (
   EFI_IFR_GUID_LABEL                        *EndLabel;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
-  
+
   mInFrameworkUpdatePakcage = TRUE;
   Status = EFI_SUCCESS;
 
@@ -519,7 +523,7 @@ HiiThunkUpdateForm (
     Status = EFI_NOT_FOUND;
     goto Done;
   }
-  
+
   if (Data->FormSetUpdate) {
     Status = UpdateFormCallBack ((EFI_HANDLE) (UINTN) Data->FormCallbackHandle, ThunkContext);
     if (EFI_ERROR (Status)) {
@@ -590,7 +594,7 @@ HiiThunkUpdateForm (
 
 Done:
 
-  mInFrameworkUpdatePakcage = FALSE; 
+  mInFrameworkUpdatePakcage = FALSE;
 
   gBS->RestoreTPL (OldTpl);
 
