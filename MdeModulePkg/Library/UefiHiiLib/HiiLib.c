@@ -108,6 +108,13 @@ InternalHiiExtractGuidFromHiiHandle (
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
+  
+  // DA-TAG: Account for Release Builds
+  //         CoverMissing ASSERT
+  if (HiiPackageList == NULL) {
+      return EFI_BUFFER_TOO_SMALL;
+  }
+
   if (EFI_ERROR (Status)) {
     FreePool (HiiPackageList);
     return Status;
