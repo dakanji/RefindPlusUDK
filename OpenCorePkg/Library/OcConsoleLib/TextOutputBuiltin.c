@@ -206,11 +206,14 @@ RenderChar (
 
   DstBuffer = &mCharacterBuffer[0].Raw;
 
-  if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == CHAR_TAB || Char == 0x7F) {
+  // DA-TAG: Unsigned compared against 0 (NO_EFFECT)
+  //if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == CHAR_TAB || Char == 0x7F) {
+  if (Char < ISO_CHAR_MIN || Char == ' ' || Char == CHAR_TAB || Char == 0x7F) {
     SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   } else {
-
-    if (Char < 0 || Char > ISO_CHAR_MAX) {
+    // DA-TAG: Unsigned compared against 0 (NO_EFFECT)
+    //if (Char < 0 || Char > ISO_CHAR_MAX) {
+    if (Char > ISO_CHAR_MAX) {
       Char = L'_';
     }
 
