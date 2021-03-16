@@ -597,8 +597,32 @@ HandleCFIBadType(bool isFatal, struct CCFICheckFailData *pData, unsigned long ul
 		Report(isFatal, "UBSan: Undefined Behavior in %s, control flow integrity check for type %s failed during %s (vtable address %#lx)\n",
 		      szLocation, pData->mType->mTypeName, DeserializeCFICheckKind(pData->mCheckKind), ulVtable);
 	} else {
-		Report(isFatal || FromUnrecoverableHandler, "UBSan: Undefined Behavior in %s, control flow integrity check for type %s failed during %s (vtable address %#lx; %s vtable; from %s handler; Program Counter %#lx; Frame Pointer %#lx)\n",
-		      szLocation, pData->mType->mTypeName, DeserializeCFICheckKind(pData->mCheckKind), ulVtable, *bValidVtable ? "valid" : "invalid", *FromUnrecoverableHandler ? "unrecoverable" : "recoverable", *ProgramCounter, *FramePointer);
+		// DA-TAG: Dereference After NULL Check
+		//         Dereferencing null pointer 'FromUnrecoverableHandler'
+		//Report(
+		//	isFatal,
+		//	"UBSan: Undefined Behavior in %s, control flow integrity check for type %s failed during %s (vtable address %#lx; %s vtable; from %s handler; Program Counter %#lx; Frame Pointer %#lx)\n",
+		//	szLocation,
+		//	pData->mType->mTypeName,
+		//	DeserializeCFICheckKind(pData->mCheckKind),
+		//	ulVtable,
+		//	*bValidVtable ? "valid" : "invalid",
+		//	*FromUnrecoverableHandler ? "unrecoverable" : "recoverable",
+		//	*ProgramCounter,
+		//	*FramePointer
+		//);
+		Report(
+			isFatal,
+			"UBSan: Undefined Behavior in %s, control flow integrity check for type %s failed during %s (vtable address %#lx; %s vtable; from %s handler; Program Counter %#lx; Frame Pointer %#lx)\n",
+			szLocation,
+			pData->mType->mTypeName,
+			DeserializeCFICheckKind(pData->mCheckKind),
+			ulVtable,
+			*bValidVtable ? "valid" : "invalid",
+			"DA-Removed",
+			*ProgramCounter,
+			*FramePointer
+		);
 	}
 }
 
