@@ -75,15 +75,7 @@ InternalHiiExtractGuidFromHiiHandle (
   EFI_HII_PACKAGE_LIST_HEADER  *HiiPackageList;
 
   ASSERT (Guid != NULL);
-  // DA-TAG: Account for Release Builds
-  if (Guid == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
   ASSERT (Handle != NULL);
-  // DA-TAG: Account for Release Builds
-  if (Handle == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   //
   // Get HII PackageList
@@ -93,29 +85,19 @@ InternalHiiExtractGuidFromHiiHandle (
 
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   ASSERT (Status != EFI_NOT_FOUND);
-  // DA-TAG: Account for Release Builds
-  if (Status == EFI_NOT_FOUND) {
-      return EFI_NOT_FOUND;
-  }
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
 
-  // DA-TAG: Cover Missing ASSERT
-  if (HiiPackageList == NULL) {
-      return EFI_BUFFER_TOO_SMALL;
-  }
-
   if (EFI_ERROR (Status)) {
-    FreePool (HiiPackageList);
+    // DA-TAG: Cover Potential Double Free
+    if (HiiPackageList != NULL) {
+        FreePool (HiiPackageList);
+    }
     return Status;
   }
 
@@ -1116,10 +1098,6 @@ GetValueFromRequest (
   //
   StringPtr = StrStr (ConfigElement, VarName);
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   //
   // Skip the "VarName=" string
@@ -1369,10 +1347,6 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrOneOf->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
-            // DA-TAG: Account for Release Builds
-            if (QuestionName == NULL) {
-                return EFI_INVALID_PARAMETER;
-            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1465,10 +1439,6 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrNumeric->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
-            // DA-TAG: Account for Release Builds
-            if (QuestionName == NULL) {
-                return EFI_INVALID_PARAMETER;
-            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1649,10 +1619,6 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrCheckBox->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
-            // DA-TAG: Account for Release Builds
-            if (QuestionName == NULL) {
-                return EFI_INVALID_PARAMETER;
-            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1749,10 +1715,6 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrString->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
-            // DA-TAG: Account for Release Builds
-            if (QuestionName == NULL) {
-                return EFI_INVALID_PARAMETER;
-            }
 
             StringPtr = StrStr (RequestElement, QuestionName);
             if (StringPtr == NULL) {
@@ -1949,10 +1911,6 @@ GetBlockDataInfo (
 
   StringPtr = StrStr (ConfigElement, L"&OFFSET=");
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   //
   // Parse each <RequestElement> if exists
@@ -2196,10 +2154,6 @@ InternalHiiValidateCurrentSetting (
     //
     StringPtr = StrStr (ConfigResp, L"PATH=");
     ASSERT (StringPtr != NULL);
-    // DA-TAG: Account for Release Builds
-    if (StringPtr == NULL) {
-        return EFI_INVALID_PARAMETER;
-    }
 
     if (StrStr (StringPtr, L"&") != NULL) {
       NameValueType = TRUE;
@@ -2262,10 +2216,6 @@ GetElementsFromRequest (
 
   TmpRequest = StrStr (ConfigRequest, L"PATH=");
   ASSERT (TmpRequest != NULL);
-  // DA-TAG: Account for Release Builds
-  if (TmpRequest == NULL) {
-      return FALSE;
-  }
 
   if ((StrStr (TmpRequest, L"&OFFSET=") != NULL) || (StrStr (TmpRequest, L"&") != NULL)) {
     return TRUE;
@@ -2369,10 +2319,6 @@ InternalHiiIfrValueAction (
 
   StringPtr = ConfigAltResp;
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return FALSE;
-  }
 
   while (*StringPtr != L'\0') {
     //

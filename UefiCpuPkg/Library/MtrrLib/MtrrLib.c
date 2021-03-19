@@ -538,10 +538,6 @@ MtrrLibProgramFixedMtrr (
   }
 
   ASSERT (MsrIndex != ARRAY_SIZE (mMtrrLibFixedMtrrTable));
-  // DA-TAG: Account for Release Builds
-  if (MsrIndex >= ARRAY_SIZE (mMtrrLibFixedMtrrTable)) {
-      return RETURN_UNSUPPORTED;
-  }
 
   //
   // Find the begin offset in fixed MTRR and calculate byte offset of left shift

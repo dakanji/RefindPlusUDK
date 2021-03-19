@@ -22,10 +22,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 CONST CHAR16 FrameworkReservedVarstoreName[] = FRAMEWORK_RESERVED_VARSTORE_NAME;
 
 /**
-
-  This function returns a list of the package handles of the
-  specified type that are currently active in the HII database. The
-  pseudo-type EFI_HII_PACKAGE_TYPE_ALL will cause all package
+  
+  This function returns a list of the package handles of the   
+  specified type that are currently active in the HII database. The   
+  pseudo-type EFI_HII_PACKAGE_TYPE_ALL will cause all package   
   handles to be listed.
 
   If HandleBufferLength is NULL, then ASSERT.
@@ -34,19 +34,19 @@ CONST CHAR16 FrameworkReservedVarstoreName[] = FRAMEWORK_RESERVED_VARSTORE_NAME;
   NULL, then ASSERT.
   If PackageType is not EFI_HII_PACKAGE_TYPE_GUID and PackageGuid is not
   NULL, then ASSERT.
-
-
+  
+  
   @param PackageType          Specifies the package type of the packages
                               to list or EFI_HII_PACKAGE_TYPE_ALL for
                               all packages to be listed.
-
+  
   @param PackageGuid          If PackageType is
                               EFI_HII_PACKAGE_TYPE_GUID, then this is
                               the pointer to the GUID which must match
                               the Guid field of
                               EFI_HII_PACKAGE_GUID_HEADER. Otherwise, it
                               must be NULL.
-
+  
   @param HandleBufferLength   On output, the length of the handle buffer
                               that is required for the handles found.
 
@@ -68,10 +68,10 @@ ListPackageLists (
   )
 {
   EFI_STATUS          Status;
-
+  
   ASSERT (HandleBufferLength != NULL);
   ASSERT (HandleBuffer != NULL);
-
+  
   *HandleBufferLength = 0;
   *HandleBuffer       = NULL;
 
@@ -91,17 +91,17 @@ ListPackageLists (
   if (EFI_ERROR (Status) && (Status != EFI_BUFFER_TOO_SMALL)) {
     //
     // No packages is registered to UEFI HII Database, just return.
-    //
+    // 
     //
     return Status;
   }
 
   *HandleBuffer = AllocateZeroPool (*HandleBufferLength);
-
+  
   if (*HandleBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-
+  
   return mHiiDatabase->ListPackageLists (
                          mHiiDatabase,
                          PackageType,
@@ -109,19 +109,19 @@ ListPackageLists (
                          HandleBufferLength,
                          *HandleBuffer
                          );
-
+  
 }
 
 /**
   Exports the contents of one or all package lists in the HII database into a buffer.
 
-  If Handle is not NULL and not a valid EFI_HII_HANDLE registered in the database,
+  If Handle is not NULL and not a valid EFI_HII_HANDLE registered in the database, 
   then ASSERT.
   If PackageListHeader is NULL, then ASSERT.
   If PackageListSize is NULL, then ASSERT.
 
   @param  Handle                 The HII Handle.
-  @param  PackageListHeader      A pointer to a buffer that will contain the results of
+  @param  PackageListHeader      A pointer to a buffer that will contain the results of 
                                  the export function.
   @param  PackageListSize        On output, the length of the buffer that is required for the exported data.
 
@@ -130,7 +130,7 @@ ListPackageLists (
   @retval EFI_OUT_OF_RESOURCES   Not enought memory to complete the operations.
 
 **/
-EFI_STATUS
+EFI_STATUS 
 EFIAPI
 ExportPackageLists (
   IN EFI_HII_HANDLE                    Handle,
@@ -154,10 +154,10 @@ ExportPackageLists (
                            PackageListHdr
                            );
   ASSERT (Status != EFI_BUFFER_TOO_SMALL);
-
+  
   if (Status == EFI_BUFFER_TOO_SMALL) {
     PackageListHdr = AllocateZeroPool (Size);
-
+    
     if (PackageListHeader == NULL) {
       return EFI_OUT_OF_RESOURCES;
     } else {
@@ -204,15 +204,7 @@ ExtractGuidFromHiiHandle (
   EFI_HII_PACKAGE_LIST_HEADER  *HiiPackageList;
 
   ASSERT (Guid != NULL);
-  // DA-TAG: Account for Release Builds
-  if (Guid == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
   ASSERT (Handle != NULL);
-  // DA-TAG: Account for Release Builds
-  if (Handle == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   //
   // Get HII PackageList
@@ -222,18 +214,10 @@ ExtractGuidFromHiiHandle (
 
   Status = mHiiDatabase->ExportPackageLists (mHiiDatabase, Handle, &BufferSize, HiiPackageList);
   ASSERT (Status != EFI_NOT_FOUND);
-  // DA-TAG: Account for Release Builds
-  if (Status == EFI_NOT_FOUND) {
-      return EFI_NOT_FOUND;
-  }
-
+  
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = mHiiDatabase->ExportPackageLists (mHiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
@@ -277,7 +261,7 @@ FwHiiHandleToUefiHiiHandle (
   if (ThunkContext != NULL) {
     return ThunkContext->UefiHiiHandle;
   }
-
+  
   return (EFI_HII_HANDLE) NULL;
 }
 
@@ -379,7 +363,7 @@ TagGuidToIfrPackThunkContext (
   }
 
   return NULL;
-
+  
 }
 
 /**
@@ -406,13 +390,13 @@ DestroyThunkContextForUefiHiiHandle (
 
 /**
   This function create a HII_THUNK_CONTEXT for the input UEFI HiiHandle
-  that is created when a package list registered by a module calling
-  EFI_HII_DATABASE_PROTOCOL.NewPackageList.
-  This function records the PackageListGuid of EFI_HII_PACKAGE_LIST_HEADER
+  that is created when a package list registered by a module calling 
+  EFI_HII_DATABASE_PROTOCOL.NewPackageList. 
+  This function records the PackageListGuid of EFI_HII_PACKAGE_LIST_HEADER 
   into the TagGuid of the created HII_THUNK_CONTEXT.
 
   @param UefiHiiHandle  The UEFI HII Handle.
-
+  
   @return the new created Hii thunk context.
 
 **/
@@ -427,19 +411,19 @@ CreateThunkContextForUefiHiiHandle (
 
   ThunkContext = AllocateZeroPool (sizeof (*ThunkContext));
   ASSERT (ThunkContext != NULL);
-
+  
   ThunkContext->Signature = HII_THUNK_CONTEXT_SIGNATURE;
 
   Status = AllocateHiiHandle (&ThunkContext->FwHiiHandle);
   if (EFI_ERROR (Status)) {
     return NULL;
   }
-
+  
   ThunkContext->UefiHiiHandle = UefiHiiHandle;
-
+  
   Status = ExtractGuidFromHiiHandle (UefiHiiHandle, &PackageGuid);
   ASSERT_EFI_ERROR (Status);
-
+  
   CopyGuid(&ThunkContext->TagGuid, &PackageGuid);
 
   return ThunkContext;
@@ -465,15 +449,15 @@ GetPackageCountByType (
 
   PackageHeader = (EFI_HII_PACKAGE_HEADER *) ((UINT8 *) PackageListHeader + sizeof (EFI_HII_PACKAGE_LIST_HEADER));
   Count = 0;
-
+  
   while (PackageHeader->Type != EFI_HII_PACKAGE_END) {
     if (PackageHeader->Type == PackageType ) {
       Count++;
     }
     PackageHeader = (EFI_HII_PACKAGE_HEADER *) ((UINT8 *) PackageHeader + PackageHeader->Length);
   }
-
-
+  
+  
   return Count;
 }
 
@@ -495,13 +479,13 @@ GetIfrPackage (
   ASSERT (Packages != NULL);
 
   TianoAutogenPackageHdrArray = (TIANO_AUTOGEN_PACKAGES_HEADER **) (((UINT8 *) &Packages->GuidId) + sizeof (Packages->GuidId));
-
+  
   for (Index = 0; Index < Packages->NumberOfPackages; Index++) {
     //
-    // The current UEFI HII build tool generate a binary in the format defined by
+    // The current UEFI HII build tool generate a binary in the format defined by 
     // TIANO_AUTOGEN_PACKAGES_HEADER. We assume that all packages generated in
     // this binary is with same package type. So the returned IfrPackageCount and StringPackageCount
-    // may not be the exact number of valid package number in the binary generated
+    // may not be the exact number of valid package number in the binary generated 
     // by HII Build tool.
     //
     switch (TianoAutogenPackageHdrArray[Index]->FrameworkPackageHeader.Type) {
@@ -550,10 +534,10 @@ GetFormSetGuid (
       FormSet = (EFI_IFR_FORM_SET *) OpCode;
       CopyGuid (FormSetGuid, (EFI_GUID *)(VOID *)&FormSet->Guid);
       return;
-
+      
       default:
         break;
-
+      
     }
     Offset += OpCode->Length;
   }
@@ -589,7 +573,7 @@ CreateThunkContext (
 
   ThunkContext = AllocateZeroPool (sizeof (HII_THUNK_CONTEXT));
   ASSERT (ThunkContext != NULL);
-
+  
   ThunkContext->Signature = HII_THUNK_CONTEXT_SIGNATURE;
   ThunkContext->IfrPackageCount = IfrPackageCount;
   ThunkContext->StringPackageCount = StringPackageCount;
@@ -599,7 +583,7 @@ CreateThunkContext (
   }
 
   return ThunkContext;
-
+     
 }
 
 /**
@@ -630,11 +614,11 @@ DestroyThunkContext (
   Get the FormSet's Default Varstore ID based on the rule (Descending Priority):
 
   1) If VarStore ID of FRAMEWORK_RESERVED_VARSTORE_ID (0x01) is found, Var Store ID is used.
-  2) If VarStore ID of FRAMEWORK_RESERVED_VARSTORE_ID is not found, First Var Store ID is used
+  2) If VarStore ID of FRAMEWORK_RESERVED_VARSTORE_ID is not found, First Var Store ID is used 
      as the default Var Store ID.
 
   @param FormSet The Form Set. The Default Varstore ID is updated if found.
-
+  
 **/
 VOID
 GetFormsetDefaultVarstoreId (
@@ -668,8 +652,8 @@ GetFormsetDefaultVarstoreId (
 
   if (FormSet->DefaultVarStoreId != FRAMEWORK_RESERVED_VARSTORE_ID) {
     //
-    //
-    // 2) If VarStore ID of FRAMEWORK_RESERVED_VARSTORE_ID is not found, First Var Store ID is used
+    // 
+    // 2) If VarStore ID of FRAMEWORK_RESERVED_VARSTORE_ID is not found, First Var Store ID is used 
     //   as the default Var Store ID.
     //
     StorageList = GetFirstNode (&FormSet->StorageListHead);
@@ -677,13 +661,13 @@ GetFormsetDefaultVarstoreId (
       Storage = FORMSET_STORAGE_FROM_LINK (StorageList);
       FormSet->DefaultVarStoreId = Storage->VarStoreId;
     }
-
+    
   }
 
   if (FormSet->DefaultVarStoreId == 0) {
     DEBUG ((EFI_D_INFO, "FormSet %g: No Varstore Found\n", &FormSet->Guid));
-  }
-
+  } 
+  
   return;
 }
 
@@ -745,10 +729,6 @@ GetIfrBinaryData (
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = mHiiDatabase->ExportPackageLists (mHiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
@@ -895,8 +875,8 @@ ParseFormSet (
   FORM_BROWSER_FORMSET  *FormSet;
   EFI_GUID              FormSetGuid;
   EFI_STATUS            Status;
-
-  FormSet = AllocateZeroPool (sizeof (FORM_BROWSER_FORMSET));
+  
+  FormSet = AllocateZeroPool (sizeof (FORM_BROWSER_FORMSET));    
   ASSERT (FormSet != NULL);
 
   CopyGuid (&FormSetGuid, &gZeroGuid);
@@ -908,3 +888,4 @@ ParseFormSet (
 
   return FormSet;
 }
+

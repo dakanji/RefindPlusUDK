@@ -476,10 +476,6 @@ Returns:
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = EfiLibAllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = HiiDatabase->ExportPackageLists (HiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
@@ -559,10 +555,6 @@ Returns:
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = EfiLibAllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = HiiDatabase->ExportPackageLists (HiiDatabase, Handle, &BufferSize, HiiPackageList);
   }
@@ -702,10 +694,6 @@ Returns:
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = EfiLibAllocatePool (BufferSize);
     ASSERT (HiiPackageList != NULL);
-    // DA-TAG: Account for Release Builds
-    if (HiiPackageList == NULL) {
-        return EFI_BUFFER_TOO_SMALL;
-    }
 
     Status = HiiDatabase->ExportPackageLists (HiiDatabase, Handle, &BufferSize, HiiPackageList);
   }

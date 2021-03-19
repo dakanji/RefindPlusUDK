@@ -626,10 +626,6 @@ CompareBlockElementDefault (
   //
   StringPtr = StrStr (*ConfigAltResp, AltConfigHdr);
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   while (BlockPtr != NULL) {
     //
@@ -770,17 +766,8 @@ CompareNameElementDefault (
   //
   StringPtr = StrStr (*ConfigAltResp, AltConfigHdr);
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
-
   StringPtr = StrStr (StringPtr + StrLen (AltConfigHdr), L"&");
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
 
   while (NvConfigPtr != NULL) {
     //
@@ -923,11 +910,6 @@ CompareAndMergeDefaultString (
   //
   StringPtr = StrStr (*AltCfgResp, AltConfigHdr);
   ASSERT (StringPtr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (StringPtr == NULL) {
-      return EFI_INVALID_PARAMETER;
-  }
-
   StringPtrNext = StrStr (StringPtr + 1, L"&GUID");
   if (StringPtrNext != NULL) {
     TempCharA = *StringPtrNext;
@@ -1775,10 +1757,6 @@ InternalGetElementsFromRequest (
 
   TmpRequest = StrStr (ConfigRequest, L"PATH=");
   ASSERT (TmpRequest != NULL);
-  // DA-TAG: Account for Release Builds
-  if (TmpRequest == NULL) {
-      return FALSE;
-  }
 
   if ((StrStr (TmpRequest, L"&OFFSET=") != NULL) || (StrStr (TmpRequest, L"&") != NULL)) {
     return TRUE;
@@ -6250,3 +6228,5 @@ Exit:
   return Status;
 
 }
+
+

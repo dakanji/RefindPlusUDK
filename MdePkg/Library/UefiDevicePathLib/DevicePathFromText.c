@@ -965,10 +965,6 @@ DevPathFromTextAcpiAdr (
   );
 
   ASSERT (AcpiAdr != NULL);
-  // DA-TAG: Account for Release Builds
-  if (AcpiAdr == NULL) {
-      return NULL;
-  }
 
   for (Index = 0; ; Index++) {
     DisplayDeviceStr = GetNextParamStr (&TextDeviceNode);
@@ -983,11 +979,7 @@ DevPathFromTextAcpiAdr (
           AcpiAdr
       );
       ASSERT (AcpiAdr != NULL);
-      // DA-TAG: Account for Release Builds
-      if (AcpiAdr == NULL) {
-          return NULL;
-      }
-      
+
       SetDevicePathNodeLength (AcpiAdr, Length + sizeof (UINT32));
     }
 
