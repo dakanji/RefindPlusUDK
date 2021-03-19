@@ -37,6 +37,23 @@ runErr() { # $1: message
 trap runErr ERR
 
 
+## UPDATE GOPFIX BRANCH ##
+msg_base "Syncing RefindPlus"
+BASE_DIR="${HOME}/Documents/RefindPlus/Working"
+pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
+git checkout GOPFix
+git reset --hard "${REFINDPLUS_SHA}"
+git push origin HEAD -f
+git pull --tags upstream GOPFix
+git push origin
+git push --tags origin -f
+popd > /dev/null || exit 1
+echo ''
+msg_status "Synced RefindPlus"
+echo ''
+echo ''
+
+
 ## UPDATE RUDK BRANCH ##
 clear
 msg_info '## RepoUpdater ##'
@@ -56,23 +73,6 @@ git push --tags origin -f
 popd > /dev/null || runErr "ERROR: Could not return to starting directory ...Exiting"
 echo ''
 msg_status "Synced RefindPlusUDK"
-echo ''
-echo ''
-
-
-## UPDATE GOPFIX BRANCH ##
-msg_base "Syncing RefindPlus"
-BASE_DIR="${HOME}/Documents/RefindPlus/Working"
-pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
-git checkout GOPFix
-git reset --hard "${REFINDPLUS_SHA}"
-git push origin HEAD -f
-git pull --tags upstream GOPFix
-git push origin
-git push --tags origin -f
-popd > /dev/null || exit 1
-echo ''
-msg_status "Synced RefindPlus"
 echo ''
 msg_info '-----------------'
 msg_info '## RepoUpdater ##'
