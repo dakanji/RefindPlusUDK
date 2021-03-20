@@ -85,6 +85,10 @@ InternalHiiExtractGuidFromHiiHandle (
 
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, HiiPackageList);
   ASSERT (Status != EFI_NOT_FOUND);
+  // DA-TAG: ASSERT Proxy
+  if (Status == EFI_NOT_FOUND) {
+      return Status;
+  }
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     HiiPackageList = AllocatePool (BufferSize);
@@ -2154,6 +2158,10 @@ InternalHiiValidateCurrentSetting (
     //
     StringPtr = StrStr (ConfigResp, L"PATH=");
     ASSERT (StringPtr != NULL);
+    // DA-TAG: ASSERT Proxy
+    if (StringPtr == NULL) {
+        return EFI_INVALID_PARAMETER;
+    }
 
     if (StrStr (StringPtr, L"&") != NULL) {
       NameValueType = TRUE;
@@ -2216,6 +2224,11 @@ GetElementsFromRequest (
 
   TmpRequest = StrStr (ConfigRequest, L"PATH=");
   ASSERT (TmpRequest != NULL);
+  // DA-TAG: ASSERT Proxy
+  if (TmpRequest == NULL) {
+      return FALSE;
+  }
+
 
   if ((StrStr (TmpRequest, L"&OFFSET=") != NULL) || (StrStr (TmpRequest, L"&") != NULL)) {
     return TRUE;

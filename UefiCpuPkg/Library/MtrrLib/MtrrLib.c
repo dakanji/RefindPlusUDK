@@ -528,8 +528,8 @@ MtrrLibProgramFixedMtrr (
     if ((*Base >= mMtrrLibFixedMtrrTable[MsrIndex].BaseAddress) &&
         (*Base <
             (
-              mMtrrLibFixedMtrrTable[MsrIndex].BaseAddress +
-              (8 * (UINT64) (mMtrrLibFixedMtrrTable[MsrIndex].Length))
+                mMtrrLibFixedMtrrTable[MsrIndex].BaseAddress +
+                (8 * (UINT64) (mMtrrLibFixedMtrrTable[MsrIndex].Length))
             )
           )
         ) {
@@ -538,6 +538,10 @@ MtrrLibProgramFixedMtrr (
   }
 
   ASSERT (MsrIndex != ARRAY_SIZE (mMtrrLibFixedMtrrTable));
+  // DA-TAG: ASSERT Proxy
+  if (MsrIndex >= ARRAY_SIZE (mMtrrLibFixedMtrrTable)) {
+      return RETURN_UNSUPPORTED;
+  }
 
   //
   // Find the begin offset in fixed MTRR and calculate byte offset of left shift
@@ -550,6 +554,10 @@ MtrrLibProgramFixedMtrr (
   }
   LeftByteShift = ((UINT32)*Base - mMtrrLibFixedMtrrTable[MsrIndex].BaseAddress) / mMtrrLibFixedMtrrTable[MsrIndex].Length;
   ASSERT (LeftByteShift < 8);
+  // DA-TAG: ASSERT Proxy
+  if (LeftByteShift >= 8) {
+      return RETURN_UNSUPPORTED;
+  }
 
   //
   // Find the end offset in fixed MTRR and calculate byte offset of right shift
