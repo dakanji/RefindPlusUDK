@@ -108,6 +108,10 @@ InternalHiiExtractGuidFromHiiHandle (
   //
   // Extract GUID
   //
+  // DA-TAG: ASSERT Proxy
+  if (HiiPackageList == NULL) {
+      return EFI_NOT_FOUND;
+  }
   CopyGuid (Guid, &HiiPackageList->PackageListGuid);
 
   FreePool (HiiPackageList);
@@ -1443,6 +1447,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrNumeric->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: ASSERT Proxy
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1915,6 +1923,11 @@ GetBlockDataInfo (
 
   StringPtr = StrStr (ConfigElement, L"&OFFSET=");
   ASSERT (StringPtr != NULL);
+  // DA-TAG: ASSERT Proxy
+  if (StringPtr == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto Done;
+  }
 
   //
   // Parse each <RequestElement> if exists
