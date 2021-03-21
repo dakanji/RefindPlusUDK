@@ -1355,6 +1355,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrOneOf->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: ASSERT Proxy
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
@@ -1731,6 +1735,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrString->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: ASSERT Proxy
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             StringPtr = StrStr (RequestElement, QuestionName);
             if (StringPtr == NULL) {
