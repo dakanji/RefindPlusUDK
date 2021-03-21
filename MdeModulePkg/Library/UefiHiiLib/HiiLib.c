@@ -1631,6 +1631,10 @@ ValidateQuestionFromVfr (
           if (NameValueType) {
             QuestionName = HiiGetString (HiiHandle, IfrCheckBox->Question.VarStoreInfo.VarName, NULL);
             ASSERT (QuestionName != NULL);
+            // DA-TAG: ASSERT Proxy
+            if (QuestionName == NULL) {
+                return EFI_INVALID_PARAMETER;
+            }
 
             if (StrStr (RequestElement, QuestionName) == NULL) {
               //
