@@ -114,7 +114,7 @@ echo ''
 
 REPO_SHA_FILE="${HOME}/Documents/RefindPlus/edk2/000-BuildScript/RepoUpdateSHA.txt"
 # shellcheck disable=SC1090
-source "${REPO_SHA_FILE}"  || msg_info 'WARN: Could not find RepoUpdateSHA.txt'
+source "${REPO_SHA_FILE}" || msg_info 'WARN: Could not find RepoUpdateSHA.txt'
 
 msg_base 'Syncing RefindPlus'
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
