@@ -22,7 +22,8 @@ msg_error() {
     echo -e "\033[0;31m$1\033[0m"
 }
 
-## ERROR HANDLER ##
+
+## ERROR HANDLERS ##
 runErr() { # $1: message
     # Declare Local Variables
     local errMessage
@@ -34,45 +35,111 @@ runErr() { # $1: message
     echo ''
     exit 1
 }
-trap runErr ERR
+ErrSync() {
+    msg_info 'Failed ...Revise Target'
+    if [ "${OUR_BRANCH}" == 'GOPFix' ] || [ "${OUR_BRANCH}" == 'rudk' ] ; then
+        BASE_RUN='false'
+        SyncRepo ;
+        EXIT_CALL='true'
+    else
+        runErr 'Invalid Input ... Exiting' ;
+    fi
+}
 
 
-## UPDATE GOPFIX BRANCH ##
-msg_base "Syncing RefindPlus"
-BASE_DIR="${HOME}/Documents/RefindPlus/Working"
-# shellcheck disable=SC1090
-source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
-pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
-git checkout GOPFix
-git reset --hard "${REFINDPLUS_SHA}"
-git push origin HEAD -f
-git pull --tags upstream GOPFix
-git push origin
-git push --tags origin -f
-popd > /dev/null || exit 1
-echo ''
-msg_status "Synced RefindPlus"
-echo ''
-echo ''
+## REPO UPDATE FUNCTION ##
+SyncRepo() {
+    # Declare Local Variables
+    local resetSHA
+
+    # Trap Errors
+    if [ "${BASE_RUN}" == 'true' ] ; then
+        trap ErrSync ERR
+    else
+        trap runErr ERR
+    fi
+
+    # Set SHA Values
+    if [ "${OUR_BRANCH}" == 'GOPFix' ] ; then
+        if [ "${BASE_RUN}" == 'true' ] ; then
+            resetSHA="${REFINDPLUS_SHA}"
+        else
+            resetSHA='f8d4b1c0b89b9f3b01d99d16888efaf9217ad76e'
+        fi
+    elif [ "${OUR_BRANCH}" == 'rudk' ] ; then
+        if [ "${BASE_RUN}" == 'true' ] ; then
+            resetSHA="${REFIND_UDK_SHA}"
+        else
+            resetSHA='191c292441e95d621811ddf6f1c70d24a51555d8'
+        fi
+    else
+        runErr 'Invalid Input ... Exiting' ;
+    fi
+
+    # Run Sync
+    git checkout "${OUR_BRANCH}"
+
+    if [ "${EXIT_CALL}" == 'true' ] ; then
+        return 0
+    fi
+    git reset --hard "${resetSHA}"
+
+    if [ "${EXIT_CALL}" == 'true' ] ; then
+        return 0
+    fi
+    git push origin HEAD -f
+
+    if [ "${EXIT_CALL}" == 'true' ] ; then
+        return 0
+    fi
+    git pull --tags upstream "${OUR_BRANCH}"
+
+    if [ "${EXIT_CALL}" == 'true' ] ; then
+        return 0
+    fi
+    git push origin
+
+    if [ "${EXIT_CALL}" == 'true' ] ; then
+        return 0
+    fi
+    git push --tags origin -f
+}
 
 
-## UPDATE RUDK BRANCH ##
+## PROCEDURAL CODE ##
 clear
 msg_info '## RepoUpdater ##'
 msg_info '-----------------'
 echo ''
-msg_base "Syncing RefindPlusUDK"
+
+# shellcheck disable=SC1090
+source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
+
+msg_base 'Syncing RefindPlus'
+BASE_DIR="${HOME}/Documents/RefindPlus/Working"
+pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
+OUR_BRANCH='GOPFix'
+BASE_RUN='true'
+EXIT_CALL='false'
+SyncRepo ;
+popd > /dev/null || exit 1
+echo ''
+msg_status 'Synced RefindPlus'
+
+echo ''
+echo ''
+
+msg_base 'Syncing RefindPlusUDK'
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
 pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
-git checkout rudk
-git reset --hard "${REFIND_UDK_SHA}"
-git push origin HEAD -f
-git pull --tags upstream rudk
-git push origin
-git push --tags origin -f
-popd > /dev/null || runErr "ERROR: Could not return to starting directory ...Exiting"
+OUR_BRANCH='rudk'
+BASE_RUN='true'
+EXIT_CALL='false'
+SyncRepo ;
+popd > /dev/null || exit 1
 echo ''
-msg_status "Synced RefindPlusUDK"
+msg_status 'Synced RefindPlusUDK'
+
 echo ''
 msg_info '-----------------'
 msg_info '## RepoUpdater ##'
