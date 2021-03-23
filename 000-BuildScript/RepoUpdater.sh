@@ -40,6 +40,8 @@ trap runErr ERR
 ## UPDATE GOPFIX BRANCH ##
 msg_base "Syncing RefindPlus"
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
+# shellcheck disable=SC1090
+source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
 pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout GOPFix
 git reset --hard "${REFINDPLUS_SHA}"
@@ -61,8 +63,6 @@ msg_info '-----------------'
 echo ''
 msg_base "Syncing RefindPlusUDK"
 BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
-# shellcheck disable=SC1090
-source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
 pushd ${BASE_DIR} > /dev/null || runErr "ERROR: Could not find ${BASE_DIR} ...Exiting"
 git checkout rudk
 git reset --hard "${REFIND_UDK_SHA}"
