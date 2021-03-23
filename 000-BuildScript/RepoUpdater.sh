@@ -113,7 +113,7 @@ msg_info '-----------------'
 echo ''
 
 # shellcheck disable=SC1090
-source "${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
+source "${HOME}/Documents/RefindPlus/edk2/000-BuildScript/RepoUpdateSHA.txt"
 
 msg_base 'Syncing RefindPlus'
 BASE_DIR="${HOME}/Documents/RefindPlus/Working"
