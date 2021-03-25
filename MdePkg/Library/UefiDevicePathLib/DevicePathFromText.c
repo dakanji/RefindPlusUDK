@@ -2844,6 +2844,10 @@ DevPathFromTextUri (
                                  MSG_URI_DP,
                                  (UINT16) (sizeof (URI_DEVICE_PATH) + UriLength)
                                  );
+  ASSERT (Uri != NULL);
+  if (Uri == NULL) {
+      return NULL;
+  }
 
   while (UriLength-- != 0) {
     Uri->Uri[UriLength] = (CHAR8) UriStr[UriLength];

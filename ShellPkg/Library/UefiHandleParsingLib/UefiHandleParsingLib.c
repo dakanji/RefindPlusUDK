@@ -881,15 +881,17 @@ DevicePathProtocolDumpInformationEx (
   Status = gBS->OpenProtocol(TheHandle, Protocol, (VOID**)&DevPath, gImageHandle, NULL, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
   if (!EFI_ERROR(Status)) {
     DevPathStr = ConvertDevicePathToShortText (DevPath, Verbose, 30);
-    if (Verbose) {
-      Size = StrSize(DevPathStr) + sizeof(CHAR16) * 2;
-      DevPathStrTemp = AllocateZeroPool (Size);
-      if (DevPathStrTemp != NULL) {
-        StrnCatS (DevPathStrTemp, Size/sizeof(CHAR16), L"  ", 2);
-        StrnCatS (DevPathStrTemp, Size/sizeof(CHAR16), DevPathStr, StrLen (DevPathStr));
-      }
-      FreePool (DevPathStr);
-      DevPathStr = DevPathStrTemp;
+    if (DevPathStr != NULL) {
+        if (Verbose) {
+          Size = StrSize(DevPathStr) + sizeof(CHAR16) * 2;
+          DevPathStrTemp = AllocateZeroPool (Size);
+          if (DevPathStrTemp != NULL) {
+            StrnCatS (DevPathStrTemp, Size/sizeof(CHAR16), L"  ", 2);
+            StrnCatS (DevPathStrTemp, Size/sizeof(CHAR16), DevPathStr, StrLen (DevPathStr));
+          }
+          FreePool (DevPathStr);
+          DevPathStr = DevPathStrTemp;
+        }
     }
     gBS->CloseProtocol(TheHandle, Protocol, gImageHandle, NULL);
   }
