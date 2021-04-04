@@ -1625,6 +1625,7 @@ StrToGuid (
   //
   // Get eeff in big-endian.
   //
+  StringIndex2 = 2 * sizeof (LocalGuid.Data2);
   Status = StrHexToBytes (String, StringIndex2, (UINT8 *) &LocalGuid.Data2, sizeof (LocalGuid.Data2));
   if (RETURN_ERROR (Status) || String[StringIndex2] != L'-') {
     return RETURN_UNSUPPORTED;
