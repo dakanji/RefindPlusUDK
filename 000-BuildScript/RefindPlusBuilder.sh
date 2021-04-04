@@ -64,7 +64,7 @@ BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
 BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
 
 
-pushd ${WORK_DIR} > /dev/null || exit 1
+pushd "${WORK_DIR}" > /dev/null || exit 1
 msg_base "Checkout '${EDIT_BRANCH}' branch..."
 git checkout ${EDIT_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
@@ -83,29 +83,25 @@ msg_status '...OK'; echo ''
 sleep 2
 popd > /dev/null || exit 1
 
+pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || exit 1
+msg_base "Make Clean..."
+sleep 2
+make clean
+msg_status '...OK'; echo ''
+popd > /dev/null || exit 1
+
+sleep 2
+msg_base "Make BaseTools..."
+sleep 2
+make -C BaseTools/Source/C
+msg_status '...OK'; echo ''
+sleep 2
 
 # Basic clean up
 clear
 msg_info '## RefindPlusBuilder - Initial Clean Up ##'
 msg_info '------------------------------------------'
 sleep 2
-
-
-# Remove later #
-if [ -d "${EDK2_DIR}/Build-DBG" ] ; then
-    rm -fr "${EDK2_DIR}/Build-DBG"
-fi
-if [ -d "${EDK2_DIR}/Build-TMP" ] ; then
-    rm -fr "${EDK2_DIR}/Build-TMP"
-fi
-if [ -d "${EDK2_DIR}/Build-OLD" ] ; then
-    rm -fr "${EDK2_DIR}/Build-OLD"
-fi
-if [ -d "${EDK2_DIR}/RefindPlusPkg-OLD" ] ; then
-    rm -fr "${EDK2_DIR}/RefindPlusPkg-OLD"
-fi
-# Remove later #
-
 
 if [ -d "${EDK2_DIR}/Build" ] ; then
     rm -fr "${EDK2_DIR}/Build"
@@ -122,7 +118,7 @@ msg_info '## RefindPlusBuilder - Building REL Version ##'
 msg_info '----------------------------------------------'
 
 sleep 2
-pushd ${EDK2_DIR} > /dev/null || exit 1
+pushd "${EDK2_DIR}" > /dev/null || exit 1
 if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
     rm -fr "${EDK2_DIR}/.Build-TMP"
 fi
@@ -156,7 +152,7 @@ clear
 msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
 sleep 2
-pushd ${EDK2_DIR} > /dev/null || exit 1
+pushd "${EDK2_DIR}" > /dev/null || exit 1
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
 fi
