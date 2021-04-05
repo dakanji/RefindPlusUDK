@@ -62,7 +62,11 @@ GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/MainLoader/globalExtra-DBG.txt"
 BUILD_DSC="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg.dsc"
 BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
 BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
-
+OUR_RAND=$(( RANDOM % 3 ))
+BASETOOLS='true'
+if [ -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] && [ "${OUR_RAND}" != "0" ] ; then
+    BASETOOLS='false'
+fi
 
 pushd "${WORK_DIR}" > /dev/null || exit 1
 msg_base "Checkout '${EDIT_BRANCH}' branch..."
@@ -83,21 +87,24 @@ msg_status '...OK'; echo ''
 sleep 2
 popd > /dev/null || exit 1
 
-pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || exit 1
-msg_base "Make Clean..."
-sleep 2
-make clean
-msg_status '...OK'; echo ''
-popd > /dev/null || exit 1
+if [ "${BASETOOLS}" == 'true' ] ; then
+    pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || exit 1
+    msg_base "Make Clean..."
+    sleep 2
+    make clean
+    msg_status '...OK'; echo ''
+    popd > /dev/null || exit 1
 
-pushd "${EDK2_DIR}" > /dev/null || exit 1
-sleep 2
-msg_base "Make BaseTools..."
-sleep 2
-make -C BaseTools/Source/C
-msg_status '...OK'; echo ''
-sleep 2
-popd > /dev/null || exit 1
+    pushd "${EDK2_DIR}" > /dev/null || exit 1
+    sleep 2
+    msg_base "Make BaseTools..."
+    sleep 2
+    make -C BaseTools/Source/C
+    msg_status '...OK'; echo ''
+    sleep 2
+    popd > /dev/null || exit 1
+fi
+
 
 # Basic clean up
 clear
