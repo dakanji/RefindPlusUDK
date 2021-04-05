@@ -90,12 +90,14 @@ make clean
 msg_status '...OK'; echo ''
 popd > /dev/null || exit 1
 
+pushd "${EDK2_DIR}" > /dev/null || exit 1
 sleep 2
 msg_base "Make BaseTools..."
 sleep 2
 make -C BaseTools/Source/C
 msg_status '...OK'; echo ''
 sleep 2
+popd > /dev/null || exit 1
 
 # Basic clean up
 clear
