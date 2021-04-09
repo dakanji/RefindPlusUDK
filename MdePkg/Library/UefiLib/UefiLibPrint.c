@@ -508,11 +508,20 @@ InternalPrintGraphic (
 
     if (!EFI_ERROR (Status)) {
       ASSERT (RowInfoArray != NULL);
+      // DA-TAG: ASSERT Proxy
+      if (RowInfoArray == NULL) {
+        goto Error;
+      }
+
       //
       // Explicit Line break characters are ignored, so the updated parameter RowInfoArraySize by StringToImage will
       // always be 1 or 0 (if there is no valid Unicode Char can be printed). ASSERT here to make sure.
       //
       ASSERT (RowInfoArraySize <= 1);
+      // DA-TAG: ASSERT Proxy
+      if (RowInfoArraySize > 1) {
+        goto Error;
+      }
 
       if (RowInfoArraySize != 0) {
         Width  = RowInfoArray[0].LineWidth;
@@ -523,18 +532,15 @@ InternalPrintGraphic (
         Height = 0;
         Delta  = 0;
       }
-      Status = UgaDraw->Blt (
-                          UgaDraw,
-                          (EFI_UGA_PIXEL *) Blt->Image.Bitmap,
-                          EfiUgaBltBufferToVideo,
-                          PointX,
-                          PointY,
-                          PointX,
-                          PointY,
-                          Width,
-                          Height,
-                          Delta
-                          );
+      UgaDraw->Blt (
+          UgaDraw,
+          (EFI_UGA_PIXEL *) Blt->Image.Bitmap,
+          EfiUgaBltBufferToVideo,
+          PointX, PointY,
+          PointX, PointY,
+          Width, Height,
+          Delta
+      );
     } else {
       goto Error;
     }
