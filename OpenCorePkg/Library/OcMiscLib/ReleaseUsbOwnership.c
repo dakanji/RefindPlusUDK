@@ -218,7 +218,8 @@ EhciReleaseOwnership (
   UINT32           HcCapParams;
   INT32            TimeOut;
 
-  Value = 0x0002;
+  Value  = 0x0002;
+  Status = EFI_SUCCESS;
 
   PciIo->Pci.Write (
     PciIo,
@@ -230,7 +231,7 @@ EhciReleaseOwnership (
 
   Base = 0;
 
-  Status = PciIo->Pci.Read (
+  PciIo->Pci.Read (
     PciIo,
     EfiPciIoWidthUint32,
     0x10,
@@ -250,7 +251,7 @@ EhciReleaseOwnership (
   //
   OpAddr = Base + MmioRead8 (Base);
 
-  Status = PciIo->Mem.Read (
+  PciIo->Mem.Read (
     PciIo,
     EfiPciIoWidthUint32,
     EHC_BAR_INDEX,
@@ -264,7 +265,7 @@ EhciReleaseOwnership (
   //
   // Read PCI Config 32bit USBLEGSUP (eecp+0).
   //
-  Status = PciIo->Pci.Read (
+  PciIo->Pci.Read (
     PciIo,
     EfiPciIoWidthUint32,
     ExtendCap,
