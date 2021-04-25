@@ -62,10 +62,13 @@ GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/MainLoader/globalExtra-DBG.txt"
 BUILD_DSC="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg.dsc"
 BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
 BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
-OUR_RAND=$(( RANDOM % 7 ))
-BASETOOLS='true'
-if [ -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] && [ "${OUR_RAND}" != "0" ] ; then
-    BASETOOLS='false'
+BASETOOLS='false'
+OUR_RAND=$(( RANDOM % 17 ))
+if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
+    OUR_RAND=$(( RANDOM % 17 ))
+    if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
+        BASETOOLS='true'
+    fi
 fi
 
 pushd "${WORK_DIR}" > /dev/null || exit 1
