@@ -65,7 +65,7 @@ BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
 BASETOOLS='false'
 OUR_RAND=$(( RANDOM % 17 ))
 if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
-    OUR_RAND=$(( RANDOM % 17 ))
+    OUR_RAND=$(( RANDOM % 2 ))
     if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
         BASETOOLS='true'
     fi
