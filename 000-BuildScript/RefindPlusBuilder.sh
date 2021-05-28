@@ -8,18 +8,35 @@
  # MIT License
 ###
 
+COLOUR_BASE=""
+COLOUR_INFO=""
+COLOUR_STATUS=""
+COLOUR_ERROR=""
+COLOUR_NORMAL=""
+
+if test -t 1; then
+    NCOLOURS=$(tput colors)
+    if test -n "${NCOLOURS}" && test ${NCOLOURS} -ge 8; then
+        COLOUR_BASE="\033[0;36m"
+        COLOUR_INFO="\033[0;33m"
+        COLOUR_STATUS="\033[0;32m"
+        COLOUR_ERROR="\033[0;31m"
+        COLOUR_NORMAL="\033[0m"
+    fi
+fi
+
 # Provide custom colours
 msg_base() {
-    echo -e "\033[0;36m$1\033[0m"
+    echo -e "${COLOUR_BASE}${1}${COLOUR_NORMAL}"
 }
 msg_info() {
-    echo -e "\033[0;33m$1\033[0m"
+    echo -e "${COLOUR_INFO}${1}${COLOUR_NORMAL}"
 }
 msg_status() {
-    echo -e "\033[0;32m$1\033[0m"
+    echo -e "${COLOUR_STATUS}${1}${COLOUR_NORMAL}"
 }
 msg_error() {
-    echo -e "\033[0;31m$1\033[0m"
+    echo -e "${COLOUR_ERROR}${1}${COLOUR_NORMAL}"
 }
 
 ## ERROR HANDLER ##
@@ -56,16 +73,19 @@ XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
 BINARY_DIR_REL="${XCODE_DIR_REL}/X64"
 BINARY_DIR_DBG="${XCODE_DIR_DBG}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/MainLoader/globalExtra.h"
-GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/MainLoader/globalExtra-REL.txt"
-GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/MainLoader/globalExtra-DBG.txt"
+GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra.h"
+GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra-REL.txt"
+GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra-DBG.txt"
 BUILD_DSC="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg.dsc"
 BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
 BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
-OUR_RAND=$(( RANDOM % 7 ))
-BASETOOLS='true'
-if [ -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] && [ "${OUR_RAND}" != "0" ] ; then
-    BASETOOLS='false'
+BASETOOLS='false'
+OUR_RAND=$(( RANDOM % 17 ))
+if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
+    OUR_RAND=$(( RANDOM % 2 ))
+    if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
+        BASETOOLS='true'
+    fi
 fi
 
 pushd "${WORK_DIR}" > /dev/null || exit 1
