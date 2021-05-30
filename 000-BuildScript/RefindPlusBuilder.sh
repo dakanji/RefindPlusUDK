@@ -58,7 +58,6 @@ trap runErr ERR
 clear
 msg_info '## RefindPlusBuilder - Setting Up ##'
 msg_info '------------------------------------'
-sleep 2
 EDIT_BRANCH="${1:-GOPFix}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 WORK_DIR="${BASE_DIR}/Working"
@@ -92,7 +91,6 @@ pushd "${WORK_DIR}" > /dev/null || exit 1
 msg_base "Checkout '${EDIT_BRANCH}' branch..."
 git checkout ${EDIT_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
-sleep 2
 msg_base 'Update RefindPlusPkg...'
 
 # Remove later #
@@ -104,24 +102,19 @@ cp -fa "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
 rm -fr "${EDK2_DIR}/RefindPlusPkg/.gitignore"
 rm -fr "${EDK2_DIR}/RefindPlusPkg/.git"
 msg_status '...OK'; echo ''
-sleep 2
 popd > /dev/null || exit 1
 
 if [ "${BASETOOLS}" == 'true' ] ; then
     pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || exit 1
     msg_base 'Make Clean...'
-    sleep 2
     make clean
     msg_status '...OK'; echo ''
     popd > /dev/null || exit 1
 
     pushd "${EDK2_DIR}" > /dev/null || exit 1
-    sleep 2
     msg_base 'Make BaseTools...'
-    sleep 2
     make -C BaseTools/Source/C
     msg_status '...OK'; echo ''
-    sleep 2
     popd > /dev/null || exit 1
 fi
 
@@ -130,8 +123,6 @@ fi
 clear
 msg_info '## RefindPlusBuilder - Initial Clean Up ##'
 msg_info '------------------------------------------'
-sleep 2
-
 if [ -d "${EDK2_DIR}/Build" ] ; then
     rm -fr "${EDK2_DIR}/Build"
 fi
@@ -145,8 +136,6 @@ mkdir -p "${OUTPUT_DIR}"
 clear
 msg_info '## RefindPlusBuilder - Building REL Version ##'
 msg_info '----------------------------------------------'
-
-sleep 2
 pushd "${EDK2_DIR}" > /dev/null || exit 1
 if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
     rm -fr "${EDK2_DIR}/.Build-TMP"
@@ -170,7 +159,6 @@ fi
 popd > /dev/null || exit 1
 echo ''
 msg_info "Completed REL Build on '${EDIT_BRANCH}' Branch of RefindPlus"
-sleep 2
 msg_info 'Preparing DBG Build...'
 echo ''
 sleep 4
@@ -180,7 +168,6 @@ sleep 4
 clear
 msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
-sleep 2
 pushd "${EDK2_DIR}" > /dev/null || exit 1
 if [ -f "${GLOBAL_FILE}" ] ; then
     rm -fr "${GLOBAL_FILE}"
