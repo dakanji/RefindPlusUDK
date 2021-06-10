@@ -78,13 +78,11 @@ GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra-DBG.txt"
 BUILD_DSC="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg.dsc"
 BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
 BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
-BASETOOLS='false'
-OUR_RAND=$(( RANDOM % 17 ))
-if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
-    OUR_RAND=$(( RANDOM % 2 ))
-    if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${OUR_RAND}" == "0" ] ; then
-        BASETOOLS='true'
-    fi
+
+if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] ; then
+    BASETOOLS='true'
+else
+    BASETOOLS='false'
 fi
 
 pushd "${WORK_DIR}" > /dev/null || exit 1
@@ -97,10 +95,10 @@ msg_base 'Update RefindPlusPkg...'
 rm -fr "${EDK2_DIR}/RefindPkg"
 # Remove later #
 
-rm -fr "${EDK2_DIR}/RefindPlusPkg"
-cp -fa "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
-rm -fr "${EDK2_DIR}/RefindPlusPkg/.gitignore"
-rm -fr "${EDK2_DIR}/RefindPlusPkg/.git"
+if [ ! -L "${EDK2_DIR}/RefindPlusPkg" ]; then
+	rm -fr "${EDK2_DIR}/RefindPlusPkg"
+    ln -s "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
+fi
 msg_status '...OK'; echo ''
 popd > /dev/null || exit 1
 

@@ -6,7 +6,7 @@ cov-int/
 infer-out/
 compile_commands.json
 000-BOOTx64-Files/
-RefindPlusPkg/
+RefindPlusPkg
 000-Releases/
 
 # OS generated files #
