@@ -791,7 +791,7 @@ RamDiskUnregister (
     }
 
     Header = NextDevicePathNode (Header);
-  } while ((Header->Type != END_DEVICE_PATH_TYPE));
+  } while (((Header->Type & EFI_DP_TYPE_MASK) != END_DEVICE_PATH_TYPE));
 
   if (NULL == RamDiskDevNode) {
     return EFI_UNSUPPORTED;

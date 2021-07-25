@@ -372,7 +372,7 @@ InternalExpandNewPath (
       EFI_DEVICE_PATH_PROTOCOL *RemDevPath = ExpandedPath;
       EFI_HANDLE Dev;
       EFI_STATUS Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemDevPath, &Dev);
-      if (EFI_ERROR (Status) || RemDevPath->Type != END_DEVICE_PATH_TYPE || RemDevPath->SubType != END_ENTIRE_DEVICE_PATH_SUBTYPE) {
+      if (EFI_ERROR (Status) || (RemDevPath->Type & EFI_DP_TYPE_MASK) != END_DEVICE_PATH_TYPE || RemDevPath->SubType != END_ENTIRE_DEVICE_PATH_SUBTYPE) {
         DEBUG ((DEBUG_VERBOSE, "borked piece of crap\n"));
       }
       );
@@ -925,13 +925,13 @@ InternalDevicePathCmpWorker (
     NodeType    = DevicePathType (ChildPathPtr.DevPath);
     NodeSubType = DevicePathSubType (ChildPathPtr.DevPath);
 
-    if (NodeType == END_DEVICE_PATH_TYPE) {
+    if ((NodeType & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE) {
       //
       // We only support single-instance Device Paths.
       //
       ASSERT (NodeSubType == END_ENTIRE_DEVICE_PATH_SUBTYPE);
       return (CheckChild
-          || (DevicePathType (ParentPathPtr.DevPath) == END_DEVICE_PATH_TYPE));
+          || ((DevicePathType (ParentPathPtr.DevPath) & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE));
     }
 
     if ((DevicePathType (ParentPathPtr.DevPath) != NodeType)

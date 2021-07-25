@@ -188,7 +188,7 @@ int main(int argc, CHAR8 *argv[])
     free(Str16);
     return STATUS_ERROR;
   }
-  while (!((DevicePath->Type == END_DEVICE_PATH_TYPE) && (DevicePath->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE)) )
+  while (!(((DevicePath->Type & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE) && (DevicePath->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE)) )
   {
     PrintMem (DevicePath, DevicePath->Length[0] | DevicePath->Length[1] << 8);
     DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)DevicePath + (DevicePath->Length[0] | DevicePath->Length[1] << 8));

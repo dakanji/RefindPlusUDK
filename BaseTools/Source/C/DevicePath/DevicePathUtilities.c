@@ -219,7 +219,7 @@ IsDevicePathEndType (
   )
 {
   ASSERT (Node != NULL);
-  return (BOOLEAN) (DevicePathType (Node) == END_DEVICE_PATH_TYPE);
+  return (BOOLEAN) ((DevicePathType (Node) & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE);
 }
 
 /**

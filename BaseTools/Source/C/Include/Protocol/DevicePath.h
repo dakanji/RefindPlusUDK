@@ -1393,6 +1393,9 @@ typedef struct {
 #define END_ENTIRE_DEVICE_PATH_SUBTYPE       0xFF
 #define END_INSTANCE_DEVICE_PATH_SUBTYPE     0x01
 
+#define EFI_DP_TYPE_MASK                     0x7f // for EFI 1.1 compatibility
+
+
 extern EFI_GUID gEfiDevicePathProtocolGuid;
 
 #endif
