@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2004 - 2012, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
@@ -16,9 +16,9 @@ Module Name:
 Abstract:
 
   Basic Ascii AvSPrintf() function named VSPrint(). VSPrint() enables very
-  simple implemenation of SPrint() and Print() to support debug. 
+  simple implemenation of SPrint() and Print() to support debug.
 
-  You can not Print more than EFI_DRIVER_LIB_MAX_PRINT_BUFFER characters at a 
+  You can not Print more than EFI_DRIVER_LIB_MAX_PRINT_BUFFER characters at a
   time. This makes the implementation very simple.
 
   VSPrint, Print, SPrint format specification has the follwoing form
@@ -42,7 +42,7 @@ Abstract:
     'X' - argument is a UINTN hex number, prefix '0'
     'x' - argument is a hex number
     'd' - argument is a decimal number
-    'a' - argument is an ascii string 
+    'a' - argument is an ascii string
     'S','s' - argument is an Unicode string
     'g' - argument is a pointer to an EFI_GUID
     't' - argument is a pointer to an EFI_TIME structure
@@ -133,22 +133,22 @@ Arguments:
   GraphicsOutput  - Graphics output protocol interface
 
   UgaDraw         - UGA draw protocol interface
-  
+
   Sto             - Simple text out protocol interface
-  
+
   X               - X coordinate to start printing
-  
+
   Y               - Y coordinate to start printing
-  
+
   Foreground      - Foreground color
-  
+
   Background      - Background color
-  
+
   fmt             - Format string
-  
+
   args            - Print arguments
 
-Returns: 
+Returns:
 
   Length of string printed to the console
 
@@ -167,7 +167,7 @@ Returns:
 #if (EFI_SPECIFICATION_VERSION >= 0x0002000A)
   EFI_HII_FONT_PROTOCOL          *HiiFont;
   EFI_IMAGE_OUTPUT               *Blt;
-  EFI_FONT_DISPLAY_INFO          *FontInfo;  
+  EFI_FONT_DISPLAY_INFO          *FontInfo;
 #else
   EFI_HII_PROTOCOL               *Hii;
   UINT16                         GlyphWidth;
@@ -192,7 +192,7 @@ Returns:
   } else {
     UgaDraw->GetMode (UgaDraw, &HorizontalResolution, &VerticalResolution, &ColorDepth, &RefreshRate);
   }
-  ASSERT ((HorizontalResolution != 0) && (VerticalResolution !=0)); 
+  ASSERT ((HorizontalResolution != 0) && (VerticalResolution !=0));
 
 #if (EFI_SPECIFICATION_VERSION >= 0x0002000A)
   Blt      = NULL;
@@ -201,8 +201,8 @@ Returns:
   Status = gBS->LocateProtocol (&gEfiHiiFontProtocolGuid, NULL, (VOID **) &HiiFont);
   if (EFI_ERROR (Status)) {
     goto Error;
-  }  
-#else  
+  }
+#else
   LineBuffer = NULL;
   Status = gBS->LocateProtocol (&gEfiHiiProtocolGuid, NULL, (VOID**)&Hii);
   if (EFI_ERROR (Status)) {
@@ -213,11 +213,11 @@ Returns:
   if (LineBuffer == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
     goto Error;
-  }  
+  }
 #endif
 
   VSPrint (Buffer, 0x10000, fmt, args);
-  
+
   UnicodeWeight = (CHAR16 *) Buffer;
 
   for (Index = 0; UnicodeWeight[Index] != 0; Index++) {
@@ -229,7 +229,7 @@ Returns:
   }
 
   BufferLen = EfiStrLen (Buffer);
- 
+
 
 #if (EFI_SPECIFICATION_VERSION >= 0x0002000A)
   LineBufferLen = sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL) * HorizontalResolution * EFI_GLYPH_HEIGHT;
@@ -247,7 +247,7 @@ Returns:
   Blt->Width        = (UINT16) (HorizontalResolution);
   Blt->Height       = (UINT16) (VerticalResolution);
   Blt->Image.Screen = GraphicsOutput;
-   
+
   FontInfo = (EFI_FONT_DISPLAY_INFO *) EfiLibAllocateZeroPool (sizeof (EFI_FONT_DISPLAY_INFO));
   if (FontInfo == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
@@ -257,8 +257,8 @@ Returns:
     EfiCopyMem (&FontInfo->ForegroundColor, Foreground, sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
   } else {
     EfiCopyMem (
-      &FontInfo->ForegroundColor, 
-      &mEfiColors[Sto->Mode->Attribute & 0x0f], 
+      &FontInfo->ForegroundColor,
+      &mEfiColors[Sto->Mode->Attribute & 0x0f],
       sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
       );
   }
@@ -266,8 +266,8 @@ Returns:
     EfiCopyMem (&FontInfo->BackgroundColor, Background, sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
   } else {
     EfiCopyMem (
-      &FontInfo->BackgroundColor, 
-      &mEfiColors[Sto->Mode->Attribute >> 4], 
+      &FontInfo->BackgroundColor,
+      &mEfiColors[Sto->Mode->Attribute >> 4],
       sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
       );
   }
@@ -284,7 +284,7 @@ Returns:
                        NULL,
                        NULL
                        );
-  
+
 #else
   GlyphStatus = 0;
 
@@ -364,9 +364,9 @@ Error:
   EfiLibSafeFreePool (FontInfo);
 #else
   EfiLibSafeFreePool (LineBuffer);
-#endif  
+#endif
   gBS->FreePool (Buffer);
-  
+
   if (EFI_ERROR (Status)) {
     return 0;
   }
@@ -393,11 +393,11 @@ Routine Description:
 Arguments:
 
     X           - X coordinate to start printing
-    
+
     Y           - Y coordinate to start printing
-    
+
     ForeGround  - Foreground color
-    
+
     BackGround  - Background color
 
     Fmt         - Format string
@@ -477,14 +477,14 @@ Arguments:
 
   Buffer     - Wide char buffer to print the results of the parsing of Format into.
 
-  BufferSize - Maximum number of characters to put into buffer. Zero means no 
+  BufferSize - Maximum number of characters to put into buffer. Zero means no
                limit.
 
   Format - Format string see file header for more details.
 
   ...    - Vararg list consumed by processing Format.
 
-Returns: 
+Returns:
 
   Number of characters printed.
 
@@ -512,22 +512,22 @@ VSPrint (
 
 Routine Description:
 
-  VSPrint function to process format and place the results in Buffer. Since a 
-  VA_LIST is used this rountine allows the nesting of Vararg routines. Thus 
+  VSPrint function to process format and place the results in Buffer. Since a
+  VA_LIST is used this rountine allows the nesting of Vararg routines. Thus
   this is the main print working routine
 
 Arguments:
 
   StartOfBuffer - Unicode buffer to print the results of the parsing of Format into.
 
-  BufferSize    - Maximum number of characters to put into buffer. Zero means 
+  BufferSize    - Maximum number of characters to put into buffer. Zero means
                   no limit.
 
   FormatString  - Unicode format string see file header for more details.
 
   Marker        - Vararg list consumed by processing Format.
 
-Returns: 
+Returns:
 
   Number of characters printed.
 
@@ -569,7 +569,7 @@ Returns:
       Buffer[Index++] = *Format;
       BufferLeft -= sizeof (CHAR_W);
     } else {
-      
+
       //
       // Now it's time to parse what follows after %
       //
@@ -577,37 +577,37 @@ Returns:
       Width  = 0;
       for (Done = FALSE; !Done;) {
         Format++;
-    
+
         switch (*Format) {
-    
+
         case '-':
           Flags |= LEFT_JUSTIFY;
           break;
-    
+
         case '+':
           Flags |= PREFIX_SIGN;
           break;
-    
+
         case ' ':
           Flags |= PREFIX_BLANK;
           break;
-    
+
         case ',':
           Flags |= COMMA_TYPE;
           break;
-    
+
         case 'L':
         case 'l':
           Flags |= LONG_TYPE;
           break;
-    
+
         case '*':
           Width = VA_ARG (Marker, UINTN);
           break;
-    
+
         case '0':
           Flags |= PREFIX_ZERO;
-    
+
         case '1':
         case '2':
         case '3':
@@ -625,7 +625,7 @@ Returns:
           Format--;
           Width = Count;
           break;
-    
+
         default:
           Done = TRUE;
         }
@@ -644,15 +644,15 @@ Returns:
           Value = VA_ARG (Marker, UINTN);
         }
         Flags |= PREFIX_ZERO;
-      
+
         EfiValueToHexStr (TempBuffer, Value, Flags, Width);
         UnicodeStr = TempBuffer;
-      
+
         for ( ;(*UnicodeStr != '\0') && (Index < NumberOfCharacters - 1); UnicodeStr++) {
           Buffer[Index++] = *UnicodeStr;
         }
         break;
-        
+
       case 'X':
         Flags |= PREFIX_ZERO;
         Width = sizeof (UINT64) * 2;
@@ -743,7 +743,7 @@ Returns:
 
       case 't':
         Index += TimeToString (
-                  VA_ARG (Marker, EFI_TIME *), 
+                  VA_ARG (Marker, EFI_TIME *),
                   &Buffer[Index],
                   BufferLeft
                   );
@@ -751,7 +751,7 @@ Returns:
 
       case 'r':
         Index += EfiStatusToString (
-                  VA_ARG (Marker, EFI_STATUS), 
+                  VA_ARG (Marker, EFI_STATUS),
                   &Buffer[Index],
                   BufferLeft
                   );
@@ -795,12 +795,12 @@ Arguments:
   Guid       - Pointer to GUID to print.
 
   Buffer     - Buffe to print Guid into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -848,12 +848,12 @@ Arguments:
   Time       - Pointer to EFI_TIME sturcture to print.
 
   Buffer     - Buffer to print Time into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -895,12 +895,12 @@ Arguments:
   Status     -  EFI_STATUS sturcture to print.
 
   Buffer     - Buffer to print EFI_STATUS message string into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -908,11 +908,11 @@ Returns:
   CHAR8   *Desc;
 
   Desc = NULL;
-  
+
   //
   // Can't use global Status String Array as UINTN is not constant for EBC
   //
-  if (Status == EFI_SUCCESS) { Desc = (CHAR8 *) "Success"; } else 
+  if (Status == EFI_SUCCESS) { Desc = (CHAR8 *) "Success"; } else
   if (Status == EFI_LOAD_ERROR) { Desc = (CHAR8 *) "Load Error"; } else
   if (Status == EFI_INVALID_PARAMETER) { Desc = (CHAR8 *) "Invalid Parameter"; } else
   if (Status == EFI_UNSUPPORTED) { Desc = (CHAR8 *) "Unsupported"; } else
@@ -925,14 +925,14 @@ Returns:
   if (Status == EFI_VOLUME_CORRUPTED) { Desc = (CHAR8 *) "Volume Corrupt"; } else
   if (Status == EFI_VOLUME_FULL) { Desc = (CHAR8 *) "Volume Full"; } else
   if (Status == EFI_NO_MEDIA) { Desc = (CHAR8 *) "No Media"; } else
-  if (Status == EFI_MEDIA_CHANGED) { Desc = (CHAR8 *) "Media changed"; } else
+  if (Status == EFI_MEDIA_CHANGED) { Desc = (CHAR8 *) "Media Changed"; } else
   if (Status == EFI_NOT_FOUND) { Desc = (CHAR8 *) "Not Found"; } else
   if (Status == EFI_ACCESS_DENIED) { Desc = (CHAR8 *) "Access Denied"; } else
   if (Status == EFI_NO_RESPONSE) { Desc = (CHAR8 *) "No Response"; } else
-  if (Status == EFI_NO_MAPPING) { Desc = (CHAR8 *) "No mapping"; } else
-  if (Status == EFI_TIMEOUT) { Desc = (CHAR8 *) "Time out"; } else
-  if (Status == EFI_NOT_STARTED) { Desc = (CHAR8 *) "Not started"; } else
-  if (Status == EFI_ALREADY_STARTED) { Desc = (CHAR8 *) "Already started"; } else
+  if (Status == EFI_NO_MAPPING) { Desc = (CHAR8 *) "No Mapping"; } else
+  if (Status == EFI_TIMEOUT) { Desc = (CHAR8 *) "Time Out"; } else
+  if (Status == EFI_NOT_STARTED) { Desc = (CHAR8 *) "Not Started"; } else
+  if (Status == EFI_ALREADY_STARTED) { Desc = (CHAR8 *) "Already Started"; } else
   if (Status == EFI_ABORTED) { Desc = (CHAR8 *) "Aborted"; } else
   if (Status == EFI_ICMP_ERROR) { Desc = (CHAR8 *) "ICMP Error"; } else
   if (Status == EFI_TFTP_ERROR) { Desc = (CHAR8 *) "TFTP Error"; } else
@@ -940,7 +940,7 @@ Returns:
   if (Status == EFI_WARN_UNKNOWN_GLYPH) { Desc = (CHAR8 *) "Warning Unknown Glyph"; } else
   if (Status == EFI_WARN_DELETE_FAILURE) { Desc = (CHAR8 *) "Warning Delete Failure"; } else
   if (Status == EFI_WARN_WRITE_FAILURE) { Desc = (CHAR8 *) "Warning Write Failure"; } else
-  if (Status == EFI_WARN_BUFFER_TOO_SMALL) { Desc = (CHAR8 *) "Warning Buffer Too Small"; } 
+  if (Status == EFI_WARN_BUFFER_TOO_SMALL) { Desc = (CHAR8 *) "Warning Buffer Too Small"; }
 
   //
   // If we found a match, copy the message to the user's buffer. Otherwise

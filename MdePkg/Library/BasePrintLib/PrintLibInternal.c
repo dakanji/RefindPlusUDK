@@ -52,14 +52,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 * CONST mStatusString[] = {
   "Volume Corrupt",               //  RETURN_VOLUME_CORRUPTED       = 10 | MAX_BIT
   "Volume Full",                  //  RETURN_VOLUME_FULL            = 11 | MAX_BIT
   "No Media",                     //  RETURN_NO_MEDIA               = 12 | MAX_BIT
-  "Media changed",                //  RETURN_MEDIA_CHANGED          = 13 | MAX_BIT
+  "Media Changed",                //  RETURN_MEDIA_CHANGED          = 13 | MAX_BIT
   "Not Found",                    //  RETURN_NOT_FOUND              = 14 | MAX_BIT
   "Access Denied",                //  RETURN_ACCESS_DENIED          = 15 | MAX_BIT
   "No Response",                  //  RETURN_NO_RESPONSE            = 16 | MAX_BIT
-  "No mapping",                   //  RETURN_NO_MAPPING             = 17 | MAX_BIT
-  "Time out",                     //  RETURN_TIMEOUT                = 18 | MAX_BIT
-  "Not started",                  //  RETURN_NOT_STARTED            = 19 | MAX_BIT
-  "Already started",              //  RETURN_ALREADY_STARTED        = 20 | MAX_BIT
+  "No Mapping",                   //  RETURN_NO_MAPPING             = 17 | MAX_BIT
+  "Time Out",                     //  RETURN_TIMEOUT                = 18 | MAX_BIT
+  "Not Started",                  //  RETURN_NOT_STARTED            = 19 | MAX_BIT
+  "Already Started",              //  RETURN_ALREADY_STARTED        = 20 | MAX_BIT
   "Aborted",                      //  RETURN_ABORTED                = 21 | MAX_BIT
   "ICMP Error",                   //  RETURN_ICMP_ERROR             = 22 | MAX_BIT
   "TFTP Error",                   //  RETURN_TFTP_ERROR             = 23 | MAX_BIT
@@ -727,7 +727,7 @@ BasePrintLibSPrintMarker (
             Flags |= PREFIX_ZERO;
           }
           break;
-          
+
         case '1':
         case '2':
         case '3':

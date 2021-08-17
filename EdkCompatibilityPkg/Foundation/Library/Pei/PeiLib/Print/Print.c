@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2004 - 2014, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
@@ -18,7 +18,7 @@ Abstract:
   Basic Ascii AvSPrintf() function named AvSPrint(). AvSPrint() enables very
   simple implemenation of debug prints.
 
-  You can not Print more than PEI_LIB_MAX_PRINT_BUFFER characters at a 
+  You can not Print more than PEI_LIB_MAX_PRINT_BUFFER characters at a
   time. This makes the implementation very simple.
 
   AvSPrint format specification has the follwoing form
@@ -43,7 +43,7 @@ Abstract:
     'X' - argument is a UINTN hex number, prefix '0'
     'x' - argument is a hex number
     'd' - argument is a decimal number
-    'a' - argument is an ascii string 
+    'a' - argument is an ascii string
     'S', 's' - argument is an Unicode string
     'g' - argument is a pointer to an EFI_GUID
     't' - argument is a pointer to an EFI_TIME structure
@@ -62,18 +62,18 @@ Abstract:
 STATIC
 UINTN
 ValueToString (
-  IN  OUT CHAR8   *Buffer, 
-  IN  INT64       Value, 
-  IN  UINTN       Flags, 
+  IN  OUT CHAR8   *Buffer,
+  IN  INT64       Value,
+  IN  UINTN       Flags,
   IN  UINTN       Width
   );
 
 STATIC
 UINTN
 ValueTomHexStr (
-  IN  OUT CHAR8   *Buffer, 
-  IN  UINT64      Value, 
-  IN  UINTN       Flags, 
+  IN  OUT CHAR8   *Buffer,
+  IN  UINT64      Value,
+  IN  UINTN       Flags,
   IN  UINTN       Width
   );
 
@@ -119,14 +119,14 @@ Arguments:
 
   Buffer     - Ascii buffer to print the results of the parsing of Format into.
 
-  BufferSize - Maximum number of characters to put into buffer. Zero means no 
+  BufferSize - Maximum number of characters to put into buffer. Zero means no
                limit.
 
   Format - Ascii format string see file header for more details.
 
   ...    - Vararg list consumed by processing Format.
 
-Returns: 
+Returns:
 
   Number of characters printed.
 
@@ -138,7 +138,7 @@ Returns:
   VA_START(Marker, Format);
   Return = AvSPrint(Buffer, BufferSize, Format, Marker);
   VA_END (Marker);
-  
+
   return Return;
 }
 
@@ -154,22 +154,22 @@ AvSPrint (
 
 Routine Description:
 
-  AvSPrint function to process format and place the results in Buffer. Since a 
-  VA_LIST is used this rountine allows the nesting of Vararg routines. Thus 
+  AvSPrint function to process format and place the results in Buffer. Since a
+  VA_LIST is used this rountine allows the nesting of Vararg routines. Thus
   this is the main print working routine
 
 Arguments:
 
   StartOfBuffer - Ascii buffer to print the results of the parsing of Format into.
 
-  BufferSize    - Maximum number of characters to put into buffer. Zero means 
+  BufferSize    - Maximum number of characters to put into buffer. Zero means
                   no limit.
 
   FormatString  - Ascii format string see file header for more details.
 
   Marker        - Vararg list consumed by processing Format.
 
-Returns: 
+Returns:
 
   Number of characters printed.
 
@@ -188,7 +188,7 @@ Returns:
   UINT64    Value;
   EFI_GUID  *TmpGUID;
   BOOLEAN   Done;
- 
+
   //
   // Process the format string. Stop if Buffer is over run.
   //
@@ -208,28 +208,28 @@ Returns:
       Buffer[Index++] = *Format;
       BufferLeft -= sizeof (CHAR8);
     } else {
-      
+
       //
       // Now it's time to parse what follows after %
-      //   
+      //
       Flags = 0;
       Width = 0;
       for (Done = FALSE; !Done; ) {
         Format++;
-    
+
         switch (*Format) {
-    
+
         case '-': Flags |= LEFT_JUSTIFY; break;
         case '+': Flags |= PREFIX_SIGN;  break;
         case ' ': Flags |= PREFIX_BLANK; break;
         case ',': Flags |= COMMA_TYPE;   break;
         case 'L':
         case 'l': Flags |= LONG_TYPE;    break;
-    
+
         case '*':
           Width = VA_ARG (Marker, UINTN);
           break;
-    
+
         case '0':
           Flags |= PREFIX_ZERO;
         case '1':
@@ -249,7 +249,7 @@ Returns:
           Format--;
           Width = Count;
           break;
-    
+
         default:
           Done = TRUE;
         }
@@ -268,7 +268,7 @@ Returns:
           Value = VA_ARG (Marker, UINTN);
         }
         Flags |= PREFIX_ZERO;
-      
+
         ValueTomHexStr (TempBuffer, Value, Flags, Width);
         AsciiStr = TempBuffer;
 
@@ -366,7 +366,7 @@ Returns:
 
       case 't':
         Index += TimeToString (
-                  VA_ARG (Marker, EFI_TIME *), 
+                  VA_ARG (Marker, EFI_TIME *),
                   &Buffer[Index],
                   BufferLeft
                   );
@@ -374,7 +374,7 @@ Returns:
 
       case 'r':
         Index += EfiStatusToString (
-                  VA_ARG (Marker, EFI_STATUS), 
+                  VA_ARG (Marker, EFI_STATUS),
                   &Buffer[Index],
                   BufferLeft
                   );
@@ -408,9 +408,9 @@ static CHAR8 mHexStr[] = { '0','1','2','3','4','5','6','7',
 STATIC
 UINTN
 ValueTomHexStr (
-  IN  OUT CHAR8   *Buffer, 
-  IN  UINT64      Value, 
-  IN  UINTN       Flags, 
+  IN  OUT CHAR8   *Buffer,
+  IN  UINT64      Value,
+  IN  UINTN       Flags,
   IN  UINTN       Width
   )
 /*++
@@ -429,9 +429,9 @@ Arguments:
 
   Width  - Width of hex value.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -444,7 +444,7 @@ Returns:
 
   TempStr = TempBuffer;
   BufferPtr = Buffer;
-  
+
   //
   // Count starts at one since we will null terminate. Each iteration of the
   // loop picks off one nibble. Oh yea TempStr ends up backwards
@@ -458,11 +458,11 @@ Returns:
 
   if (Flags & PREFIX_ZERO) {
     Prefix = '0';
-  } else if (!(Flags & LEFT_JUSTIFY)) { 
+  } else if (!(Flags & LEFT_JUSTIFY)) {
     Prefix = ' ';
   } else {
     Prefix = 0x00;
-  }                    
+  }
   for (Index = Count; Index < Width; Index++) {
     *(TempStr++) = Prefix;
   }
@@ -478,7 +478,7 @@ Returns:
     *(BufferPtr++) = *(--TempStr);
     Index++;
   }
-    
+
   *BufferPtr = 0;
   return Index;
 }
@@ -486,9 +486,9 @@ Returns:
 STATIC
 UINTN
 ValueToString (
-  IN  OUT CHAR8   *Buffer, 
-  IN  INT64       Value, 
-  IN  UINTN       Flags, 
+  IN  OUT CHAR8   *Buffer,
+  IN  INT64       Value,
+  IN  UINTN       Flags,
   IN  UINTN       Width
   )
 /*++
@@ -507,9 +507,9 @@ Arguments:
 
   Width  - Width of hex value.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -561,7 +561,7 @@ Returns:
   Index = 0;
   while (TempStr != TempBuffer) {
     *(BufferPtr++) = *(--TempStr);
-  }  
+  }
 
   *BufferPtr = 0;
   return Index;
@@ -585,12 +585,12 @@ Arguments:
   Guid       - Pointer to GUID to print.
 
   Buffer     - Buffe to print Guid into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
@@ -598,9 +598,9 @@ Returns:
 
   Size = ASPrint (
             Buffer,
-            BufferSize, 
+            BufferSize,
             "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-            (UINTN)Guid->Data1,                    
+            (UINTN)Guid->Data1,
             (UINTN)Guid->Data2,
             (UINTN)Guid->Data3,
             (UINTN)Guid->Data4[0],
@@ -638,20 +638,20 @@ Arguments:
   Time       - Pointer to EFI_TIME sturcture to print.
 
   Buffer     - Buffer to print Time into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
-{ 
+{
   UINTN Size;
 
   Size = ASPrint (
             Buffer,
-            BufferSize, 
+            BufferSize,
             "%02d/%02d/%04d  %02d:%02d",
             (UINTN)Time->Month,
             (UINTN)Time->Day,
@@ -664,7 +664,7 @@ Returns:
   // ASPrint will null terminate the string. The -1 skips the null
   //
   return Size - 1;
-} 
+}
 
 STATIC
 UINTN
@@ -685,18 +685,18 @@ Arguments:
   Status     -  EFI_STATUS sturcture to print.
 
   Buffer     - Buffer to print EFI_STATUS message string into.
-  
+
   BufferSize - Size of Buffer.
 
-Returns: 
+Returns:
 
-  Number of characters printed.  
+  Number of characters printed.
 
 --*/
 {
   UINTN   Size;
   CHAR8   *Desc;
-  
+
   if (Status == EFI_SUCCESS) {
     Desc = "Success";
   } else if (Status == EFI_LOAD_ERROR) {
@@ -724,7 +724,7 @@ Returns:
   } else if (Status == EFI_NO_MEDIA) {
     Desc = "No Media";
   } else if (Status == EFI_MEDIA_CHANGED) {
-    Desc = "Media changed";
+    Desc = "Media Changed";
   } else if (Status == EFI_NOT_FOUND) {
     Desc = "Not Found";
   } else if (Status == EFI_ACCESS_DENIED) {
@@ -732,13 +732,13 @@ Returns:
   } else if (Status == EFI_NO_RESPONSE) {
     Desc = "No Response";
   } else if (Status == EFI_NO_MAPPING) {
-    Desc = "No mapping";
+    Desc = "No Mapping";
   } else if (Status == EFI_TIMEOUT) {
-    Desc = "Time out";
+    Desc = "Time Out";
   } else if (Status == EFI_NOT_STARTED) {
-    Desc = "Not started";
+    Desc = "Not Started";
   } else if (Status == EFI_ALREADY_STARTED) {
-    Desc = "Already started";
+    Desc = "Already Started";
   } else if (Status == EFI_ABORTED) {
     Desc = "Aborted";
   } else if (Status == EFI_ICMP_ERROR) {
