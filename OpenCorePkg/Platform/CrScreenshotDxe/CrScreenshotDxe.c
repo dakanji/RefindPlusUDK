@@ -157,7 +157,7 @@ FindWritableFs (
   }
 
   if (PreferedHandle != NULL) {
-    *FsPtr = LocateRootVolume (PreferedHandle, NULL);
+    *FsPtr = OcLocateRootVolume (PreferedHandle, NULL);
   } else {
     *FsPtr = NULL;
   }
@@ -165,7 +165,7 @@ FindWritableFs (
   DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FsPtr));
 
   if (*FsPtr == NULL) {
-    return FindWritableFileSystem (FsPtr);
+    return OcFindWritableFileSystem (FsPtr);
   }
 
   return EFI_SUCCESS;
@@ -316,7 +316,7 @@ TakeScreenshot (
   //
   // Write PNG image into the file.
   //
-  Status = SetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
+  Status = OcSetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
   gBS->FreePool (PngFile);
   Fs->Close (Fs);
   if (EFI_ERROR (Status)) {

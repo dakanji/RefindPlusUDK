@@ -43,7 +43,7 @@ int main (int argc, char *argv[]) {
     printf ("Please provide a valid Disk Image path\n");
     return -1;
   }
-  
+
   if ((argc % 2) != 1) {
     printf ("Please provide a chunklist file for each DMG, enter \'n\' to skip\n");
   }

@@ -328,7 +328,7 @@ OcKernelLoadAndReserveKext (
   UnicodeUefiSlashes (FullPath);
 
   if (IsForced) {
-    Kext->PlistData = ReadFileFromFile (
+    Kext->PlistData = OcReadFileFromFile (
       RootFile,
       FullPath,
       &Kext->PlistDataSize,
@@ -385,7 +385,7 @@ OcKernelLoadAndReserveKext (
     UnicodeUefiSlashes (FullPath);
 
     if (IsForced) {
-      Kext->ImageData = ReadFileFromFile (
+      Kext->ImageData = OcReadFileFromFile (
         RootFile,
         FullPath,
         &Kext->ImageDataSize,
@@ -971,7 +971,7 @@ OcKernelFuzzyMatch (
   }
   CopyMem (FileNameDir, FileName, StrnSizeS (FileName, FileNameDirLength) - sizeof (*FileName));
 
-  Status = SafeFileOpen (RootFile, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
+  Status = OcSafeFileOpen (RootFile, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     FreePool (FileNameDir);
     return Status;
@@ -980,9 +980,9 @@ OcKernelFuzzyMatch (
   //
   // Search for kernelcache files, trying each one.
   //
-  DirectorySeachContextInit (&Context);
+  OcDirectorySeachContextInit (&Context);
   do {
-    Status = GetNewestFileFromDirectory (
+    Status = OcGetNewestFileFromDirectory (
       &Context,
       FileDirectory,
       L"kernelcache",
@@ -1014,7 +1014,7 @@ OcKernelFuzzyMatch (
       break;
     }
 
-    Status = SafeFileOpen (RootFile, KernelFile, FileNameCacheNew, OpenMode, Attributes);
+    Status = OcSafeFileOpen (RootFile, KernelFile, FileNameCacheNew, OpenMode, Attributes);
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -1113,7 +1113,7 @@ OcKernelFileOpen (
     return Status;
   }
 
-  Status = SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
+  Status = OcSafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
 
   DEBUG ((
     DEBUG_VERBOSE,
@@ -1239,7 +1239,7 @@ OcKernelFileOpen (
 
       DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));
 
-      Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+      Status = OcGetFileModificationTime (*NewHandle, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
@@ -1328,7 +1328,7 @@ OcKernelFileOpen (
         );
       DEBUG ((DEBUG_INFO, "OC: Mkext status - %r\n", Status));
       if (!EFI_ERROR (Status)) {
-        Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+        Status = OcGetFileModificationTime (*NewHandle, &ModificationTime);
         if (EFI_ERROR (Status)) {
           ZeroMem (&ModificationTime, sizeof (ModificationTime));
         }

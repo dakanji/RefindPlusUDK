@@ -120,7 +120,7 @@ PatchAppleCpuPmCfgLock (
       ++Walker;
     }
   }
-  
+
   //
   // At least one patch must be successful for this to work.
   //
@@ -1588,7 +1588,7 @@ PatchSegmentJettison (
         && AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0) {
         DEBUG ((DEBUG_INFO, "OCAK: Found jettisoning fileset\n"));
         SetMem (CurrFreeCall, 5, 0x90);
-        return EFI_SUCCESS;    
+        return EFI_SUCCESS;
       }
     }
 
@@ -1792,7 +1792,7 @@ PatchLegacyCommpage (
       DEBUG ((
         DEBUG_VERBOSE,
         "OCAK: Found 64-bit _COMM_PAGE_BCOPY function @ 0x%llx (0x%X bytes)\n",
-        Address, 
+        Address,
         CommpageCodeLength
         ));
 
@@ -1892,7 +1892,7 @@ PatchForceSecureBootScheme (
 // Quirks table.
 //
 KERNEL_QUIRK gKernelQuirks[] = {
-  [KernelQuirkAppleCpuPmCfgLock] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
+  [KernelQuirkAppleCpuPmCfgLock] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock },
   [KernelQuirkAppleXcpmCfgLock] = { NULL, PatchAppleXcpmCfgLock },
   [KernelQuirkAppleXcpmExtraMsrs] = { NULL, PatchAppleXcpmExtraMsrs },
   [KernelQuirkAppleXcpmForceBoost] = { NULL, PatchAppleXcpmForceBoost },

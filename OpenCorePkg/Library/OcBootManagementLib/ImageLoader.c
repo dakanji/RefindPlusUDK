@@ -103,7 +103,7 @@ InternalEfiLoadImageFile (
     return EFI_NOT_FOUND;
   }
 
-  Status = GetFileSize (
+  Status = OcGetFileSize (
     File,
     &Size
     );
@@ -118,7 +118,7 @@ InternalEfiLoadImageFile (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Status = GetFileData (
+  Status = OcGetFileData (
     File,
     0,
     Size,

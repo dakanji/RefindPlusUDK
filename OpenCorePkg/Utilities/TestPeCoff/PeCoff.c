@@ -44,10 +44,10 @@ TestImageLoad (
 {
   EFI_STATUS                   Status;
   IMAGE_STATUS                 ImageStatus;
-  PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;      
+  PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;
   EFI_PHYSICAL_ADDRESS         DestinationArea;
   VOID                         *DestinationBuffer;
- 
+
 
   //
   // Initialize the image context.

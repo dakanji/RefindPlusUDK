@@ -718,7 +718,7 @@ OcRunAppleBootPicker (
 
   DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to find...\n"));
 
-  Dp = CreateFvFileDevicePath (&gAppleBootPickerFileGuid);
+  Dp = OcCreateFvFileDevicePath (&gAppleBootPickerFileGuid);
   if (Dp != NULL) {
     DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to load...\n"));
     NewHandle = NULL;

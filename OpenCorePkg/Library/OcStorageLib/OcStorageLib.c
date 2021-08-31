@@ -240,7 +240,7 @@ OcStorageInitFromFs (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     RootVolume,
     &Context->StorageRoot,
     (CHAR16 *) Path,
@@ -349,7 +349,7 @@ OcStorageExistsFileUnicode (
     return FALSE;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Context->StorageRoot,
     &File,
     (CHAR16 *) FilePath,
@@ -400,7 +400,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Context->StorageRoot,
     &File,
     (CHAR16 *) FilePath,
@@ -412,7 +412,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = GetFileSize (File, &Size);
+  Status = OcGetFileSize (File, &Size);
   if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
     File->Close (File);
     return NULL;
@@ -424,7 +424,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = GetFileData (File, 0, Size, FileBuffer);
+  Status = OcGetFileData (File, 0, Size, FileBuffer);
   File->Close (File);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);

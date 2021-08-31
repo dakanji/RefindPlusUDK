@@ -88,20 +88,20 @@ ProduceDebugReport (
   EFI_FILE_PROTOCOL  *SubReport;
 
   if (VolumeHandle != NULL) {
-    Fs = LocateRootVolume (VolumeHandle, NULL);
+    Fs = OcLocateRootVolume (VolumeHandle, NULL);
   } else {
     Fs = NULL;
   }
 
   if (Fs == NULL) {
-    Status = FindWritableFileSystem (&Fs);
+    Status = OcFindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OC: No usable filesystem for report - %r\n", Status));
       return EFI_NOT_FOUND;
     }
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -115,7 +115,7 @@ ProduceDebugReport (
     return EFI_ALREADY_STARTED;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -128,7 +128,7 @@ ProduceDebugReport (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"ACPI",
@@ -142,7 +142,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"SMBIOS",
@@ -385,7 +385,7 @@ SavePanicLog (
       &RootFs
       );
     if (!EFI_ERROR (Status)) {
-      Status = SetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
+      Status = OcSetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
       RootFs->Close (RootFs);
     }
 

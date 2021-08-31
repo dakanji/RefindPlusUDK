@@ -90,7 +90,7 @@ GetFvFileVolume (
 }
 
 EFI_DEVICE_PATH_PROTOCOL *
-CreateFvFileDevicePath (
+OcCreateFvFileDevicePath (
   IN EFI_GUID  *FileGuid
   )
 {

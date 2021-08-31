@@ -52,7 +52,7 @@ InternalGetAppleDiskLabel (
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
   DEBUG ((DEBUG_INFO, "OCB: Trying to get label from %s\n", DiskLabelPath));
 
-  AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
+  AsciiDiskLabel = (CHAR8 *) OcReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
   FreePool (DiskLabelPath);
 
   if (AsciiDiskLabel != NULL) {
@@ -90,7 +90,7 @@ InternalGetAppleImage (
   UnicodeSPrint (ImagePath, ImagePathSize, L"%s%s", DirectoryName, LabelFilename);
   DEBUG ((DEBUG_INFO, "OCB: Trying to get image from %s\n", ImagePath));
 
-  *ImageData = ReadFile (FileSystem, ImagePath, DataSize, BASE_16MB);
+  *ImageData = OcReadFile (FileSystem, ImagePath, DataSize, BASE_16MB);
 
   FreePool (ImagePath);
 
@@ -190,7 +190,7 @@ InternalGetAppleRecoveryName (
 
   UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%sSystemVersion.plist", BootDirectoryName);
   DEBUG ((DEBUG_INFO, "OCB: Trying to get recovery from %s\n", SystemVersionPath));
-  SystemVersionData = (CHAR8 *) ReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
+  SystemVersionData = (CHAR8 *) OcReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
   FreePool (SystemVersionPath);
 
   if (SystemVersionData != NULL) {
@@ -236,7 +236,7 @@ InternalGetRecoveryOsBooter (
   FilePathSize = 0;
 
   if (!Basic) {
-    *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+    *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
                   Root,
                   &gAppleBlessedOsxFolderInfoGuid,
                   sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -257,7 +257,7 @@ InternalGetRecoveryOsBooter (
       // This is to prevent recovery and volume duplicates on HFS+ systems.
       //
 
-      TmpPath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+      TmpPath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
         Root,
         &gAppleBlessedSystemFolderInfoGuid,
         sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -300,7 +300,7 @@ InternalGetRecoveryOsBooter (
     // Their SlingShot.efi app just bruteforces com.apple.recovery.boot directory existence,
     // and we have to copy.
     //
-    Status = SafeFileOpen (Root, &Recovery, L"\\com.apple.recovery.boot", EFI_FILE_MODE_READ, 0);
+    Status = OcSafeFileOpen (Root, &Recovery, L"\\com.apple.recovery.boot", EFI_FILE_MODE_READ, 0);
     if (!EFI_ERROR (Status)) {
       //
       // Do not do any extra checks for simplicity, as they will be done later either way.
@@ -567,7 +567,7 @@ InternalDescribeBootEntry (
   //
   if (BootEntry->Type == OC_BOOT_UNKNOWN && BootEntry->IsGeneric) {
     DEBUG ((DEBUG_INFO, "OCB: Trying to detect Microsoft BCD\n"));
-    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+    Status = OcReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
     if (!EFI_ERROR (Status)) {
       BootEntry->Type = OC_BOOT_WINDOWS;
     }
@@ -578,7 +578,7 @@ InternalDescribeBootEntry (
   }
 
   if (BootEntry->Name == NULL) {
-    BootEntry->Name = GetVolumeLabel (FileSystem);
+    BootEntry->Name = OcGetVolumeLabel (FileSystem);
     if (BootEntry->Name != NULL) {
       if (StrCmp (BootEntry->Name, L"Recovery HD") == 0
         || StrCmp (BootEntry->Name, L"Recovery") == 0) {

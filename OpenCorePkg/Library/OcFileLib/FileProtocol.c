@@ -74,7 +74,7 @@ EfiTimeToEpoch (
 }
 
 EFI_STATUS
-GetFileData (
+OcGetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -119,7 +119,7 @@ GetFileData (
 }
 
 EFI_STATUS
-GetFileSize (
+OcGetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   )
@@ -148,14 +148,14 @@ GetFileSize (
 }
 
 EFI_STATUS
-GetFileModificationTime (
+OcGetFileModificationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   )
 {
   EFI_FILE_INFO  *FileInfo;
 
-  FileInfo = GetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
+  FileInfo = OcGetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
   if (FileInfo == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -167,7 +167,7 @@ GetFileModificationTime (
 }
 
 EFI_STATUS
-FindWritableFileSystem (
+OcFindWritableFileSystem (
   IN OUT EFI_FILE_PROTOCOL  **WritableFs
   )
 {
@@ -223,7 +223,7 @@ FindWritableFileSystem (
     //
     // We cannot test if the file system is writeable without attempting to create some file.
     //
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       Fs,
       &File,
       L"octest.fil",
@@ -254,7 +254,7 @@ FindWritableFileSystem (
 }
 
 EFI_STATUS
-SetFileData (
+OcSetFileData (
   IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
   IN CONST CHAR16       *FileName,
   IN CONST VOID         *Buffer,
@@ -270,7 +270,7 @@ SetFileData (
   ASSERT (Buffer != NULL);
 
   if (WritableFs == NULL) {
-    Status = FindWritableFileSystem (&Fs);
+    Status = OcFindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_VERBOSE, "OCFS: WriteFileData can't find writable FS\n"));
       return Status;
@@ -279,7 +279,7 @@ SetFileData (
     Fs = WritableFs;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &File,
     (CHAR16 *) FileName,
@@ -316,7 +316,7 @@ SetFileData (
 }
 
 EFI_STATUS
-AllocateCopyFileData (
+OcAllocateCopyFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT8              **Buffer,
   OUT UINT32             *BufferSize
@@ -329,7 +329,7 @@ AllocateCopyFileData (
   //
   // Get full file data.
   //
-  Status = GetFileSize (File, &ReadSize);
+  Status = OcGetFileSize (File, &ReadSize);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -338,7 +338,7 @@ AllocateCopyFileData (
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  Status = GetFileData (File, 0, ReadSize, FileBuffer);
+  Status = OcGetFileData (File, 0, ReadSize, FileBuffer);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);
     return Status;
@@ -350,7 +350,7 @@ AllocateCopyFileData (
 }
 
 VOID
-DirectorySeachContextInit (
+OcDirectorySeachContextInit (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context
   )
 {
@@ -360,7 +360,7 @@ DirectorySeachContextInit (
 }
 
 EFI_STATUS
-GetNewestFileFromDirectory (
+OcGetNewestFileFromDirectory (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
   IN     EFI_FILE_PROTOCOL        *Directory,
   IN     CHAR16                   *FileNameStartsWith OPTIONAL,
@@ -387,7 +387,7 @@ GetNewestFileFromDirectory (
   //
   // Ensure this is a directory.
   //
-  FileInfoCurrent = GetFileInfo (Directory, &gEfiFileInfoGuid, 0, NULL);
+  FileInfoCurrent = OcGetFileInfo (Directory, &gEfiFileInfoGuid, 0, NULL);
   if (FileInfoCurrent == NULL) {
     return EFI_INVALID_PARAMETER;
   }

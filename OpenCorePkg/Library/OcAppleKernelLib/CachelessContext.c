@@ -212,7 +212,7 @@ ScanExtensions (
           //
           // Parse Info.plist.
           //
-          Status = AllocateCopyFileData (FilePlist, (UINT8**)&InfoPlist, &InfoPlistSize);
+          Status = OcAllocateCopyFileData (FilePlist, (UINT8**)&InfoPlist, &InfoPlistSize);
           FilePlist->Close (FilePlist);
           if (EFI_ERROR (Status)) {
             FileKext->Close (FileKext);
@@ -1058,7 +1058,7 @@ CachelessContextOverlayExtensionsDir (
   //
   // Create directory overlay.
   //
-  Status = GetFileModificationTime (Context->ExtensionsDir, &ModificationTime);
+  Status = OcGetFileModificationTime (Context->ExtensionsDir, &ModificationTime);
   if (EFI_ERROR (Status)) {
     ZeroMem (&ModificationTime, sizeof (ModificationTime));
   }
@@ -1399,7 +1399,7 @@ CachelessContextHookBuiltin (
       //
       // Open Info.plist
       //
-      Status = AllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
+      Status = OcAllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -1461,7 +1461,7 @@ CachelessContextHookBuiltin (
       //
       // Virtualize newly created Info.plist.
       //
-      Status = GetFileModificationTime (File, &ModificationTime);
+      Status = OcGetFileModificationTime (File, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
@@ -1486,7 +1486,7 @@ CachelessContextHookBuiltin (
         return EFI_INVALID_PARAMETER;
       }
 
-      Status = AllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
+      Status = OcAllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -1544,7 +1544,7 @@ CachelessContextHookBuiltin (
       //
       // Virtualize patched binary.
       //
-      Status = GetFileModificationTime (File, &ModificationTime);
+      Status = OcGetFileModificationTime (File, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }

@@ -513,7 +513,7 @@ UINT8  *Prelinked;
 UINT32 PrelinkedSize;
 
 EFI_STATUS
-GetFileData (
+OcGetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -531,7 +531,7 @@ GetFileData (
 }
 
 EFI_STATUS
-GetFileSize (
+OcGetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   )
