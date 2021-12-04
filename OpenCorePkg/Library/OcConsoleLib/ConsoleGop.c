@@ -63,16 +63,20 @@ ConsoleHandleProtocol (
 
   Status = mOriginalHandleProtocol (Handle, Protocol, Interface);
 
-  if (Status != EFI_UNSUPPORTED) {
+  if (Status != EFI_UNSUPPORTED && EFI_ERROR (Status)) {
     return Status;
   }
 
-  if (CompareGuid (&gEfiGraphicsOutputProtocolGuid, Protocol)) {
-    if (mConsoleGraphicsOutput != NULL) {
-      *Interface = mConsoleGraphicsOutput;
-      return EFI_SUCCESS;
-    }
-  } else if (CompareGuid (&gEfiUgaDrawProtocolGuid, Protocol)) {
+  if (mConsoleGraphicsOutput != NULL && CompareGuid (&gEfiGraphicsOutputProtocolGuid, Protocol)) {
+    *Interface = mConsoleGraphicsOutput;
+    return EFI_SUCCESS;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (CompareGuid (&gEfiUgaDrawProtocolGuid, Protocol)) {
     //
     // EfiBoot from 10.4 can only use UgaDraw protocol.
     //
@@ -126,19 +130,29 @@ OcProvideConsoleGop (
       (UINT32) OriginalGop->Mode->MaxMode
       ));
 
-    //
-    // This is not the case on MacPro5,1 with Mac EFI incompatible GPU.
-    // Here we need to uninstall ConOut GOP in favour of GPU GOP.
-    //
-    if (OriginalGop->Mode->MaxMode > 0) {
-      mConsoleGraphicsOutput = OriginalGop;
+    if (OriginalGop->Mode->Info->PixelFormat == PixelBltOnly) {
+      //
+      // ASUS Z690F has GOP aggregator on console handle with blit only
+      // formats. This GOP obviously does not work on macOS, so we need
+      // to uninstall it, but only when we have an alternative.
+      //
+      DEBUG ((
+        DEBUG_INFO,
+        "OCC: Looking for GOP replacement due to blit-only GOP\n"
+        ));
+    } else if (OriginalGop->Mode->MaxMode == 0) {
+      //
+      // No modes on MacPro5,1 with Mac EFI incompatible GPU.
+      // Here we need to uninstall ConOut GOP in favour of GPU GOP.
+      //
+      DEBUG ((
+        DEBUG_INFO,
+        "OCC: Looking for GOP replacement due to invalid mode count\n"
+        ));
+    } else {
+        mConsoleGraphicsOutput = OriginalGop;
       return EFI_ALREADY_STARTED;
     }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCC: Looking for GOP replacement due to invalid mode count\n"
-      ));
 
     Status = gBS->LocateHandleBuffer (
       ByProtocol,
@@ -167,6 +181,28 @@ OcProvideConsoleGop (
 
     DEBUG ((DEBUG_INFO, "OCC: Alternative GOP status is - %r\n", Status));
     FreePool (HandleBuffer);
+
+    if (!EFI_ERROR (Status)
+      && OriginalGop->Mode->Info->PixelFormat == PixelBltOnly) {
+      if ((UINT32) Gop->Mode->Info->PixelFormat >= PixelBltOnly) {
+        Status = EFI_NOT_FOUND;
+      }
+      DEBUG ((
+        DEBUG_INFO,
+        "OCC: Checking alternative GOP mode %u - %r\n",
+        Gop->Mode->Info->PixelFormat,
+        Status
+        ));
+
+      //
+      // We cannot uninstall this GOP as ASUS will reinstall it.
+      // Hook HandleProtocol instead.
+      //
+      if (!EFI_ERROR (Status)) {
+        mConsoleGraphicsOutput = Gop;
+        return EFI_SUCCESS;
+      }
+    }
 
     if (!EFI_ERROR (Status)) {
       gBS->UninstallProtocolInterface (
