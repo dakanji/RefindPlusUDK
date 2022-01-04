@@ -489,16 +489,6 @@ InternalGetBootOrderForBooting (
     return NULL;
   }
 
-  DEBUG_CODE_BEGIN ();
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Found %u BootOrder entries with BootNext %a\n",
-    (UINT32) *BootOrderCount,
-    HasBootNext ? "included" : "excluded"
-    ));
-  InternalDebugBootEnvironment (BootOrder, BootVariableGuid, *BootOrderCount);
-  DEBUG_CODE_END ();
-
   if (HasBootNext) {
     gRT->SetVariable (
       EFI_BOOT_NEXT_VARIABLE_NAME,
@@ -1007,22 +997,6 @@ InternalLoadBootEntry (
   } else {
     DevicePath = BootEntry->DevicePath;
   }
-
-  DEBUG_CODE_BEGIN ();
-  ASSERT (DevicePath != NULL);
-  UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Perform boot %s to dp %s (%p/%u)\n",
-    BootEntry->Name,
-    UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
-    EntryData,
-    EntryDataSize
-    ));
-  if (UnicodeDevicePath != NULL) {
-    FreePool (UnicodeDevicePath);
-  }
-  DEBUG_CODE_END ();
 
   Status = gBS->LoadImage (
     FALSE,

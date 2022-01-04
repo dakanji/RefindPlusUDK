@@ -1577,7 +1577,6 @@ FirmwareManagementDumpInformation (
   ImageInfoSize          = 1;
   AttributeSetting       = 0;
   Found                  = FALSE;
-  AttributeSupported     = FALSE;
   ImageInfo              = NULL;
   ImageInfoV1            = NULL;
   ImageInfoV2            = NULL;

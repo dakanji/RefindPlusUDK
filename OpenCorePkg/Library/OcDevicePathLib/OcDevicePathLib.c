@@ -368,15 +368,6 @@ InternalExpandNewPath (
     DebugPrintDevicePath (DEBUG_VERBOSE, "accepted DP", ExpandedPath);
     DebugPrintDevicePath (DEBUG_VERBOSE, "fix starting at", ExpandedNode);
 
-    DEBUG_CODE (
-      EFI_DEVICE_PATH_PROTOCOL *RemDevPath = ExpandedPath;
-      EFI_HANDLE Dev;
-      EFI_STATUS Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemDevPath, &Dev);
-      if (EFI_ERROR (Status) || (RemDevPath->Type & EFI_DP_TYPE_MASK) != END_DEVICE_PATH_TYPE || RemDevPath->SubType != END_ENTIRE_DEVICE_PATH_SUBTYPE) {
-        DEBUG ((DEBUG_VERBOSE, "borked piece of crap\n"));
-      }
-      );
-
     *DevicePath     = ExpandedPath;
     *DevicePathNode = ExpandedNode;
     return 1;
@@ -611,7 +602,6 @@ OcFixAppleBootDevicePath (
 {
   INTN                        Result;
   INTN                        NodePatched;
-  UINTN                       DevicePathSize;
 
   APPLE_BOOT_DP_PATCH_CONTEXT FirstNodeRestoreContext;
   APPLE_BOOT_DP_PATCH_CONTEXT *RestoreContextPtr;
@@ -687,15 +677,6 @@ OcFixAppleBootDevicePath (
 
     return -1;
   }
-
-  //
-  // Double-check that *RemainingDevicePath still points into *DevicePath.
-  //
-  DEBUG_CODE_BEGIN ();
-  DevicePathSize = GetDevicePathSize (*DevicePath);
-  ASSERT ((UINTN) *RemainingDevicePath >= (UINTN) *DevicePath);
-  ASSERT ((UINTN) *RemainingDevicePath < ((UINTN) *DevicePath) + DevicePathSize);
-  DEBUG_CODE_END ();
 
   return NodePatched;
 }

@@ -173,15 +173,6 @@ OcApfsConnectDevices (
   EFI_STATUS  Status;
   VOID        *PartitionInfoInterface;
 
-  DEBUG_CODE_BEGIN ();
-  Status = gBS->LocateProtocol (
-    &gEfiPartitionInfoProtocolGuid,
-    NULL,
-    &PartitionInfoInterface
-    );
-  DEBUG ((DEBUG_INFO, "OCJS: PartitionInfo is %r\n", Status));
-  DEBUG_CODE_END ();
-
   if (Monitor) {
     Status = ApfsMonitorNewPartitions ();
     if (EFI_ERROR (Status)) {

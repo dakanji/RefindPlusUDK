@@ -312,7 +312,7 @@ KcInitKextFixupChains (
     OC_ALIGNOF (MACH_LINKEDIT_DATA_COMMAND) <= sizeof (UINT64),
     "Alignment is not guaranteed."
     );
-  
+
   DyldChainedFixups = (CONST MACH_LINKEDIT_DATA_COMMAND *) MachoGetNextCommand (
     &Context->PrelinkedMachContext,
     MACH_LOAD_COMMAND_DYLD_CHAINED_FIXUPS,
@@ -806,16 +806,6 @@ KcFixupValue (
     // Some day, when Intel rewrites EDK II.
     //
     Rebase = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)(UINTN) &Value;
-    DEBUG_CODE_BEGIN ();
-    if (Rebase->CacheLevel != 0
-      || Rebase->Diversity != 0
-      || Rebase->AddrDiv != 0
-      || Rebase->Key != 0
-      || Rebase->IsAuth != 0) {
-      DEBUG ((DEBUG_INFO, "OCAK: Invalid fixup %Lx for %a\n", Value, Name != NULL ? Name : "<none>"));
-    }
-    DEBUG_CODE_END ();
-
     Value = Rebase->Target + KERNEL_FIXUP_OFFSET + KERNEL_ADDRESS_BASE;
   }
 

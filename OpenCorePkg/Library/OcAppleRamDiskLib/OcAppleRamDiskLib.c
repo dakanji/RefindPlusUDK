@@ -499,10 +499,6 @@ OcAppleRamDiskLoadFile (
     return FALSE;
   }
 
-  DEBUG_CODE_BEGIN ();
-  Sha256Init (&Ctx);
-  DEBUG_CODE_END ();
-
   FilePosition = 0;
 
   for (Index = 0; Index < ExtentTable->ExtentCount && FileSize > 0; ++Index) {
@@ -531,10 +527,6 @@ OcAppleRamDiskLoadFile (
         return FALSE;
       }
 
-      DEBUG_CODE_BEGIN ();
-      Sha256Update (&Ctx, TmpBuffer, ReadSize);
-      DEBUG_CODE_END ();
-
       CopyMem (ExtentBuffer, TmpBuffer, ReadSize);
 
       FilePosition += ReadSize;
@@ -553,17 +545,6 @@ OcAppleRamDiskLoadFile (
     return FALSE;
   }
 
-  DEBUG_CODE_BEGIN ();
-  Sha256Final (&Ctx, Digest);
-  DEBUG ((
-    DEBUG_INFO,
-    "OCRAM: SHA-256 Digest is: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X\n",
-     Digest[0],  Digest[1],  Digest[2],  Digest[3],  Digest[4],  Digest[5],  Digest[6],  Digest[7],  Digest[8],  Digest[9],
-    Digest[10], Digest[11], Digest[12], Digest[13], Digest[14], Digest[15], Digest[16], Digest[17], Digest[18], Digest[19],
-    Digest[20], Digest[21], Digest[22], Digest[23], Digest[24], Digest[25], Digest[26], Digest[27], Digest[28], Digest[29],
-    Digest[30], Digest[31]
-    ));
-  DEBUG_CODE_END ();
   return TRUE;
 }
 

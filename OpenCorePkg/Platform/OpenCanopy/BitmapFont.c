@@ -376,21 +376,6 @@ BmfContextInitialize (
 
     MinY = MIN (MinY, Chars[Index].yoffset);
     MaxY = MAX (MaxY, (UINT16) Height);
-    //
-    // This only yields unexpected but not undefined behaviour when not met,
-    // hence it is fine verifying it only DEBUG mode.
-    //
-    DEBUG_CODE_BEGIN ();
-    if (Index > 0) {
-      if (Chars[Index - 1].id > Chars[Index].id) {
-        DEBUG ((DEBUG_WARN, "BMF: Character IDs are not sorted\n"));
-        return FALSE;
-      } else if (Chars[Index - 1].id == Chars[Index].id) {
-        DEBUG ((DEBUG_WARN, "BMF: Character ID duplicate\n"));
-        return FALSE;
-      }
-    }
-    DEBUG_CODE_END ();
   }
 
   Result = OcOverflowSubS32 (
@@ -448,29 +433,6 @@ BmfContextInitialize (
            ));
         return FALSE;
       }
-      //
-      // This only yields unexpected but not undefined behaviour when not met,
-      // hence it is fine verifying it only DEBUG mode.
-      //
-      DEBUG_CODE_BEGIN ();
-      if (Index > 0) {
-        if (Pairs[Index - 1].first > Pairs[Index].first) {
-          DEBUG ((DEBUG_WARN, "BMF: First Character IDs are not sorted\n"));
-          return FALSE;
-        }
-
-        if (Pairs[Index - 1].first == Pairs[Index].first) {
-          if (Pairs[Index - 1].second > Pairs[Index].second) {
-            DEBUG ((DEBUG_WARN, "BMF: Second Character IDs are not sorted\n"));
-            return FALSE;
-          }
-          if (Pairs[Index - 1].second == Pairs[Index].second) {
-            DEBUG ((DEBUG_WARN, "BMF: Second Character ID duplicate\n"));
-            return FALSE;
-          }
-        }
-      }
-      DEBUG_CODE_END ();
     }
   }
 

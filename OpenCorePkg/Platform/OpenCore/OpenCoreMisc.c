@@ -634,12 +634,6 @@ OcMiscMiddleInit (
 
   *LoadHandle = OcHandle;
 
-  DEBUG_CODE_BEGIN ();
-  if (OcHandle != NULL && Config->Misc.Debug.SysReport) {
-    ProduceDebugReport (OcHandle);
-  }
-  DEBUG_CODE_END ();
-
   return Status;
 }
 

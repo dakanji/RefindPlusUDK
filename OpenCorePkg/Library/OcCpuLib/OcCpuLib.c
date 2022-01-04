@@ -394,10 +394,6 @@ ScanIntelProcessor (
     //
     Recalculate = FALSE;
 
-    DEBUG_CODE_BEGIN ();
-    Recalculate = TRUE;
-    DEBUG_CODE_END ();
-
     //
     // Determine our core crystal clock frequency
     //
@@ -411,10 +407,6 @@ ScanIntelProcessor (
     // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
     //
     if (Cpu->CPUFrequencyFromART == 0 || Recalculate) {
-      DEBUG_CODE_BEGIN ();
-      TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
-      DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
-      DEBUG_CODE_END ();
       Cpu->CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
     }
 
@@ -521,10 +513,6 @@ ScanAmdProcessor (
   // DEBUG builds.
   //
   Recalculate = FALSE;
-
-  DEBUG_CODE_BEGIN ();
-  Recalculate = TRUE;
-  DEBUG_CODE_END ();
 
   //
   // Faking an Intel Core i5 Processor.

@@ -35,16 +35,6 @@ OcSafeFileOpen (
   )
 {
   EFI_STATUS  Status;
-  UINTN       Length;
-
-  DEBUG_CODE_BEGIN ();
-  ASSERT (FileName != NULL);
-  ASSERT (NewHandle != NULL);
-  Length = StrLen (FileName);
-  if (Length > 0 && FileName[Length - 1] == L'\\') {
-    DEBUG ((DEBUG_INFO, "OCFS: Filename %s has trailing slash\n", FileName));
-  }
-  DEBUG_CODE_END ();
 
   *NewHandle = NULL;
   Status = Protocol->Open (

@@ -509,7 +509,7 @@ UhciReleaseOwnership (
 
   Base = 0;
 
-  Status = PciIo->Pci.Read(
+  PciIo->Pci.Read(
     PciIo,
     EfiPciIoWidthUint32,
     0x20,

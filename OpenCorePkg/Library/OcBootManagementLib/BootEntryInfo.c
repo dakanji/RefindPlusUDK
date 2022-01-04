@@ -312,13 +312,6 @@ InternalGetRecoveryOsBooter (
       if (TmpPath != NULL) {
         *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
         if (*FilePath != NULL) {
-          DEBUG_CODE_BEGIN ();
-          DevicePathText = ConvertDevicePathToText (*FilePath, FALSE, FALSE);
-          if (DevicePathText != NULL) {
-            DEBUG ((DEBUG_INFO, "OCB: Got recovery dp %s\n", DevicePathText));
-            FreePool (DevicePathText);
-          }
-          DEBUG_CODE_END ();
           Status = EFI_SUCCESS;
         }
       }
@@ -472,9 +465,9 @@ OcGetBootEntryIcon (
       ImageData,
       DataLength
       );
-    
+
     DEBUG ((DEBUG_INFO, "OCB: OcGetBootEntryIcon - %s (custom entry) - %r\n", BootEntry->Name, Status));
-    
+
     //
     // Return early if custom icon was loaded successfully.
     //

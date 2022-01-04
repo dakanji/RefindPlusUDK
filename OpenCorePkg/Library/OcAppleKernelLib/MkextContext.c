@@ -42,7 +42,7 @@ ParseKextBinary (
 {
   EFI_STATUS        Status;
   MACH_HEADER_ANY   *MachHeader;
-  
+
   Status = FatFilterArchitectureByType (Buffer, BufferSize, Is32Bit ? MachCpuTypeI386 : MachCpuTypeX8664);
   if (EFI_ERROR (Status)) {
     return FALSE;
@@ -101,7 +101,7 @@ ParseMkextV2Plist (
 
   XML_NODE            *PlistBundleArray;
   CONST CHAR8         *BundleArrayKey;
-  
+
 
   MkextBuffer         = (UINT8 *) Mkext;
   MkextLength         = SwapBytes32 (Mkext->Header.Length);
@@ -276,7 +276,7 @@ InternalCachedMkextKext (
   // Search mkext and add kext to cache.
   //
   IsKextMatch = FALSE;
-  
+
   //
   // Mkext v1.
   //
@@ -331,7 +331,7 @@ InternalCachedMkextKext (
         if (PlistBundleKey == NULL || PlistBundleKeyValue == NULL) {
           continue;
         }
-        
+
         if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
           KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
           break;
@@ -377,7 +377,7 @@ InternalCachedMkextKext (
         if (PlistBundleKey == NULL || PlistBundleKeyValue == NULL) {
           continue;
         }
-        
+
         if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
           KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
         }
@@ -555,7 +555,7 @@ MkextDecompress (
       if (CurrentOffset > OutBufferSize) {
         return EFI_BUFFER_TOO_SMALL;
       }
-      
+
       //
       // Copy header.
       //
@@ -846,7 +846,7 @@ MkextDecompress (
       }
     } else {
       //
-      // Account for plist, future plist expansion for each bundle, 
+      // Account for plist, future plist expansion for each bundle,
       //   and additional headers for future kext injection.
       //
       PlistFullSize = SwapBytes32 (MkextHeader->V2.PlistFullSize);
@@ -1010,7 +1010,7 @@ MkextContextInit (
       || NumMaxKexts == MAX_UINT32) {
       return EFI_INVALID_PARAMETER;
     }
-    
+
   //
   // Mkext v2.
   //
@@ -1147,7 +1147,7 @@ MkextInjectKext (
   XML_DOCUMENT          *PlistXml;
   XML_NODE              *PlistRoot;
   BOOLEAN               PlistFailed;
-  
+
   CONST CHAR8           *TmpKeyValue;
   UINT32                FieldCount;
   UINT32                FieldIndex;
@@ -1260,36 +1260,13 @@ MkextInjectKext (
     }
 
     //
-    // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-    // However, to avoid certain users making this kind of mistake, we still provide some
-    // code in debug mode to diagnose it.
-    //
-    DEBUG_CODE_BEGIN ();
-    if (Executable == NULL) {
-      FieldCount = PlistDictChildren (PlistRoot);
-      for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-        TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, NULL));
-        if (TmpKeyValue == NULL) {
-          continue;
-        }
-
-        if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
-          DEBUG ((DEBUG_ERROR, "OCK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
-          ASSERT (FALSE);
-          CpuDeadLoop ();
-        }
-      }
-    }
-    DEBUG_CODE_END ();
-
-    //
     // Executable, if present, will be placed at end of mkext and plist will be moved further out.
     //
     PlistOffset = Context->MkextInfoOffset;
     PlistFailed = FALSE;
     if (Executable != NULL) {
       ASSERT (ExecutableSize > 0);
-      
+
       BinOffset = PlistOffset;
       if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
         XmlDocumentFree (PlistXml);
@@ -1302,8 +1279,8 @@ MkextInjectKext (
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
         return EFI_INVALID_PARAMETER;
-      } 
-      
+      }
+
       if (PlistOffset >= Context->MkextAllocSize) {
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
@@ -1344,7 +1321,7 @@ MkextInjectKext (
       MkextExecutableEntry->FullSize = SwapBytes32 (ExecutableSize);
       CopyMem (MkextExecutableEntry->Data, Executable, ExecutableSize);
     }
-  
+
   //
   // Unsupported version.
   //

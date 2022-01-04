@@ -38,7 +38,7 @@
 
 /*
   Expands DevicePath from short-form to full-form.
-  The only valid expansions are full Device Paths refering to a file or a 
+  The only valid expansions are full Device Paths refering to a file or a
   volume root. Latter type may be used with custom policies to determine a
   bootable file.
 
@@ -212,7 +212,7 @@ IsOpenCoreBootloader (
     0x0E, 0x1F, 0xBA, 0x10, 0x00, 0xB4, 0x09, 0xCD, 0x21, 0xB8, 0x01, 0x4C, 0xCD, 0x21, 0x0F, 0x0B,
     0x4F, 0x70, 0x65, 0x6E, 0x43, 0x6F, 0x72, 0x65, 0x20, 0x42, 0x6F, 0x6F, 0x74, 0x6C, 0x6F, 0x61,
     0x64, 0x65, 0x72, 0x20, 0x28, 0x63, 0x29, 0x20, 0x41, 0x63, 0x69, 0x64, 0x61, 0x6E, 0x74, 0x68,
-    0x65, 0x72, 0x61, 0x20, 0x52, 0x65, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x0D, 0x0A, 0x24, 0x00 
+    0x65, 0x72, 0x61, 0x20, 0x52, 0x65, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x0D, 0x0A, 0x24, 0x00
   };
 
   EFI_STATUS        Status;
@@ -260,31 +260,6 @@ RegisterBootOption (
 {
   CHAR16  *TextDevicePath;
 
-  DEBUG_CODE_BEGIN ();
-
-  if (BootEntry->DevicePath != NULL) {
-    TextDevicePath = ConvertDevicePathToText (BootEntry->DevicePath, FALSE, FALSE);
-  } else {
-    TextDevicePath = NULL;
-  }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Registering entry %s (T:%d|F:%d|G:%d|E:%d) - %s\n",
-    BootEntry->Name,
-    BootEntry->Type,
-    BootEntry->IsFolder,
-    BootEntry->IsGeneric,
-    BootEntry->IsExternal,
-    OC_HUMAN_STRING (TextDevicePath)
-    ));
-
-  if (TextDevicePath != NULL) {
-    FreePool (TextDevicePath);
-  }
-
-  DEBUG_CODE_END ();
-
   //
   // Register boot entry.
   // Not using RecoveryFs is intended for correct order.
@@ -324,7 +299,7 @@ RegisterBootOption (
   @param[in,out] FileSystem    Filesystem for creation.
   @param[in]     DevicePath    Device path of the entry.
   @param[in]     RecoveryPart  Device path is on recovery partition.
-  @param[in]     Deduplicate   Ensure that duplicated entries are not added. 
+  @param[in]     Deduplicate   Ensure that duplicated entries are not added.
 
   @retval EFI_SUCCESS on success.
 **/
@@ -361,25 +336,6 @@ AddBootEntryOnFileSystem (
   } else {
     IsReallocated = FALSE;
   }
-
-  DEBUG_CODE_BEGIN ();
-
-  TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Adding entry type (T:%u|F:%d|G:%d) - %s\n",
-    EntryType,
-    IsFolder,
-    IsGeneric,
-    OC_HUMAN_STRING (TextDevicePath)
-    ));
-
-  if (TextDevicePath != NULL) {
-    FreePool (TextDevicePath);
-  }
-
-  DEBUG_CODE_END ();
 
   //
   // Mark self recovery presence.
@@ -678,7 +634,7 @@ AddBootEntryFromSystemEntry (
   @param[in]     PredefinedPaths     The predefined boot file locations to scan.
   @param[in]     NumPredefinedPaths  The number of elements in PredefinedPaths.
   @param[in]     LazyScan            Lazy filesystem scanning.
-  @param[in]     Deduplicate         Ensure that duplicated entries are not added. 
+  @param[in]     Deduplicate         Ensure that duplicated entries are not added.
 
   @retval EFI_STATUS for last created option.
 **/
@@ -1321,35 +1277,6 @@ AddFileSystemEntry (
 
   LoaderFs = BootContext->PickerContext->LoaderHandle == FileSystemHandle;
 
-  DEBUG_CODE_BEGIN ();
-
-  TmpStatus = gBS->HandleProtocol (
-    FileSystemHandle,
-    &gEfiDevicePathProtocolGuid,
-    (VOID **) &DevicePath
-    );
-  if (!EFI_ERROR (TmpStatus)) {
-    TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-  } else {
-    TextDevicePath = NULL;
-  }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Adding fs %p (E:%d|L:%d|P:%r) - %s\n",
-    FileSystemHandle,
-    IsExternal,
-    LoaderFs,
-    Status,
-    OC_HUMAN_STRING (TextDevicePath)
-    ));
-
-  if (TextDevicePath != NULL) {
-    FreePool (TextDevicePath);
-  }
-
-  DEBUG_CODE_END ();
-
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1467,7 +1394,7 @@ InternalFileSystemForHandle (
 {
   EFI_STATUS          Status;
   LIST_ENTRY          *Link;
-  OC_BOOT_FILESYSTEM  *FileSystem;  
+  OC_BOOT_FILESYSTEM  *FileSystem;
 
   for (
     Link = GetFirstNode (&BootContext->FileSystems);
@@ -1482,7 +1409,7 @@ InternalFileSystemForHandle (
   }
 
   //
-  // Lazily check filesystem scan policy and add it in case it is ok. 
+  // Lazily check filesystem scan policy and add it in case it is ok.
   //
   if (!LazyScan) {
     DEBUG ((DEBUG_INFO, "OCB: Restricted fs %p access\n", FileSystemHandle));

@@ -167,6 +167,7 @@ OcProvideConsoleGop (
       return EFI_UNSUPPORTED;
     }
 
+    Gop = NULL;
     Status = EFI_NOT_FOUND;
     for (Index = 0; Index < HandleCount; ++Index) {
       if (HandleBuffer[Index] != gST->ConsoleOutHandle) {

@@ -106,56 +106,6 @@ OcHandleRecoveryRequest (
     return EFI_NOT_FOUND;
   }
 
-  //
-  // Debug recovery-boot-mode contents.
-  //
-  DEBUG_CODE_BEGIN ();
-  RecoveryBootMode = AllocatePool (RecoveryBootModeSize + 1);
-  if (RecoveryBootMode != NULL) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Failed to allocate recovery-boot-mode %u\n",
-      (UINT32) (RecoveryBootModeSize + 1)
-      ));
-
-    Status = gRT->GetVariable (
-      APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
-      &gAppleBootVariableGuid,
-      NULL,
-      &RecoveryBootModeSize,
-      RecoveryBootMode
-      );
-    if (!EFI_ERROR (Status)) {
-      //
-      // Ensure null-termination.
-      //
-      RecoveryBootMode[RecoveryBootModeSize] = '\0';
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: recovery-boot-mode %u = %a - %r\n",
-        (UINT32) RecoveryBootModeSize,
-        RecoveryBootMode,
-        Status
-        ));
-    } else {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Failed to obtain recovery-boot-mode %u - %r\n",
-        (UINT32) RecoveryBootModeSize,
-        Status
-        ));
-    }
-
-    FreePool (RecoveryBootMode);
-  } else {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Failed to allocate recovery-boot-mode %u\n",
-      (UINT32) (RecoveryBootModeSize + 1)
-      ));
-  }
-  DEBUG_CODE_END ();
-
   if (Initiator != NULL) {
     *Initiator = InternalGetRecoveryInitiator ();
   }

@@ -136,16 +136,6 @@ OcAbcInitialize (
     Settings->SyncRuntimePermissions
     ));
 
-  DEBUG_CODE_BEGIN ();
-  TotalMemory = OcCountFreePages (&LowMemory);
-  DEBUG ((
-    DEBUG_INFO,
-    "OCABC: Firmware has %Lu free pages (%Lu in lower 4 GB)\n",
-    (UINT64) TotalMemory,
-    (UINT64) LowMemory
-    ));
-  DEBUG_CODE_END ();
-
   BootCompat = GetBootCompatContext ();
 
   CopyMem (

@@ -339,7 +339,7 @@ PrelinkedContextInit (
     AllocateCopyPool (Context->PrelinkedInfoSection->Section32.Size,
       &Context->Prelinked[Context->PrelinkedInfoSection->Section32.Offset]) :
     AllocateCopyPool ((UINTN) Context->PrelinkedInfoSection->Section64.Size,
-      &Context->Prelinked[Context->PrelinkedInfoSection->Section64.Offset]);  
+      &Context->Prelinked[Context->PrelinkedInfoSection->Section64.Offset]);
   if (Context->PrelinkedInfo == NULL) {
     PrelinkedContextFree (Context);
     return EFI_OUT_OF_RESOURCES;
@@ -382,7 +382,7 @@ PrelinkedContextInit (
       PrelinkedContextFree (Context);
       return EFI_INVALID_PARAMETER;
     }
-    
+
     Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
   }
 
@@ -704,7 +704,7 @@ PrelinkedInjectPrepare (
     }
 
     //
-    // Prior to plist there usually is prelinked text. 
+    // Prior to plist there usually is prelinked text.
     //
     SegmentEndOffset = Context->Is32Bit ?
       Context->PrelinkedTextSegment->Segment32.FileOffset + Context->PrelinkedTextSegment->Segment32.FileSize :
@@ -1046,29 +1046,6 @@ PrelinkedInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-  // However, to avoid certain users making this kind of mistake, we still provide some
-  // code in debug mode to diagnose it.
-  //
-  DEBUG_CODE_BEGIN ();
-  if (Executable == NULL) {
-    FieldCount = PlistDictChildren (InfoPlistRoot);
-    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-      TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, NULL));
-      if (TmpKeyValue == NULL) {
-        continue;
-      }
-
-      if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
-        DEBUG ((DEBUG_ERROR, "OCAK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
-        ASSERT (FALSE);
-        CpuDeadLoop ();
-      }
-    }
-  }
-  DEBUG_CODE_END ();
-
   Failed = FALSE;
   Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL;
   Failed |= XmlNodeAppend (InfoPlistRoot, "string", NULL, BundlePath) == NULL;
@@ -1086,7 +1063,7 @@ PrelinkedInjectKext (
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
     Failed |= !AsciiUint64ToLowerHex (KmodInfoStr, sizeof (KmodInfoStr), KmodAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
-    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;
   }
 
   if (Failed) {

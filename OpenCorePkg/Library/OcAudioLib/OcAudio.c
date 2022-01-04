@@ -65,62 +65,12 @@ InternalMatchCodecDevicePath (
   EFI_AUDIO_IO_PROTOCOL_PORT  *OutputPorts;
   UINTN                       OutputPortsCount;
 
-  DEBUG_CODE_BEGIN ();
-  DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-  DEBUG ((
-    DEBUG_INFO,
-    "OCAU: Matching %s...\n",
-    DevicePathText != NULL ? DevicePathText : L"<invalid>"
-    ));
-  if (DevicePathText != NULL) {
-    FreePool (DevicePathText);
-  }
-  DEBUG_CODE_END ();
-
   for (Index = 0; Index < AudioIoHandleCount; ++Index) {
     Status = gBS->HandleProtocol (
       AudioIoHandles[Index],
       &gEfiDevicePathProtocolGuid,
       (VOID **) &CodecDevicePath
       );
-
-    DEBUG_CODE_BEGIN ();
-    DevicePathText = NULL;
-    if (!EFI_ERROR (Status)) {
-      DevicePathText = ConvertDevicePathToText (CodecDevicePath, FALSE, FALSE);
-    }
-
-    OutputPortsCount = 0;
-    Status = gBS->HandleProtocol (
-      AudioIoHandles[Index],
-      &gEfiAudioIoProtocolGuid,
-      (VOID **) &Private->AudioIo
-      );
-    if (!EFI_ERROR (Status)) {
-      Status = Private->AudioIo->GetOutputs (
-        Private->AudioIo,
-        &OutputPorts,
-        &OutputPortsCount
-        );
-      if (!EFI_ERROR (Status)) {
-        FreePool (OutputPorts);
-      }
-    }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCAU: %u/%u %s (%u outputs) - %r\n",
-      (UINT32) (Index + 1),
-      (UINT32) (AudioIoHandleCount),
-      DevicePathText != NULL ? DevicePathText : L"<invalid>",
-      (UINT32) OutputPortsCount,
-      Status
-      ));
-
-    if (DevicePathText != NULL) {
-      FreePool (DevicePathText);
-    }
-    DEBUG_CODE_END ();
 
     if (IsDevicePathEqual (DevicePath, CodecDevicePath)) {
       Status = gBS->HandleProtocol (

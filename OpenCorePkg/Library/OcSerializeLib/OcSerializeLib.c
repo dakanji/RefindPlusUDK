@@ -151,37 +151,6 @@ ParseSerializedDict (
 
     NewSchema->Apply (Serialized, CurrentValue, &NewSchema->Info, CurrentKey);
   }
-
-  DEBUG_CODE_BEGIN ();
-
-  for (Index = 0; Index < Info->Dict.SchemaSize; ++Index) {
-    if (Info->Dict.Schema[Index].Optional) {
-      continue;
-    }
-
-    for (Index2 = 0; Index2 < DictSize; ++Index2) {
-      CurrentKey = PlistKeyValue (PlistDictChild (Node, Index2, NULL));
-
-      if (CurrentKey == NULL) {
-        continue;
-      }
-
-      if (AsciiStrCmp (CurrentKey, Info->Dict.Schema[Index].Name) == 0) {
-        break;
-      }
-    }
-
-    if (Index2 == DictSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "OCS: Missing key %a, context <%a>!\n",
-        Info->Dict.Schema[Index].Name,
-        Context
-        ));
-    }
-  }
-
-  DEBUG_CODE_END ();
 }
 
 VOID

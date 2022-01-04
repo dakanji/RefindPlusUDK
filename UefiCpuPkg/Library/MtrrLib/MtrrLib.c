@@ -2249,22 +2249,6 @@ MtrrSetMemoryAttributesInMtrrSettings (
   OriginalVariableMtrrCount = 0;
 
   //
-  // 0. Dump the requests.
-  //
-  DEBUG_CODE (
-    DEBUG ((DEBUG_CACHE, "Mtrr: Set Mem Attribute to %a, ScratchSize = %x%a",
-            (MtrrSetting == NULL) ? "Hardware" : "Buffer", *ScratchSize,
-            (RangeCount <= 1) ? "," : "\n"
-            ));
-    for (Index = 0; Index < RangeCount; Index++) {
-      DEBUG ((DEBUG_CACHE, " %a: [%016lx, %016lx)\n",
-              mMtrrMemoryCacheTypeShortName[MIN (Ranges[Index].Type, CacheInvalid)],
-              Ranges[Index].BaseAddress, Ranges[Index].BaseAddress + Ranges[Index].Length
-              ));
-    }
-  );
-
-  //
   // 1. Validate the parameters.
   //
   if (!IsMtrrSupported ()) {
@@ -2838,91 +2822,7 @@ MtrrDebugPrintAllMtrrsWorker (
   IN MTRR_SETTINGS    *MtrrSetting
   )
 {
-  DEBUG_CODE (
-    MTRR_SETTINGS     LocalMtrrs;
-    MTRR_SETTINGS     *Mtrrs;
-    UINTN             Index;
-    UINTN             RangeCount;
-    UINT64            MtrrValidBitsMask;
-    UINT64            MtrrValidAddressMask;
-    UINT32            VariableMtrrCount;
-    BOOLEAN           ContainVariableMtrr;
-    MTRR_MEMORY_RANGE Ranges[
-      ARRAY_SIZE (mMtrrLibFixedMtrrTable) * sizeof (UINT64) + 2 * ARRAY_SIZE (Mtrrs->Variables.Mtrr) + 1
-      ];
-    MTRR_MEMORY_RANGE RawVariableRanges[ARRAY_SIZE (Mtrrs->Variables.Mtrr)];
-
-    if (!IsMtrrSupported ()) {
-      return;
-    }
-
-    VariableMtrrCount = GetVariableMtrrCountWorker ();
-
-    if (MtrrSetting != NULL) {
-      Mtrrs = MtrrSetting;
-    } else {
-      MtrrGetAllMtrrs (&LocalMtrrs);
-      Mtrrs = &LocalMtrrs;
-    }
-
-    //
-    // Dump RAW MTRR contents
-    //
-    DEBUG ((DEBUG_CACHE, "MTRR Settings:\n"));
-    DEBUG ((DEBUG_CACHE, "=============\n"));
-    DEBUG ((DEBUG_CACHE, "MTRR Default Type: %016lx\n", Mtrrs->MtrrDefType));
-    for (Index = 0; Index < ARRAY_SIZE (mMtrrLibFixedMtrrTable); Index++) {
-      DEBUG ((DEBUG_CACHE, "Fixed MTRR[%02d]   : %016lx\n", Index, Mtrrs->Fixed.Mtrr[Index]));
-    }
-    ContainVariableMtrr = FALSE;
-    for (Index = 0; Index < VariableMtrrCount; Index++) {
-      if (((MSR_IA32_MTRR_PHYSMASK_REGISTER *)&Mtrrs->Variables.Mtrr[Index].Mask)->Bits.V == 0) {
-        //
-        // If mask is not valid, then do not display range
-        //
-        continue;
-      }
-      ContainVariableMtrr = TRUE;
-      DEBUG ((DEBUG_CACHE, "Variable MTRR[%02d]: Base=%016lx Mask=%016lx\n",
-        Index,
-        Mtrrs->Variables.Mtrr[Index].Base,
-        Mtrrs->Variables.Mtrr[Index].Mask
-        ));
-    }
-    if (!ContainVariableMtrr) {
-      DEBUG ((DEBUG_CACHE, "Variable MTRR    : None.\n"));
-    }
-    DEBUG((DEBUG_CACHE, "\n"));
-
-    //
-    // Dump MTRR setting in ranges
-    //
-    DEBUG((DEBUG_CACHE, "Memory Ranges:\n"));
-    DEBUG((DEBUG_CACHE, "====================================\n"));
-    MtrrLibInitializeMtrrMask (&MtrrValidBitsMask, &MtrrValidAddressMask);
-    Ranges[0].BaseAddress = 0;
-    Ranges[0].Length      = MtrrValidBitsMask + 1;
-    Ranges[0].Type        = MtrrGetDefaultMemoryTypeWorker (Mtrrs);
-    RangeCount = 1;
-
-    MtrrLibGetRawVariableRanges (
-      &Mtrrs->Variables, VariableMtrrCount,
-      MtrrValidBitsMask, MtrrValidAddressMask, RawVariableRanges
-      );
-    MtrrLibApplyVariableMtrrs (
-      RawVariableRanges, VariableMtrrCount,
-      Ranges, ARRAY_SIZE (Ranges), &RangeCount
-      );
-
-    MtrrLibApplyFixedMtrrs (&Mtrrs->Fixed, Ranges, ARRAY_SIZE (Ranges), &RangeCount);
-
-    for (Index = 0; Index < RangeCount; Index++) {
-      DEBUG ((DEBUG_CACHE, "%a:%016lx-%016lx\n",
-        mMtrrMemoryCacheTypeShortName[Ranges[Index].Type],
-        Ranges[Index].BaseAddress, Ranges[Index].BaseAddress + Ranges[Index].Length - 1
-        ));
-    }
-  );
+    return;
 }
 
 /**

@@ -94,7 +94,7 @@ DiskImageBlockIoReadBlocks (
   IN EFI_LBA                Lba,
   IN UINTN                  BufferSize,
   OUT VOID                  *Buffer
-  ) 
+  )
 {
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
   BOOLEAN                          Result;
@@ -150,7 +150,7 @@ EFI_STATUS
 EFIAPI
 DiskImageBlockIoFlushBlocks (
   IN EFI_BLOCK_IO_PROTOCOL  *This
-  ) 
+  )
 {
   return EFI_SUCCESS;
 }
@@ -214,18 +214,6 @@ InternalConstructDmgDevicePath (
     );
 
   SetDevicePathEndNode (&DevPath->End);
-
-  DEBUG_CODE_BEGIN ();
-  ASSERT (
-    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, sizeof (*DevPath))
-    );
-
-  UnicodeDevPath = ConvertDevicePathToText ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, FALSE, FALSE);
-  DEBUG ((DEBUG_INFO, "OCDI: Built DMG DP: %s\n", UnicodeDevPath != NULL ? UnicodeDevPath : L"<NULL>"));
-  if (UnicodeDevPath != NULL) {
-    FreePool (UnicodeDevPath);
-  }
-  DEBUG_CODE_END ();
 }
 
 STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {

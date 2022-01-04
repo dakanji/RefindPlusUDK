@@ -460,7 +460,7 @@ LookupPatchedKextForIdentifier (
   KextLink = GetFirstNode (&Context->PatchedKexts);
   while (!IsNull (&Context->PatchedKexts, KextLink)) {
     PatchedKext = GET_PATCHED_KEXT_FROM_LINK (KextLink);
- 
+
     if (AsciiStrCmp (Identifier, PatchedKext->Identifier) == 0) {
       return PatchedKext;
     }
@@ -484,7 +484,7 @@ LookupBuiltinKextForIdentifier (
   KextLink = GetFirstNode (&Context->BuiltInKexts);
   while (!IsNull (&Context->BuiltInKexts, KextLink)) {
     BuiltinKext = GET_BUILTIN_KEXT_FROM_LINK (KextLink);
- 
+
     if (AsciiStrCmp (Identifier, BuiltinKext->Identifier) == 0) {
       return BuiltinKext;
     }
@@ -508,7 +508,7 @@ LookupBuiltinKextForPlistPath (
   KextLink = GetFirstNode (&Context->BuiltInKexts);
   while (!IsNull (&Context->BuiltInKexts, KextLink)) {
     BuiltinKext = GET_BUILTIN_KEXT_FROM_LINK (KextLink);
- 
+
     if (StrCmp (PlistPath, BuiltinKext->PlistPath) == 0) {
       return BuiltinKext;
     }
@@ -532,7 +532,7 @@ LookupBuiltinKextForBinaryPath (
   KextLink = GetFirstNode (&Context->BuiltInKexts);
   while (!IsNull (&Context->BuiltInKexts, KextLink)) {
     BuiltinKext = GET_BUILTIN_KEXT_FROM_LINK (KextLink);
- 
+
     if (BuiltinKext->BinaryPath != NULL
       && StrCmp (BinaryPath, BuiltinKext->BinaryPath) == 0) {
       return BuiltinKext;
@@ -603,7 +603,7 @@ InternalAddPatchedKext (
   if (PatchedKext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  
+
   PatchedKext->Signature  = PATCHED_KEXT_SIGNATURE;
   PatchedKext->Identifier = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
   if (PatchedKext->Identifier == NULL) {
@@ -669,7 +669,7 @@ InternalAddKextPatch (
     KextPatch->ApplyQuirk = TRUE;
     KextPatch->QuirkName  = QuirkName;
   }
-  
+
   InsertTailList (&PatchedKext->Patches, &KextPatch->Link);
 
   return EFI_SUCCESS;
@@ -694,7 +694,7 @@ CachelessContextInit (
   Context->ExtensionsDirFileName  = FileName;
   Context->KernelVersion          = KernelVersion;
   Context->Is32Bit                = Is32Bit;
-  
+
   InitializeListHead (&Context->InjectedKexts);
   InitializeListHead (&Context->InjectedDependencies);
   InitializeListHead (&Context->PatchedKexts);
@@ -766,7 +766,7 @@ CachelessContextFree (
     }
     FreePool (BuiltinKext);
   }
-  
+
   ZeroMem (Context, sizeof (*Context));
 }
 
@@ -855,19 +855,6 @@ CachelessContextAddKext (
     }
 
     if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
-      //
-      // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-      // However, to avoid certain users making this kind of mistake, we still provide some
-      // code in debug mode to diagnose it.
-      //
-      DEBUG_CODE_BEGIN ();
-      if (Executable == NULL) {
-        DEBUG ((DEBUG_ERROR, "OCAK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
-        ASSERT (FALSE);
-        CpuDeadLoop ();
-      }
-      DEBUG_CODE_END ();
-
       NewKext->BinaryFileName = AsciiStrCopyToUnicode (XmlNodeContent (InfoPlistValue), 0);
       if (NewKext->BinaryFileName == NULL) {
         XmlDocumentFree (InfoPlistDocument);
@@ -1031,7 +1018,7 @@ CachelessContextBlock (
     }
   }
 
-  PatchedKext->Block = TRUE;  
+  PatchedKext->Block = TRUE;
 
   return EFI_SUCCESS;
 }
@@ -1357,7 +1344,7 @@ CachelessContextHookBuiltin (
         // Kext is not present, skip.
         //
         DEBUG ((DEBUG_WARN, "OCAK: Attempted to patch non-existent kext %a\n", PatchedKext->Identifier));
-        
+
       } else {
         BuiltinKext->PatchKext = TRUE;
         Status = ScanDependencies (Context, PatchedKext->Identifier);
