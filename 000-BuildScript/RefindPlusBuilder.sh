@@ -58,7 +58,8 @@ trap runErr ERR
 clear
 msg_info '## RefindPlusBuilder - Setting Up ##'
 msg_info '------------------------------------'
-EDIT_BRANCH="${1:-GOPFix}"
+BUILD_BRANCH="${1:-GOPFix}"
+DEBUG_TYPE="${2:-0}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 WORK_DIR="${BASE_DIR}/Working"
 EDK2_DIR="${BASE_DIR}/edk2"
@@ -72,12 +73,7 @@ XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
 BINARY_DIR_REL="${XCODE_DIR_REL}/X64"
 BINARY_DIR_DBG="${XCODE_DIR_DBG}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra.h"
-GLOBAL_FILE_TMP_REL="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra-REL.txt"
-GLOBAL_FILE_TMP_DBG="${EDK2_DIR}/RefindPlusPkg/BootMaster/globalExtra-DBG.txt"
-BUILD_DSC="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg.dsc"
-BUILD_DSC_REL="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-REL.dsc"
-BUILD_DSC_DBG="${EDK2_DIR}/RefindPlusPkg/RefindPlusPkg-DBG.dsc"
+GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/BootMaster/global.h"
 SHASUM='/usr/bin/shasum'
 DUP_SHASUM='/usr/local/bin/shasum'
 TMP_SHASUM='/usr/local/bin/_shasum'
@@ -110,8 +106,8 @@ else
 fi
 
 pushd "${WORK_DIR}" > /dev/null || exit 1
-msg_base "Checkout '${EDIT_BRANCH}' branch..."
-git checkout ${EDIT_BRANCH} > /dev/null
+msg_base "Checkout '${BUILD_BRANCH}' branch..."
+git checkout ${BUILD_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
 msg_base 'Update RefindPlusPkg...'
 
@@ -165,24 +161,19 @@ if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
     rm -fr "${EDK2_DIR}/.Build-TMP"
 fi
 if [ -f "${GLOBAL_FILE}" ] ; then
-    rm -fr "${GLOBAL_FILE}"
+    DEBUG_LEVEL='0'
+    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
 fi
-cp "${GLOBAL_FILE_TMP_REL}" "${GLOBAL_FILE}"
-
-if [ -f "${BUILD_DSC}" ] ; then
-    rm -fr "${BUILD_DSC}"
-fi
-cp "${BUILD_DSC_REL}" "${BUILD_DSC}"
 
 source edksetup.sh BaseTools
-build -b RELEASE
+build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
 
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
 fi
 popd > /dev/null || exit 1
 echo ''
-msg_info "Completed REL Build on '${EDIT_BRANCH}' Branch of RefindPlus"
+msg_info "Completed REL Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 msg_info 'Preparing DBG Build...'
 echo ''
 sleep 4
@@ -194,17 +185,16 @@ msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
 pushd "${EDK2_DIR}" > /dev/null || exit 1
 if [ -f "${GLOBAL_FILE}" ] ; then
-    rm -fr "${GLOBAL_FILE}"
+    if [ "${DEBUG_TYPE}" == '0' ] ; then
+        DEBUG_LEVEL='1'
+    else
+        DEBUG_LEVEL='2'
+    fi
+    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
 fi
-cp "${GLOBAL_FILE_TMP_DBG}" "${GLOBAL_FILE}"
-
-if [ -f "${BUILD_DSC}" ] ; then
-    rm -fr "${BUILD_DSC}"
-fi
-cp "${BUILD_DSC_DBG}" "${BUILD_DSC}"
 
 source edksetup.sh BaseTools
-build -b DEBUG
+build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
 
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
@@ -217,19 +207,16 @@ if [ -d "${EDK2_DIR}/Build" ] ; then
 fi
 popd > /dev/null || exit 1
 echo ''
-msg_info "Completed DBG Build on '${EDIT_BRANCH}' Branch of RefindPlus"
+msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 echo ''
 
 
 # Tidy up
 if [ -f "${GLOBAL_FILE}" ] ; then
-    rm -fr "${GLOBAL_FILE}"
+    DEBUG_LEVEL='0'
+    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
 fi
-cp "${GLOBAL_FILE_TMP_REL}" "${GLOBAL_FILE}"
-if [ -f "${BUILD_DSC}" ] ; then
-    rm -fr "${BUILD_DSC}"
-fi
-cp "${BUILD_DSC_REL}" "${BUILD_DSC}"
+
 echo ''
 msg_info 'Output EFI Files...'
 msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
