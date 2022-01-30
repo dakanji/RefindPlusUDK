@@ -220,8 +220,9 @@ echo ''
 msg_info 'Output EFI Files...'
 msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
 if [ "${DEBUG_TYPE}" != '0' ] ; then
-    msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_DBG}/X64'"
+    msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_NPT}/X64'"
 fi
+msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
 msg_status "RefindPlus EFI Files (Others - REL) : '${XCODE_DIR_REL}/X64'"
 echo ''
 echo ''
