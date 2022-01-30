@@ -4,7 +4,7 @@
  # RefindPlusBuilder.sh
  # A script to build RefindPlus
  #
- # Copyright (c) 2020-2021 Dayo Akanji
+ # Copyright (c) 2020-2022 Dayo Akanji
  # MIT License
 ###
 
@@ -70,10 +70,11 @@ if [ ! -d "${EDK2_DIR}" ] ; then
 fi
 XCODE_DIR_REL="${EDK2_DIR}/Build/RefindPlus/RELEASE_XCODE5"
 XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
+XCODE_DIR_NPT="${EDK2_DIR}/Build/RefindPlus/NOOPT_XCODE5"
 BINARY_DIR_REL="${XCODE_DIR_REL}/X64"
 BINARY_DIR_DBG="${XCODE_DIR_DBG}/X64"
+BINARY_DIR_NPT="${XCODE_DIR_NPT}/X64"
 OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-GLOBAL_FILE="${EDK2_DIR}/RefindPlusPkg/BootMaster/global.h"
 SHASUM='/usr/bin/shasum'
 DUP_SHASUM='/usr/local/bin/shasum'
 TMP_SHASUM='/usr/local/bin/_shasum'
@@ -113,6 +114,7 @@ msg_base 'Update RefindPlusPkg...'
 
 # Remove later #
 rm -fr "${EDK2_DIR}/RefindPkg"
+rm -fr "${EDK2_DIR}/.Build-TMP"
 # Remove later #
 
 if [ ! -L "${EDK2_DIR}/RefindPlusPkg" ]; then
@@ -152,18 +154,11 @@ if [ -d "${OUTPUT_DIR}" ] ; then
 fi
 mkdir -p "${OUTPUT_DIR}"
 
-# Build release version
+# Build RELEASE version
 clear
 msg_info '## RefindPlusBuilder - Building REL Version ##'
 msg_info '----------------------------------------------'
 pushd "${EDK2_DIR}" > /dev/null || exit 1
-if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
-    rm -fr "${EDK2_DIR}/.Build-TMP"
-fi
-if [ -f "${GLOBAL_FILE}" ] ; then
-    DEBUG_LEVEL='0'
-    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
-fi
 
 source edksetup.sh BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
@@ -179,48 +174,54 @@ echo ''
 sleep 4
 
 
-# Build debug version
+# Build DEBUG version
 clear
 msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
 pushd "${EDK2_DIR}" > /dev/null || exit 1
-if [ -f "${GLOBAL_FILE}" ] ; then
-    if [ "${DEBUG_TYPE}" == '0' ] ; then
-        DEBUG_LEVEL='1'
-    else
-        DEBUG_LEVEL='2'
-    fi
-    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
-fi
 
 source edksetup.sh BaseTools
 build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
 
 if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
-fi
-if [ -d "${EDK2_DIR}/.Build-TMP" ] ; then
-    rm -fr "${EDK2_DIR}/.Build-TMP"
-fi
-if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
+    cp -f "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
 fi
 popd > /dev/null || exit 1
 echo ''
 msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+
+
+# Build NOOPT version
+if [ "${DEBUG_TYPE}" != '0' ] ; then
+    msg_info 'Preparing NPT Build...'
+    echo ''
+    sleep 4
+
+    clear
+    msg_info '## RefindPlusBuilder - Building NPT Version ##'
+    msg_info '----------------------------------------------'
+    pushd "${EDK2_DIR}" > /dev/null || exit 1
+
+    source edksetup.sh BaseTools
+    build -a X64 -b NOOPT -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
+
+    if [ -d "${EDK2_DIR}/Build" ] ; then
+        cp -f "${BINARY_DIR_NPT}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-NPT.efi"
+    fi
+    popd > /dev/null || exit 1
+    echo ''
+    msg_info "Completed NPT Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+fi
 echo ''
 
 
 # Tidy up
-if [ -f "${GLOBAL_FILE}" ] ; then
-    DEBUG_LEVEL='0'
-    /usr/bin/perl -i -p -e "s~#define REFIT_DEBUG \(\d+\)~#define REFIT_DEBUG (${DEBUG_LEVEL})~" "${GLOBAL_FILE}"
-fi
-
 echo ''
 msg_info 'Output EFI Files...'
 msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
-msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
+if [ "${DEBUG_TYPE}" != '0' ] ; then
+    msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_DBG}/X64'"
+fi
 msg_status "RefindPlus EFI Files (Others - REL) : '${XCODE_DIR_REL}/X64'"
 echo ''
 echo ''
