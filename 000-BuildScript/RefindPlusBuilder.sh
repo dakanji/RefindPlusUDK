@@ -59,14 +59,12 @@ clear
 msg_info '## RefindPlusBuilder - Setting Up ##'
 msg_info '------------------------------------'
 BUILD_BRANCH="${1:-GOPFix}"
-DEBUG_TYPE="${2:-0}"
+DEBUG_TYPE="${2:-SOME}"
 BASE_DIR="${HOME}/Documents/RefindPlus"
 WORK_DIR="${BASE_DIR}/Working"
 EDK2_DIR="${BASE_DIR}/edk2"
 if [ ! -d "${EDK2_DIR}" ] ; then
-    msg_error "ERROR: Could not locate ${EDK2_DIR}"
-    echo ''
-    exit 1
+    runErr "ERROR: Could not locate ${EDK2_DIR}"
 fi
 XCODE_DIR_REL="${EDK2_DIR}/Build/RefindPlus/RELEASE_XCODE5"
 XCODE_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_XCODE5"
@@ -80,12 +78,8 @@ DUP_SHASUM='/usr/local/bin/shasum'
 TMP_SHASUM='/usr/local/bin/_shasum'
 
 BASETOOLS_SHA_FILE="${EDK2_DIR}/000-BuildScript/BaseToolsSHA.txt"
-if [ ! -f "${BASETOOLS_SHA_FILE}" ] ; then
-    BASETOOLS_SHA_OLD='Default'
-else
-    # shellcheck disable=SC1090
-    source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
-fi
+# shellcheck disable=SC1090
+source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
 if [ -f "${DUP_SHASUM}" ] ; then
     mv "${DUP_SHASUM}" "${TMP_SHASUM}"
     SHASUM_FIX='true'
@@ -93,9 +87,10 @@ else
     SHASUM_FIX='false'
 fi
 
-pushd "${EDK2_DIR}/BaseTools" > /dev/null || exit 1
+ErrMsg="ERROR: Could not find '${EDK2_DIR}/BaseTools'"
+pushd "${EDK2_DIR}/BaseTools" > /dev/null || runErr "${ErrMsg}"
 BASETOOLS_SHA_NEW="$(find . -type f -name '*.c' -name '*.h' -name '*.py' -print0 | sort -z | xargs -0 ${SHASUM} | ${SHASUM})"
-popd > /dev/null || exit 1
+popd > /dev/null || runErr "${ErrMsg}"
 
 if [ "${SHASUM_FIX}" == 'true' ] ; then
     mv "${TMP_SHASUM}" "${DUP_SHASUM}"
@@ -106,7 +101,8 @@ else
     BUILD_TOOLS='false'
 fi
 
-pushd "${WORK_DIR}" > /dev/null || exit 1
+ErrMsg="ERROR: Could not find '${WORK_DIR}'"
+pushd "${WORK_DIR}" > /dev/null || runErr "${ErrMsg}"
 msg_base "Checkout '${BUILD_BRANCH}' branch..."
 git checkout ${BUILD_BRANCH} > /dev/null
 msg_status '...OK'; echo ''
@@ -122,22 +118,24 @@ if [ ! -L "${EDK2_DIR}/RefindPlusPkg" ]; then
     ln -s "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
 fi
 msg_status '...OK'; echo ''
-popd > /dev/null || exit 1
+popd > /dev/null || runErr "${ErrMsg}"
 
 if [ "${BUILD_TOOLS}" == 'true' ] ; then
-    pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || exit 1
+    ErrMsg="ERROR: Could not find '${EDK2_DIR}/BaseTools/Source/C'"
+    pushd "${EDK2_DIR}/BaseTools/Source/C" > /dev/null || runErr "${ErrMsg}"
     msg_base 'Make Clean...'
     make clean
     msg_status '...OK'; echo ''
-    popd > /dev/null || exit 1
+    popd > /dev/null || runErr "${ErrMsg}"
 
-    pushd "${EDK2_DIR}" > /dev/null || exit 1
+    ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+    pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
     msg_base 'Make BaseTools...'
     make -C BaseTools/Source/C
     echo '#!/usr/bin/env bash' > "${BASETOOLS_SHA_FILE}"
     echo "BASETOOLS_SHA_OLD='${BASETOOLS_SHA_NEW}'" >> "${BASETOOLS_SHA_FILE}"
     msg_status '...OK'; echo ''
-    popd > /dev/null || exit 1
+    popd > /dev/null || runErr "${ErrMsg}"
 fi
 
 
@@ -158,7 +156,8 @@ mkdir -p "${OUTPUT_DIR}"
 clear
 msg_info '## RefindPlusBuilder - Building REL Version ##'
 msg_info '----------------------------------------------'
-pushd "${EDK2_DIR}" > /dev/null || exit 1
+ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
 
 source edksetup.sh BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
@@ -166,7 +165,7 @@ build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
 fi
-popd > /dev/null || exit 1
+popd > /dev/null || runErr "${ErrMsg}"
 echo ''
 msg_info "Completed REL Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 msg_info 'Preparing DBG Build...'
@@ -178,7 +177,8 @@ sleep 4
 clear
 msg_info '## RefindPlusBuilder - Building DBG Version ##'
 msg_info '----------------------------------------------'
-pushd "${EDK2_DIR}" > /dev/null || exit 1
+ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
 
 source edksetup.sh BaseTools
 build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
@@ -186,13 +186,13 @@ build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
 if [ -d "${EDK2_DIR}/Build" ] ; then
     cp -f "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
 fi
-popd > /dev/null || exit 1
+popd > /dev/null || runErr "${ErrMsg}"
 echo ''
 msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 
 
 # Build NOOPT version
-if [ "${DEBUG_TYPE}" != '0' ] ; then
+if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
     msg_info 'Preparing NPT Build...'
     echo ''
     sleep 4
@@ -200,7 +200,8 @@ if [ "${DEBUG_TYPE}" != '0' ] ; then
     clear
     msg_info '## RefindPlusBuilder - Building NPT Version ##'
     msg_info '----------------------------------------------'
-    pushd "${EDK2_DIR}" > /dev/null || exit 1
+    ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+    pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
 
     source edksetup.sh BaseTools
     build -a X64 -b NOOPT -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
@@ -208,7 +209,7 @@ if [ "${DEBUG_TYPE}" != '0' ] ; then
     if [ -d "${EDK2_DIR}/Build" ] ; then
         cp -f "${BINARY_DIR_NPT}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-NPT.efi"
     fi
-    popd > /dev/null || exit 1
+    popd > /dev/null || runErr "${ErrMsg}"
     echo ''
     msg_info "Completed NPT Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 fi
@@ -219,7 +220,7 @@ echo ''
 echo ''
 msg_info 'Output EFI Files...'
 msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
-if [ "${DEBUG_TYPE}" != '0' ] ; then
+if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
     msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_NPT}/X64'"
 fi
 msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
