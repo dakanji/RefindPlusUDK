@@ -5,7 +5,8 @@ Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-
+//DA-TAG: Added
+#include "../../../RefindPlusPkg/Library/OCRefitLib/OCRefitLib.h"
 
 #include "OcUnicodeCollationEngInternal.h"
 
