@@ -3,9 +3,9 @@ Elf convert solution
 
 Copyright (c) 2010 - 2016, Intel Corporation. All rights reserved.<BR>
 
-This program and the accompanying materials are licensed and made available 
-under the terms and conditions of the BSD License which accompanies this 
-distribution.  The full text of the license may be found at 
+This program and the accompanying materials are licensed and made available
+under the terms and conditions of the BSD License which accompanies this
+distribution.  The full text of the license may be found at
 http://opensource.org/licenses/bsd-license.php
 
 THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
@@ -87,7 +87,7 @@ CoffAddFixup(
       // Add a null entry (is it required ?)
       //
       CoffAddFixupEntry (0);
-      
+
       //
       // Pad for alignment.
       //
@@ -158,7 +158,7 @@ IsElfHeader (
   UINT8  *FileBuffer
 )
 {
-  return (FileBuffer[EI_MAG0] == ELFMAG0 && 
+  return (FileBuffer[EI_MAG0] == ELFMAG0 &&
           FileBuffer[EI_MAG1] == ELFMAG1 &&
           FileBuffer[EI_MAG2] == ELFMAG2 &&
           FileBuffer[EI_MAG3] == ELFMAG3);
@@ -187,13 +187,13 @@ ConvertElf (
       return FALSE;
     }
   } else {
-    Error (NULL, 0, 3000, "Unsupported", "ELF EI_CLASS not supported.");
+    Error (NULL, 0, 3000, "Not Supported", "ELF EI_CLASS not supported.");
     return FALSE;
   }
 
   //
   // Compute sections new address.
-  //  
+  //
   VerboseMsg ("Compute sections new address.");
   ElfFunctions.ScanSections ();
 
@@ -234,6 +234,6 @@ ConvertElf (
   // Free resources used by ELF functions.
   //
   ElfFunctions.CleanUp ();
-  
+
   return TRUE;
 }

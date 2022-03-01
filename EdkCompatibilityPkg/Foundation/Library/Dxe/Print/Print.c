@@ -519,7 +519,7 @@ Returns:
   if (Status == EFI_SUCCESS) { Desc = (CHAR8 *) "Success"; } else
   if (Status == EFI_LOAD_ERROR) { Desc = (CHAR8 *) "Load Error"; } else
   if (Status == EFI_INVALID_PARAMETER) { Desc = (CHAR8 *) "Invalid Parameter"; } else
-  if (Status == EFI_UNSUPPORTED) { Desc = (CHAR8 *) "Unsupported"; } else
+  if (Status == EFI_UNSUPPORTED) { Desc = (CHAR8 *) "Not Supported"; } else
   if (Status == EFI_BAD_BUFFER_SIZE) { Desc = (CHAR8 *) "Bad Buffer Size"; } else
   if (Status == EFI_BUFFER_TOO_SMALL) { Desc = (CHAR8 *) "Buffer Too Small"; } else
   if (Status == EFI_NOT_READY) { Desc = (CHAR8 *) "Not Ready"; } else

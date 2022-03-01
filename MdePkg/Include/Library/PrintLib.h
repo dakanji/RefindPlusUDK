@@ -121,7 +121,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
       - RETURN_INVALID_PARAMETER
         - "Invalid Parameter"
       - RETURN_UNSUPPORTED
-        - "Unsupported"
+        - "Not Supported"
       - RETURN_BAD_BUFFER_SIZE
         - "Bad Buffer Size"
       - RETURN_BUFFER_TOO_SMALL
@@ -146,7 +146,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
         - "Not Found"
       - RETURN_ACCESS_DENIED
         - "Access Denied"
-      - RETURN_NO_RESPONSE           
+      - RETURN_NO_RESPONSE
         - "No Response"
       - RETURN_NO_MAPPING
         - "No Mapping"

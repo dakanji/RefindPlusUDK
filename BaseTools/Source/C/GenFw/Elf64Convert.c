@@ -139,23 +139,23 @@ InitializeElf64 (
   //
   VerboseMsg ("Check ELF64 Header Information");
   if (mEhdr->e_ident[EI_CLASS] != ELFCLASS64) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF EI_DATA not ELFCLASS64");
+    Error (NULL, 0, 3000, "Not Supported", "ELF EI_DATA not ELFCLASS64");
     return FALSE;
   }
   if (mEhdr->e_ident[EI_DATA] != ELFDATA2LSB) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF EI_DATA not ELFDATA2LSB");
+    Error (NULL, 0, 3000, "Not Supported", "ELF EI_DATA not ELFDATA2LSB");
     return FALSE;
   }
   if ((mEhdr->e_type != ET_EXEC) && (mEhdr->e_type != ET_DYN)) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF e_type not ET_EXEC or ET_DYN");
+    Error (NULL, 0, 3000, "Not Supported", "ELF e_type not ET_EXEC or ET_DYN");
     return FALSE;
   }
   if (!((mEhdr->e_machine == EM_X86_64) || (mEhdr->e_machine == EM_AARCH64))) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF e_machine not EM_X86_64 or EM_AARCH64");
+    Error (NULL, 0, 3000, "Not Supported", "ELF e_machine not EM_X86_64 or EM_AARCH64");
     return FALSE;
   }
   if (mEhdr->e_version != EV_CURRENT) {
-    Error (NULL, 0, 3000, "Unsupported", "ELF e_version (%u) not EV_CURRENT (%d)", (unsigned) mEhdr->e_version, EV_CURRENT);
+    Error (NULL, 0, 3000, "Not Supported", "ELF e_version (%u) not EV_CURRENT (%d)", (unsigned) mEhdr->e_version, EV_CURRENT);
     return FALSE;
   }
 
@@ -788,24 +788,24 @@ WriteSections64 (
             // Absolute relocation.
             //
             VerboseMsg ("R_X86_64_64");
-            VerboseMsg ("Offset: 0x%08X, Addend: 0x%016LX", 
-              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)), 
+            VerboseMsg ("Offset: 0x%08X, Addend: 0x%016LX",
+              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)),
               *(UINT64 *)Targ);
             *(UINT64 *)Targ = *(UINT64 *)Targ - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx];
             VerboseMsg ("Relocation:  0x%016LX", *(UINT64*)Targ);
             break;
           case R_X86_64_32:
             VerboseMsg ("R_X86_64_32");
-            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X", 
-              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)), 
+            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X",
+              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)),
               *(UINT32 *)Targ);
             *(UINT32 *)Targ = (UINT32)((UINT64)(*(UINT32 *)Targ) - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx]);
             VerboseMsg ("Relocation:  0x%08X", *(UINT32*)Targ);
             break;
           case R_X86_64_32S:
             VerboseMsg ("R_X86_64_32S");
-            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X", 
-              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)), 
+            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X",
+              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)),
               *(UINT32 *)Targ);
             *(INT32 *)Targ = (INT32)((INT64)(*(INT32 *)Targ) - SymShdr->sh_addr + mCoffSectionsOffset[Sym->st_shndx]);
             VerboseMsg ("Relocation:  0x%08X", *(UINT32*)Targ);
@@ -826,8 +826,8 @@ WriteSections64 (
             // Relative relocation: Symbol - Ip + Addend
             //
             VerboseMsg ("R_X86_64_PC32");
-            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X", 
-              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)), 
+            VerboseMsg ("Offset: 0x%08X, Addend: 0x%08X",
+              (UINT32)(SecOffset + (Rel->r_offset - SecShdr->sh_addr)),
               *(UINT32 *)Targ);
             *(UINT32 *)Targ = (UINT32) (*(UINT32 *)Targ
               + (mCoffSectionsOffset[Sym->st_shndx] - SymShdr->sh_addr)
@@ -974,7 +974,7 @@ WriteRelocations64 (
             case R_X86_64_PLT32:
               break;
             case R_X86_64_64:
-              VerboseMsg ("EFI_IMAGE_REL_BASED_DIR64 Offset: 0x%08X", 
+              VerboseMsg ("EFI_IMAGE_REL_BASED_DIR64 Offset: 0x%08X",
                 mCoffSectionsOffset[RelShdr->sh_info] + (Rel->r_offset - SecShdr->sh_addr));
               CoffAddFixup(
                 (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
@@ -983,7 +983,7 @@ WriteRelocations64 (
               break;
             case R_X86_64_32S:
             case R_X86_64_32:
-              VerboseMsg ("EFI_IMAGE_REL_BASED_HIGHLOW Offset: 0x%08X", 
+              VerboseMsg ("EFI_IMAGE_REL_BASED_HIGHLOW Offset: 0x%08X",
                 mCoffSectionsOffset[RelShdr->sh_info] + (Rel->r_offset - SecShdr->sh_addr));
               CoffAddFixup(
                 (UINT32) ((UINT64) mCoffSectionsOffset[RelShdr->sh_info]
@@ -1123,5 +1123,3 @@ CleanUp64 (
     free (mCoffSectionsOffset);
   }
 }
-
-

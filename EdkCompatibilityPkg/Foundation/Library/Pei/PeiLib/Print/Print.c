@@ -704,7 +704,7 @@ Returns:
   } else if (Status == EFI_INVALID_PARAMETER) {
     Desc = "Invalid Parameter";
   } else if (Status == EFI_UNSUPPORTED) {
-    Desc = "Unsupported";
+    Desc = "Not Supported";
   } else if (Status == EFI_BAD_BUFFER_SIZE) {
     Desc = "Bad Buffer Size";
   } else if (Status == EFI_BUFFER_TOO_SMALL) {

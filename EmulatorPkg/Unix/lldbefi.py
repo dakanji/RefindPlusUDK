@@ -54,7 +54,7 @@ def EFI_GUID_TypeSummary (valobj,internal_dict):
 EFI_STATUS_Dict = {
     (0x8000000000000000 |  1): "Load Error",
     (0x8000000000000000 |  2): "Invalid Parameter",
-    (0x8000000000000000 |  3): "Unsupported",
+    (0x8000000000000000 |  3): "Not Supported",
     (0x8000000000000000 |  4): "Bad Buffer Size",
     (0x8000000000000000 |  5): "Buffer Too Small",
     (0x8000000000000000 |  6): "Not Ready",
@@ -85,7 +85,7 @@ EFI_STATUS_Dict = {
 
     (0x80000000         |  1): "Load Error",
     (0x80000000         |  2): "Invalid Parameter",
-    (0x80000000         |  3): "Unsupported",
+    (0x80000000         |  3): "Not Supported",
     (0x80000000         |  4): "Bad Buffer Size",
     (0x80000000         |  5): "Buffer Too Small",
     (0x80000000         |  6): "Not Ready",
