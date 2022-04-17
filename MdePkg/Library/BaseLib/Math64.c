@@ -81,23 +81,20 @@ InternalMathARShiftU64 (
   IN      UINTN                     Count
   )
 {
-  INTN  TestValue;
-
   //
   // Test if this compiler supports arithmetic shift
   //
-  TestValue = (INTN)((INT64)(1ULL << 63) >> 63);
-  if (TestValue == -1) {
-    //
-    // Arithmetic shift is supported
-    //
-    return (UINT64)((INT64)Operand >> Count);
-  }
-
+  #if (((-1)>>1) == (-1))
+  //
+  // Arithmetic is supported
+  //
+  return (UINT64)((INT64)Operand >> Count);
+  #else
   //
   // Arithmetic is not supported
   //
   return (Operand >> Count) | ((INTN)Operand < 0 ? ~((UINTN)-1 >> Count) : 0);
+  #endif
 }
 
 

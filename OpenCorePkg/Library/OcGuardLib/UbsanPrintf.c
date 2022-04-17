@@ -367,6 +367,7 @@ void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'd':
             case 'i':
                 p.base = 10;
+                p.uc = 0;
 #ifdef PRINTF_LONG_SUPPORT
 #ifdef PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
@@ -534,4 +535,3 @@ int EFIAPI tfp_sprintf(char *str, const char *format, ...)
 #endif
 
 #endif // HAVE_UBSAN_SUPPORT
-
