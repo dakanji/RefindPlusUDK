@@ -100,7 +100,6 @@ trap trapINT SIGINT
 
 # Set Script Params
 BUILD_BRANCH="${1:-GOPFix}"
-BRANCH_NAME="Git Branch = ${BUILD_BRANCH}"
 DEBUG_TYPE="${2:-SOME}"
 WORD_WRAP="${3:-0}"
 if [ "${WORD_WRAP}" == '0' ] ; then
@@ -110,7 +109,7 @@ fi
 
 # Set things up for build
 clear
-msg_info "## RefindPlusBuilder - Setting Up ##  :  ${BRANCH_NAME}"
+msg_info "## RefindPlusBuilder - Setting Up ##  :  ${BUILD_BRANCH}"
 msg_info '##--------------------------------##'
 BASE_DIR="${HOME}/Documents/RefindPlus"
 WORK_DIR="${BASE_DIR}/Working"
@@ -185,7 +184,7 @@ fi
 
 # Basic clean up
 clear
-msg_info "## RefindPlusBuilder - Initial Clean Up ##  :  ${BRANCH_NAME}"
+msg_info "## RefindPlusBuilder - Initial Clean Up ##  :  ${BUILD_BRANCH}"
 msg_info '##--------------------------------------##'
 rm -fr "${EDK2_DIR}/Build"
 mkdir -p "${EDK2_DIR}/Build"
@@ -195,7 +194,7 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Build RELEASE version
 clear
-msg_info "## RefindPlusBuilder - Building REL Version ##  :  ${BRANCH_NAME}"
+msg_info "## RefindPlusBuilder - Building REL Version ##  :  ${BUILD_BRANCH}"
 msg_info '##------------------------------------------##'
 ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
 pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
@@ -214,7 +213,7 @@ sleep 4
 
 # Build DEBUG version
 clear
-msg_info "## RefindPlusBuilder - Building DBG Version ##  :  ${BRANCH_NAME}"
+msg_info "## RefindPlusBuilder - Building DBG Version ##  :  ${BUILD_BRANCH}"
 msg_info '##------------------------------------------##'
 ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
 pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
@@ -235,7 +234,7 @@ if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
     sleep 4
 
     clear
-    msg_info "## RefindPlusBuilder - Building NPT Version ##  :  ${BRANCH_NAME}"
+    msg_info "## RefindPlusBuilder - Building NPT Version ##  :  ${BUILD_BRANCH}"
     msg_info '##------------------------------------------##'
     ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
     pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
