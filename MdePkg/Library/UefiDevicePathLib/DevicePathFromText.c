@@ -983,6 +983,7 @@ DevPathFromTextAcpiAdr (
       SetDevicePathNodeLength (AcpiAdr, Length + sizeof (UINT32));
     }
 
+    /* coverity[overrun-local: SUPPRESS] */
     (&AcpiAdr->ADR)[Index] = (UINT32) Strtoi (DisplayDeviceStr);
   }
 

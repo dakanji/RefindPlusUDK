@@ -277,6 +277,7 @@ DevPathToTextVendor (
   if (DataLength != 0) {
     UefiDevicePathLibCatPrint (Str, L",");
     for (Index = 0; Index < DataLength; Index++) {
+      /* coverity[overrun-local: SUPPRESS] */
       UefiDevicePathLibCatPrint (Str, L"%02x", Data[Index]);
     }
   }

@@ -82,7 +82,7 @@ _PyLong_New(Py_ssize_t size)
                         "too many digits in integer");
         return NULL;
     }
-    /* coverity[ampersand_in_size] */
+    /* coverity[ampersand_in_size: SUPPRESS] */
     /* XXX(nnorwitz): PyObject_NEW_VAR / _PyObject_VAR_SIZE need to detect
        overflow */
     return PyObject_NEW_VAR(PyLongObject, &PyLong_Type, size);
