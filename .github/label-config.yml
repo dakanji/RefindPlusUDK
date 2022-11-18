@@ -1,0 +1,402 @@
+
+# Configuration for Label Actions - https://github.com/dessant/label-actions
+
+# The `Uncertain` label is added to issues
+Uncertain:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Bug` label is added to issues
+Bug:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Cancelled` label is added to issues
+Cancelled:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Incomplete'
+    # Close and lock thread
+    close: true
+    # Add Comment
+    comment: >
+      Cancelled by/for: @{issue-author}
+
+# The `Discussion` label is added to issues
+Discussion:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Bug'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+      - 'Known-Issue'
+      - 'Enhancement'
+
+# The `Documentation` label is added to issues or pull requests
+Documentation:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Incomplete'
+
+# The `Duplicate` label is added to issues
+Duplicate:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Incomplete'
+
+# The `Enhancement` label is added to issues
+Enhancement:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Tagged` label is added to issues
+Tagged:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+
+# The `Good-First-Issue` label is added to issues
+Good-First-Issue:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Help-Wanted` label is added to issues
+Help-Wanted:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Incomplete` label is added to issues
+Incomplete:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+
+# The `Invalid` label is added to issues
+Invalid:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Known-Issue` label is added to issues
+Known-Issue:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Parked` label is added to issues
+Parked:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Upstream` label is added to issues
+Upstream:
+  issues:
+    # Add labels
+    label:
+      - 'Known-Issue'
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Stale'
+      - 'Tagged'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Queries` label is added to issues
+Queries:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Tagged'
+      - 'Stale'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Resolved` label is added to issues
+Resolved:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Resolved` label is removed from issues
+-Resolved:
+  issues:
+    # Reopen and unlock issue
+    reopen: true
+    unlock: true
+
+# The `Stale` label is added to issues
+Stale:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+
+# The `Unclear` label is added to issues
+Unclear:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Not-Planned` label is added to issues
+Not-Planned:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Not-Planned` label is removed from issues
+-Not-Planned:
+  issues:
+    # Reopen and unlock issue
+    reopen: true
+    unlock: true
+
+# The `Cannot-Replicate` label is added to issues
+Cannot-Replicate:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Unclear'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+
+# The `Prorogued` label is added to issues
+Prorogued:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Pending'
+      - 'Parked'
+      - 'Stale'
+      - 'Queries'
+      - 'Unclear'
+      - 'Duplicate'
+      - 'Incomplete'
+    # Close thread
+    close: true
+
+# The `Prorogued` label is removed from issues
+-Prorogued:
+  issues:
+    # Reopen and unlock issue
+    reopen: true
+    unlock: true

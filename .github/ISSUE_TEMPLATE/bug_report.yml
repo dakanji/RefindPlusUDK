@@ -1,0 +1,41 @@
+name: Bug Report
+description: Report a problem with RefindPlusUDK
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a problem with RefindPlusUDK.
+        Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature instead if you only wish to ask a question or make a comment.
+  - type: dropdown
+    id: hardware
+    attributes:
+      label: Device Type
+      description: You can make more than one selection
+      multiple: true
+      options:
+        - 'UEFI PC'
+        - 'Apple Mac'
+        - 'Chromebook'
+        - 'Other Device'
+    validations:
+      required: true
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: Problem Description
+      description: |
+        Please provide a clear and concise description of the problem.
+      placeholder: |
+        Additionally, outline how to reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: extra-info
+    attributes:
+      label: Additional Context
+      description: |
+        Any additional details that may provide clarity on the problem.
+      placeholder: |
+        You can attach files by dragging/dropping them on this field.
+        You can also add screenshots to shed more light on the problem.
+        Screenshots can be saved by pressing the F10 key in RefindPlus.
