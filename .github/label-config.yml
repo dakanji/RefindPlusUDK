@@ -1,22 +1,49 @@
 
 # Configuration for Label Actions - https://github.com/dessant/label-actions
 
+# The `Accepted` label is added to issues
+Accepted:
+  issues:
+    # Remove labels
+    unlabel:
+      - 'Uncertain'
+      - 'Cancelled'
+      - 'Resolved'
+      - 'Triage'
+      - 'Not-Planned'
+      - 'Parked'
+      - 'Stale'
+      - 'Tagged'
+      - 'Queries'
+      - 'Unclear'
+      - 'Invalid'
+      - 'Prorogued'
+      - 'Duplicate'
+      - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
+
 # The `Uncertain` label is added to issues
 Uncertain:
   issues:
     # Remove labels
     unlabel:
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Bug` label is added to issues
 Bug:
@@ -25,15 +52,20 @@ Bug:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Cancelled` label is added to issues
 Cancelled:
@@ -41,15 +73,18 @@ Cancelled:
     # Remove labels
     unlabel:
       - 'Uncertain'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
-      - 'Stale'
-      - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
     # Close and lock thread
     close: true
     # Add Comment
@@ -63,20 +98,23 @@ Discussion:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Bug'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
       - 'Known-Issue'
       - 'Enhancement'
-
+      - 'Cannot-Replicate'
 # The `Documentation` label is added to issues or pull requests
 Documentation:
   issues:
@@ -84,15 +122,20 @@ Documentation:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Duplicate` label is added to issues
 Duplicate:
@@ -101,15 +144,20 @@ Duplicate:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Enhancement` label is added to issues
 Enhancement:
@@ -118,16 +166,21 @@ Enhancement:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Tagged` label is added to issues
 Tagged:
@@ -136,13 +189,18 @@ Tagged:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
       - 'Prorogued'
+      - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Good-First-Issue` label is added to issues
 Good-First-Issue:
@@ -151,16 +209,21 @@ Good-First-Issue:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Help-Wanted` label is added to issues
 Help-Wanted:
@@ -169,14 +232,21 @@ Help-Wanted:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
+      - 'Triage'
+      - 'Not-Planned'
+      - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Incomplete` label is added to issues
 Incomplete:
@@ -185,14 +255,19 @@ Incomplete:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
-      - 'Prorogued'
+      - 'Invalid'
       - 'Duplicate'
+      - 'Prorogued'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Invalid` label is added to issues
 Invalid:
@@ -201,15 +276,20 @@ Invalid:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
+      - 'Upstream'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Known-Issue` label is added to issues
 Known-Issue:
@@ -218,15 +298,19 @@ Known-Issue:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Cannot-Replicate'
 
 # The `Parked` label is added to issues
 Parked:
@@ -235,15 +319,20 @@ Parked:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Upstream` label is added to issues
 Upstream:
@@ -255,14 +344,19 @@ Upstream:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Stale'
       - 'Tagged'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Queries` label is added to issues
 Queries:
@@ -271,15 +365,20 @@ Queries:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Tagged'
       - 'Stale'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Resolved` label is added to issues
 Resolved:
@@ -288,15 +387,22 @@ Resolved:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
-      - 'Pending'
+      - 'Accepted'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Tagged'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
+    # Close thread
+    close: true
 
 # The `Resolved` label is removed from issues
 -Resolved:
@@ -312,8 +418,10 @@ Stale:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Tagged'
       - 'Queries'
@@ -328,13 +436,18 @@ Unclear:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
 
 # The `Not-Planned` label is added to issues
 Not-Planned:
@@ -343,15 +456,21 @@ Not-Planned:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
+    # Close thread
+    close: true
 
 # The `Not-Planned` label is removed from issues
 -Not-Planned:
@@ -367,14 +486,19 @@ Cannot-Replicate:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
+      - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Prorogued'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
 
 # The `Prorogued` label is added to issues
 Prorogued:
@@ -383,14 +507,19 @@ Prorogued:
     unlabel:
       - 'Uncertain'
       - 'Cancelled'
+      - 'Accepted'
       - 'Resolved'
-      - 'Pending'
+      - 'Triage'
+      - 'Not-Planned'
       - 'Parked'
       - 'Stale'
       - 'Queries'
       - 'Unclear'
+      - 'Invalid'
       - 'Duplicate'
       - 'Incomplete'
+      - 'Known-Issue'
+      - 'Cannot-Replicate'
     # Close thread
     close: true
 

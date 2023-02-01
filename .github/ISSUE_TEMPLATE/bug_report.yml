@@ -34,8 +34,8 @@ body:
     attributes:
       label: Additional Context
       description: |
-        Any additional details that may provide clarity on the problem.
+        Additional details that may provide clarity on the problem.
       placeholder: |
         You can attach files by dragging/dropping them on this field.
-        You can also add screenshots to shed more light on the problem.
+        You can also add screenshots to aid understanding the problem.
         Screenshots can be saved by pressing the F10 key in RefindPlus.
