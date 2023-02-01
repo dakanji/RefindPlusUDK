@@ -72,7 +72,7 @@ jobs:
           issue-number: ${{ github.event.inputs.item_id }}
           labels: 'Cannot-Replicate'
 
-  label_remove_Incomplete:
+  label_remove_incomplete:
     name: Label - Remove - Incomplete
     runs-on: ubuntu-20.04
 
@@ -137,7 +137,7 @@ jobs:
           issue-number: ${{ github.event.inputs.item_id }}
           labels: 'Prorogued'
 
-  label_remove_Resolved:
+  label_remove_resolved:
     name: Label - Remove - Resolved
     runs-on: ubuntu-20.04
 

@@ -30,7 +30,7 @@ jobs:
         uses: actions/stale@v7
         with:
           ignore-issue-updates: true
-          close-issue-reason: 'Resolved'
+          close-issue-reason: 'completed'
           close-issue-message: ''
           days-before-stale: 1
           days-before-close: 0
@@ -46,7 +46,7 @@ jobs:
       - name: Handle Incomplete Issues
         uses: actions/stale@v7
         with:
-          close-issue-reason: 'Resolved'
+          close-issue-reason: 'completed'
           stale-issue-message: >
             This item is being flagged for closure due to missing required information.
           close-issue-message: >
@@ -66,7 +66,7 @@ jobs:
       - name: Handle No-Response Issues
         uses: actions/stale@v7
         with:
-          close-issue-reason: 'Resolved'
+          close-issue-reason: 'completed'
           stale-issue-message: >
             This item is being flagged for closure due to a lack of response.
           close-issue-message: >
@@ -87,7 +87,7 @@ jobs:
         uses: actions/stale@v7
         with:
           ignore-issue-updates: true
-          close-issue-reason: 'Resolved'
+          close-issue-reason: 'completed'
           stale-issue-message: ''
           close-issue-message: ''
           days-before-stale: 0
@@ -104,7 +104,7 @@ jobs:
       - name: Catchall Closer
         uses: actions/stale@v7
         with:
-          close-issue-reason: 'Resolved'
+          close-issue-reason: 'completed'
           stale-issue-message: >
             This item is being flagged for closure due to inactivity.
           close-issue-message: >
@@ -136,7 +136,7 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
 
       - name: Inter-Step-Pause
@@ -154,7 +154,7 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
 
       - name: Inter-Step-Pause
@@ -173,7 +173,7 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
 
       - name: Inter-Step-Pause
@@ -192,7 +192,7 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
 
       - name: Inter-Step-Pause
@@ -210,7 +210,7 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
 
       - name: Inter-Step-Pause
@@ -230,5 +230,5 @@ jobs:
           issue-comment: |-
             This thread is being locked.
 
-            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow-on items or raise a new issue if appropriate.
+            Please use the [Discussions](https://github.com/dakanji/RefindPlus/discussions) feature for follow on discussion or raise a new issue if appropriate.
           process-only: 'issues'
