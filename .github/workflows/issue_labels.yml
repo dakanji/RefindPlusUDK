@@ -26,50 +26,67 @@ jobs:
           mode: exactly
           count: 0
           labels: "Bug, Enhancement"
+          exit_type: success
 
-  # Add  Labels  - https://github.com/actions-ecosystem/action-add-labels
+  # Add  Labels  - https://github.com/actions-cool/issues-helper
   add_label_user_close_act:
     name: Close Issue Label - Cancel
     needs: add_label_user_close_check
     runs-on: ubuntu-20.04
 
-    if: github.actor != 'dakanji' && github.event.action == 'closed'
+    if: needs.add_label_user_close_check.outputs.status == 'success'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions-cool/issues-helper@v3
         with:
-          labels: Cancelled
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          actions: 'add-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Cancelled'
+
+  add_label_user_open_enhance:
+    name: Enhancement Request Label
+    runs-on: ubuntu-20.04
+
+    if: github.actor != 'dakanji' && github.event.action == 'opened' && contains(github.event.issue.body, 'Suggested Feature') && contains(github.event.issue.body, 'Background Information') && contains(github.event.issue.body, 'Additional Context')
+    steps:
+      - uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Enhancement'
+
+  # Add Labels - https://github.com/actions-cool/issues-helper
+  add_label_user_open:
+    name: Default Issue Label
+    needs: [add_label_user_open_enhance]
+    runs-on: ubuntu-20.04
+
+    if: ${{ !failure() && github.actor != 'dakanji' && github.event.action == 'opened' }}
+    steps:
+      - uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Triage'
 
   # Check Similarity - https://github.com/actions-cool/issues-similarity-analysis
   similarity_analysis:
     name: Check Similarity
+    needs: [add_label_user_open]
     runs-on: ubuntu-20.04
 
-    if: github.actor != 'dakanji' && github.event.action == 'opened'
+    if: ${{ !failure() && github.actor != 'dakanji' && github.event.action == 'opened' }}
     steps:
       - uses: actions-cool/issues-similarity-analysis@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           since-days: 450
-          filter-threshold: 0.45
-          comment-title: '### Similarity Analysis'
-          comment-body: '[Score: ${similarity}] #${number}'
+          filter-threshold: 0.51
+          comment-title: '### Similar Items'
+          comment-body: '${index}. [Score: ${similarity}] ... [${title}](https://github.com/${{ github.repository }}/issues/${number})'
           show-footer: false
-
-  # Add Labels - https://github.com/actions-ecosystem/action-add-labels
-  add_label_user_open:
-    name: Default Issue Label
-    needs: similarity_analysis
-    runs-on: ubuntu-20.04
-
-    if: github.actor != 'dakanji' && github.event.action == 'opened'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: Triage
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   add_label_base_reopen:
     name: Reopen Issue Label - Base
@@ -77,22 +94,12 @@ jobs:
 
     if: github.actor == 'dakanji' && github.event.action == 'reopened'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions-cool/issues-helper@v3
         with:
-          labels: |
-            Not-Planned
-            Tagged
-            Stale
-            Cannot-Replicate
-            Known-Issue
-            Incomplete
-            Uncertain
-            Unclear
-            Invalid
-            Queries
-            Unclear
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          actions: 'remove-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Not-Planned,Tagged,Stale,Cannot-Replicate,Known-Issue,Incomplete,Uncertain,Resolved,Unclear,Invalid,Unclear'
 
   add_label_user_reopen:
     name: Reopen Issue Label - User
@@ -100,37 +107,26 @@ jobs:
 
     if: github.actor != 'dakanji' && github.event.action == 'reopened'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-add-labels@v1
+      - uses: actions-cool/issues-helper@v3
         with:
-          labels: Triage
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          actions: 'add-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Triage'
 
-  add_label_user_open_enhance:
-    name: Enhancement Request Label
-    needs: similarity_analysis
-    runs-on: ubuntu-20.04
-
-    if: github.actor != 'dakanji' && github.event.action == 'opened' && contains(github.event.issue.body, 'Suggested Feature') && contains(github.event.issue.body, 'Background Information') && contains(github.event.issue.body, 'Additional Context')
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: Enhancement
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  # Del Labels - https://github.com/actions-ecosystem/action-remove-labels
+  # Del Labels - https://github.com/actions-cool/issues-helper
   del_label_user_reopen:
     name: Remove Cancelled Label
     runs-on: ubuntu-20.04
 
     if: github.actor != 'dakanji' && github.event.action == 'reopened'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions-cool/issues-helper@v3
         with:
-          labels: Cancelled
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          actions: 'remove-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Cancelled'
 
   del_label_user_close:
     name: Remove Misc Labels
@@ -138,22 +134,12 @@ jobs:
 
     if: github.actor != 'dakanji' && github.event.action == 'closed'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions-cool/issues-helper@v3
         with:
-          labels: |
-            Stale
-            Tagged
-            Triage
-            Cannot-Replicate
-            Known-Issue
-            Incomplete
-            Uncertain
-            Unclear
-            Invalid
-            Queries
-            Unclear
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          actions: 'remove-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Stale,Tagged,Triage,Cannot-Replicate,Known-Issue,Incomplete,Uncertain,Unclear,Invalid,Queries,Unclear'
 
   # Check Labels - https://github.com/mheap/github-action-required-labels
   bounce_bug_check1:
@@ -169,6 +155,7 @@ jobs:
           mode: exactly
           count: 1
           labels: "Bug"
+          exit_type: success
 
   # Reopen Issue - https://github.com/actions-cool/issues-helper
   bounce_bug_act1:
@@ -176,7 +163,7 @@ jobs:
     needs: [bounce_bug_check1]
     runs-on: ubuntu-20.04
 
-    if: github.actor != 'dakanji' && github.event.action == 'closed'
+    if: needs.bounce_bug_check1.outputs.status == 'success'
     steps:
       - uses: actions-cool/issues-helper@v3
         with:
@@ -215,6 +202,7 @@ jobs:
           mode: exactly
           count: 1
           labels: "Enhancement"
+          exit_type: success
 
   # Check Labels - https://github.com/mheap/github-action-required-labels
   bounce_enhance_check2:
@@ -222,7 +210,7 @@ jobs:
     needs: [bounce_enhance_check1]
     runs-on: ubuntu-20.04
 
-    if: github.actor != 'dakanji' && github.event.action == 'closed'
+    if: needs.bounce_enhance_check1.outputs.status == 'success'
     steps:
       - uses: mheap/github-action-required-labels@v2
         env:
@@ -262,3 +250,34 @@ jobs:
           body: |
             Please do not close accepted `Accepted` Enhancements.
             Work has aleady started, or is planned, on such items.
+
+  # Check Labels - https://github.com/mheap/github-action-required-labels
+  handle_bug_tag_check:
+    name: Handle Bug Tag - Check
+    runs-on: ubuntu-20.04
+
+    if: github.actor == 'dakanji' && github.event.action == 'closed'
+    steps:
+      - uses: mheap/github-action-required-labels@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          mode: exactly
+          count: 1
+          labels: "Bug"
+          exit_type: success
+
+  # Bug Close Tag - https://github.com/actions-cool/issues-helper
+  handle_bug_act:
+    name: Handle Bug Tag - Act
+    needs: [handle_bug_tag_check]
+    runs-on: ubuntu-20.04
+
+    if: needs.handle_bug_tag_check.outputs.status == 'success'
+    steps:
+      - uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-labels'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: 'Tagged'
