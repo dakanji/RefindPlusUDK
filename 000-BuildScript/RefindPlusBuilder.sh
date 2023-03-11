@@ -99,6 +99,8 @@ trap trapINT SIGINT
 
 
 # Set Script Params
+DONE_ONE="False"
+
 BUILD_BRANCH="${1:-GOPFix}"
 DEBUG_TYPE="${2:-SOME}"
 WORD_WRAP="${3:-0}"
@@ -106,6 +108,20 @@ if [ "${WORD_WRAP}" == '0' ] ; then
     # Disable WordWrap
     tput rmam
 fi
+
+RUN_REL="True"
+RUN_DBG="True"
+RUN_NPT="False"
+if [ "${DEBUG_TYPE^^}" == 'DBG' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] ; then
+    RUN_REL="False"
+fi
+if [ "${DEBUG_TYPE^^}" == 'REL' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] ; then
+    RUN_DBG="False"
+fi
+if [ "${DEBUG_TYPE^^}" == 'ALL' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] || ( [ "${DEBUG_TYPE^^}" != 'REL' ] && [ "${DEBUG_TYPE^^}" != 'DBG' ] && [ "${DEBUG_TYPE^^}" != 'SOME' ] ) ; then
+    RUN_NPT="True"
+fi
+
 
 # Set things up for build
 clear
@@ -193,45 +209,56 @@ mkdir -p "${OUTPUT_DIR}"
 
 
 # Build RELEASE version
-clear
-msg_info "## RefindPlusBuilder - Building REL Version ##  :  ${BUILD_BRANCH}"
-msg_info '##------------------------------------------##'
-ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
-pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
-source edksetup.sh BaseTools
-build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
-if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
+if [ "${RUN_REL}" == 'True' ] ; then
+    clear
+    msg_info "## RefindPlusBuilder - Building REL Version ##  :  ${BUILD_BRANCH}"
+    msg_info '##------------------------------------------##'
+    ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+    pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
+    source edksetup.sh BaseTools
+    build -a X64 -b RELEASE -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
+    if [ -d "${EDK2_DIR}/Build" ] ; then
+        cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
+    fi
+    popd > /dev/null || runErr "${ErrMsg}"
+    echo ''
+    msg_info "Completed REL Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+    DONE_ONE="True"
 fi
-popd > /dev/null || runErr "${ErrMsg}"
-echo ''
-msg_info "Completed REL Build on '${BUILD_BRANCH}' Branch of RefindPlus"
-msg_info 'Preparing DBG Build...'
-echo ''
-sleep 4
 
 
 # Build DEBUG version
-clear
-msg_info "## RefindPlusBuilder - Building DBG Version ##  :  ${BUILD_BRANCH}"
-msg_info '##------------------------------------------##'
-ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
-pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
-source edksetup.sh BaseTools
-build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
-if [ -d "${EDK2_DIR}/Build" ] ; then
-    cp -f "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
+if [ "${RUN_DBG}" == 'True' ] ; then
+    if [ "${DONE_ONE}" == 'True' ] ; then
+        msg_info 'Preparing DBG Build...'
+        echo ''
+        sleep 4
+    fi
+
+    clear
+    msg_info "## RefindPlusBuilder - Building DBG Version ##  :  ${BUILD_BRANCH}"
+    msg_info '##------------------------------------------##'
+    ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
+    pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
+    source edksetup.sh BaseTools
+    build -a X64 -b DEBUG -t XCODE5 -p RefindPlusPkg/RefindPlusPkg.dsc
+    if [ -d "${EDK2_DIR}/Build" ] ; then
+        cp -f "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
+    fi
+    popd > /dev/null || runErr "${ErrMsg}"
+    echo ''
+    msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+    DONE_ONE="True"
 fi
-popd > /dev/null || runErr "${ErrMsg}"
-echo ''
-msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 
 
 # Build NOOPT version
-if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
-    msg_info 'Preparing NPT Build...'
-    echo ''
-    sleep 4
+if [ "${RUN_NPT}" == 'True' ] ; then
+    if [ "${DONE_ONE}" == 'True' ] ; then
+        msg_info 'Preparing NPT Build...'
+        echo ''
+        sleep 4
+    fi
 
     clear
     msg_info "## RefindPlusBuilder - Building NPT Version ##  :  ${BUILD_BRANCH}"
@@ -247,18 +274,22 @@ if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
     echo ''
     msg_info "Completed NPT Build on '${BUILD_BRANCH}' Branch of RefindPlus"
 fi
-echo ''
 
 
 # Tidy up
 echo ''
+echo ''
 msg_info 'Output EFI Files...'
 msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
-if [ "${DEBUG_TYPE}" == 'ALL' ] ; then
+if [ "${RUN_NPT}" == 'True' ] ; then
     msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_NPT}/X64'"
 fi
-msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
-msg_status "RefindPlus EFI Files (Others - REL) : '${XCODE_DIR_REL}/X64'"
+if [ "${RUN_DBG}" == 'True' ] ; then
+    msg_status "RefindPlus EFI Files (Others - DBG) : '${XCODE_DIR_DBG}/X64'"
+fi
+if [ "${RUN_REL}" == 'True' ] ; then
+    msg_status "RefindPlus EFI Files (Others - REL) : '${XCODE_DIR_REL}/X64'"
+fi
 echo ''
 echo ''
 
