@@ -112,13 +112,14 @@ fi
 RUN_REL="True"
 RUN_DBG="True"
 RUN_NPT="False"
-if [ "${DEBUG_TYPE^^}" == 'DBG' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] ; then
+BUILD_TYPE=$( echo $DEBUG_TYPE | tr '[:lower:]' '[:upper:]' )
+if [ "${BUILD_TYPE}" == 'DBG' ] || [ "${BUILD_TYPE}" == 'NPT' ] ; then
     RUN_REL="False"
 fi
-if [ "${DEBUG_TYPE^^}" == 'REL' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] ; then
+if [ "${BUILD_TYPE}" == 'REL' ] || [ "${BUILD_TYPE}" == 'NPT' ] ; then
     RUN_DBG="False"
 fi
-if [ "${DEBUG_TYPE^^}" == 'ALL' ] || [ "${DEBUG_TYPE^^}" == 'NPT' ] || ( [ "${DEBUG_TYPE^^}" != 'REL' ] && [ "${DEBUG_TYPE^^}" != 'DBG' ] && [ "${DEBUG_TYPE^^}" != 'SOME' ] ) ; then
+if [ "${BUILD_TYPE}" == 'ALL' ] || [ "${BUILD_TYPE}" == 'NPT' ] || ( [ "${BUILD_TYPE}" != 'REL' ] && [ "${BUILD_TYPE}" != 'DBG' ] && [ "${BUILD_TYPE}" != 'SOME' ] ) ; then
     RUN_NPT="True"
 fi
 
@@ -154,8 +155,10 @@ fi
 BASETOOLS_SHA_FILE="${EDK2_DIR}/000-BuildScript/BaseToolsSHA.txt"
 # shellcheck disable=SC1090
 source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
-BASETOOLS_SHA_NEW="$(find . -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or -name '*.makefile' -or -name 'GNUmakefile' \) -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | cut -d ' ' -f 1)"
+Get_Sha_Str="$(find . -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or -name '*.makefile' -or -name 'GNUmakefile' \) -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | cut -d ' ' -f 1)"
 RevertShasumFix ;
+Get_Mac_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 )"
+BASETOOLS_SHA_NEW="${Get_Sha_Str}:${Get_Mac_Ver}"
 BUILD_TOOLS='false'
 if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${BASETOOLS_SHA_NEW}" != "${BASETOOLS_SHA_OLD}" ] ; then
     BUILD_TOOLS='true'
