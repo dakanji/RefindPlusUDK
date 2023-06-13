@@ -486,7 +486,6 @@ HiiGetFormSetFromHiiHandle(
           goto Done;
         }
         CopyMem (TempBuffer + TempSize,  OpCodeData, ((EFI_IFR_OP_HEADER *) OpCodeData)->Length);
-        FormSetBuffer = NULL;
       } else {
         TempBuffer = AllocatePool (TempSize + ((EFI_IFR_OP_HEADER *) OpCodeData)->Length);
         if (TempBuffer == NULL) {

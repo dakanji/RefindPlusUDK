@@ -615,7 +615,6 @@ PciRootBridgeIoDumpInformation(
   Temp2 = CatSPrint(NULL, Temp, PciRootBridgeIo->ParentHandle);
   FreePool(Temp);
   RetVal = Temp2;
-  Temp2 = NULL;
 
   Temp = HiiGetString(mHandleParsingHiiHandle, STRING_TOKEN(STR_PCIRB_DUMP_SEG), NULL);
   if (Temp == NULL) {
@@ -626,7 +625,6 @@ PciRootBridgeIoDumpInformation(
   FreePool(Temp);
   FreePool(RetVal);
   RetVal = Temp2;
-  Temp2 = NULL;
 
   Supports   = 0;
   Attributes = 0;
@@ -641,7 +639,6 @@ PciRootBridgeIoDumpInformation(
     FreePool(Temp);
     FreePool(RetVal);
     RetVal = Temp2;
-    Temp2 = NULL;
 
     Temp = HiiGetString(mHandleParsingHiiHandle, STRING_TOKEN(STR_PCIRB_DUMP_SUPPORTS), NULL);
     if (Temp == NULL) {
@@ -652,7 +649,6 @@ PciRootBridgeIoDumpInformation(
     FreePool(Temp);
     FreePool(RetVal);
     RetVal = Temp2;
-    Temp2 = NULL;
   }
 
   Configuration   = NULL;
@@ -667,7 +663,6 @@ PciRootBridgeIoDumpInformation(
     FreePool(Temp);
     FreePool(RetVal);
     RetVal = Temp2;
-    Temp2 = NULL;
     while (Configuration->Desc == ACPI_ADDRESS_SPACE_DESCRIPTOR) {
       Temp = NULL;
       switch (Configuration->ResType) {
@@ -686,7 +681,6 @@ PciRootBridgeIoDumpInformation(
         FreePool(Temp);
         FreePool(RetVal);
         RetVal = Temp2;
-        Temp2 = NULL;
       }
 
       Temp2 = CatSPrint(RetVal,
@@ -698,7 +692,6 @@ PciRootBridgeIoDumpInformation(
         );
       FreePool(RetVal);
       RetVal = Temp2;
-      Temp2 = NULL;
       Configuration++;
     }
   }
@@ -1237,7 +1230,6 @@ PciIoProtocolDumpInformation (
     }
     FreePool (RetVal);
     RetVal = TempRetVal;
-    TempRetVal = NULL;
   }
 
   FreePool(GetString);
@@ -2764,7 +2756,6 @@ GetStringNameFromHandle(
     Status = CompNameStruct->GetDriverName(CompNameStruct, BestLang, &RetVal);
     if (BestLang != NULL) {
       FreePool (BestLang);
-      BestLang = NULL;
     }
     if (!EFI_ERROR(Status)) {
       return (RetVal);

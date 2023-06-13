@@ -170,6 +170,7 @@ TrailedBooterDevicePath (
           //
           // Strip the string termination and DP end node, which will get re-set
           //
+          /* coverity[overrun-buffer-arg: SUPPRESS] */
           CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
           NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
           Size        = DevicePathNodeLength (DevicePathWalker) + sizeof (CHAR16);

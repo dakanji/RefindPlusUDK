@@ -1081,6 +1081,7 @@ MtrrLibSetMemoryType (
   //
   // Reserve (-DeltaCount) space
   //
+  /* coverity[overrun-buffer-arg: SUPPRESS] */
   CopyMem (&Ranges[EndIndex + 1 - DeltaCount], &Ranges[EndIndex + 1], (*Count - EndIndex - 1) * sizeof (Ranges[0]));
   *Count -= DeltaCount;
 
