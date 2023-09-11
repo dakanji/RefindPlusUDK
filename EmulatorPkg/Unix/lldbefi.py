@@ -78,10 +78,10 @@ EFI_STATUS_Dict = {
     (0x8000000000000000 | 24): "Protocol Error",
 
                           0 : "Success",
-                          1 : "Warning Unknown Glyph",
-                          2 : "Warning Delete Failure",
-                          3 : "Warning Write Failure",
-                          4 : "Warning Buffer Too Small",
+                          1 : "Unknown Glyph Warning",
+                          2 : "Delete Failure Warning",
+                          3 : "Write Failure Warning",
+                          4 : "Buffer Too Small Warning",
 
     (0x80000000         |  1): "Load Error",
     (0x80000000         |  2): "Invalid Parameter",

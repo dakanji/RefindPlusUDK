@@ -35,11 +35,11 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 mHexStr[] = {'0','1','2','3','4','5','
 
 GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 * CONST mStatusString[] = {
   "Success",                      //  RETURN_SUCCESS                = 0
-  "Warning Unknown Glyph",        //  RETURN_WARN_UNKNOWN_GLYPH     = 1
-  "Warning Delete Failure",       //  RETURN_WARN_DELETE_FAILURE    = 2
-  "Warning Write Failure",        //  RETURN_WARN_WRITE_FAILURE     = 3
-  "Warning Buffer Too Small",     //  RETURN_WARN_BUFFER_TOO_SMALL  = 4
-  "Warning Stale Data",           //  RETURN_WARN_STALE_DATA        = 5
+  "Unknown Glyph Warning",        //  RETURN_WARN_UNKNOWN_GLYPH     = 1
+  "Delete Failure Warning",       //  RETURN_WARN_DELETE_FAILURE    = 2
+  "Write Failure Warning",        //  RETURN_WARN_WRITE_FAILURE     = 3
+  "Buffer Too Small Warning",     //  RETURN_WARN_BUFFER_TOO_SMALL  = 4
+  "Stale Data Warning",           //  RETURN_WARN_STALE_DATA        = 5
   "Load Error",                   //  RETURN_LOAD_ERROR             = 1  | MAX_BIT
   "Invalid Parameter",            //  RETURN_INVALID_PARAMETER      = 2  | MAX_BIT
   "Not Supported",                //  RETURN_UNSUPPORTED            = 3  | MAX_BIT

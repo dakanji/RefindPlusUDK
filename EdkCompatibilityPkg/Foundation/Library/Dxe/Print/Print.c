@@ -541,10 +541,10 @@ Returns:
   if (Status == EFI_ICMP_ERROR) { Desc = (CHAR8 *) "ICMP Error"; } else
   if (Status == EFI_TFTP_ERROR) { Desc = (CHAR8 *) "TFTP Error"; } else
   if (Status == EFI_PROTOCOL_ERROR) { Desc = (CHAR8 *) "Protocol Error"; } else
-  if (Status == EFI_WARN_UNKNOWN_GLYPH) { Desc = (CHAR8 *) "Warning Unknown Glyph"; } else
-  if (Status == EFI_WARN_DELETE_FAILURE) { Desc = (CHAR8 *) "Warning Delete Failure"; } else
-  if (Status == EFI_WARN_WRITE_FAILURE) { Desc = (CHAR8 *) "Warning Write Failure"; } else
-  if (Status == EFI_WARN_BUFFER_TOO_SMALL) { Desc = (CHAR8 *) "Warning Buffer Too Small"; }
+  if (Status == EFI_WARN_UNKNOWN_GLYPH) { Desc = (CHAR8 *) "Unknown Glyph Warning"; } else
+  if (Status == EFI_WARN_DELETE_FAILURE) { Desc = (CHAR8 *) "Delete Failure Warning"; } else
+  if (Status == EFI_WARN_WRITE_FAILURE) { Desc = (CHAR8 *) "Write Failure Warning"; } else
+  if (Status == EFI_WARN_BUFFER_TOO_SMALL) { Desc = (CHAR8 *) "Buffer Too Small Warning"; }
 
   //
   // If we found a match, copy the message to the user's buffer. Otherwise

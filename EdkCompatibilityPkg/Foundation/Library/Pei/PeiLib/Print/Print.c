@@ -748,13 +748,13 @@ Returns:
   } else if (Status == EFI_PROTOCOL_ERROR) {
     Desc = "Protocol Error";
   } else if (Status == EFI_WARN_UNKNOWN_GLYPH) {
-    Desc = "Warning Unknown Glyph";
+    Desc = "Unknown Glyph Warning";
   } else if (Status == EFI_WARN_DELETE_FAILURE) {
-    Desc = "Warning Delete Failure";
+    Desc = "Delete Failure Warning";
   } else if (Status == EFI_WARN_WRITE_FAILURE) {
-    Desc = "Warning Write Failure";
+    Desc = "Write Failure Warning";
   } else if (Status == EFI_WARN_BUFFER_TOO_SMALL) {
-    Desc = "Warning Buffer Too Small";
+    Desc = "Buffer Too Small Warning";
   } else {
     Desc = NULL;
   }

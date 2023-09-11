@@ -165,13 +165,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
       - RETURN_PROTOCOL_ERROR
         - "Protocol Error"
       - RETURN_WARN_UNKNOWN_GLYPH
-        - "Warning Unknown Glyph"
+        - "Unknown Glyph Warning"
       - RETURN_WARN_DELETE_FAILURE
-        - "Warning Delete Failure"
+        - "Delete Failure Warning"
       - RETURN_WARN_WRITE_FAILURE
-        - "Warning Write Failure"
+        - "Write Failure Warning"
       - RETURN_WARN_BUFFER_TOO_SMALL
-        - "Warning Buffer Too Small"
+        - "Buffer Too Small Warning"
 
 **/
 

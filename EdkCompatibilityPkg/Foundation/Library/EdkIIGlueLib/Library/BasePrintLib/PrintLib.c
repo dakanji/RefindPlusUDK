@@ -28,10 +28,10 @@ Abstract:
 
 GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 *StatusString [] = {
   "Success",                      //  RETURN_SUCCESS                = 0
-  "Warning Unknown Glyph",        //  RETURN_WARN_UNKNOWN_GLYPH     = 1
-  "Warning Delete Failure",       //  RETURN_WARN_DELETE_FAILURE    = 2
-  "Warning Write Failure",        //  RETURN_WARN_WRITE_FAILURE     = 3
-  "Warning Buffer Too Small",     //  RETURN_WARN_BUFFER_TOO_SMALL  = 4
+  "Unknown Glyph Warning",        //  RETURN_WARN_UNKNOWN_GLYPH     = 1
+  "Delete Failure Warning",       //  RETURN_WARN_DELETE_FAILURE    = 2
+  "Write Failure Warning",        //  RETURN_WARN_WRITE_FAILURE     = 3
+  "Buffer Too Small Warning",     //  RETURN_WARN_BUFFER_TOO_SMALL  = 4
   "Load Error",                   //  RETURN_LOAD_ERROR             = 1  | MAX_BIT
   "Invalid Parameter",            //  RETURN_INVALID_PARAMETER      = 2  | MAX_BIT
   "Not Supported",                //  RETURN_UNSUPPORTED            = 3  | MAX_BIT
