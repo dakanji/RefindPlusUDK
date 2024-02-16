@@ -157,7 +157,7 @@ BASETOOLS_SHA_FILE="${EDK2_DIR}/000-BuildScript/BaseToolsSHA.txt"
 source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
 Get_Sha_Str="$(find . -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or -name '*.makefile' -or -name 'GNUmakefile' \) -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | cut -d ' ' -f 1)"
 RevertShasumFix ;
-Get_Mac_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 )"
+Get_Mac_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 | xargs )"
 BASETOOLS_SHA_NEW="${Get_Sha_Str}:${Get_Mac_Ver}"
 BUILD_TOOLS='false'
 if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${BASETOOLS_SHA_NEW}" != "${BASETOOLS_SHA_OLD}" ] ; then
