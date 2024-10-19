@@ -1,42 +1,41 @@
 #!/usr/bin/env bash
-
 ###
  # RefindPlusBuilder.sh
  # A script to build RefindPlus
  #
- # Copyright (c) 2020-2022 Dayo Akanji
- # MIT License
+ # Copyright (c) 2020-2024 Dayo Akanji
+ # MIT-0 License
 ###
 
-COLOUR_BASE=""
-COLOUR_INFO=""
-COLOUR_STATUS=""
-COLOUR_ERROR=""
-COLOUR_NORMAL=""
+COLOR_BASE=""
+COLOR_INFO=""
+COLOR_STATUS=""
+COLOR_ERROR=""
+COLOR_NORMAL=""
 
 if test -t 1; then
-    NCOLOURS=$(tput colors)
-    if test -n "${NCOLOURS}" && test "${NCOLOURS}" -ge 8; then
-        COLOUR_BASE="\033[0;36m"
-        COLOUR_INFO="\033[0;33m"
-        COLOUR_STATUS="\033[0;32m"
-        COLOUR_ERROR="\033[0;31m"
-        COLOUR_NORMAL="\033[0m"
+    NCOLORS=$(tput colors)
+    if test -n "${NCOLORS}" && test "${NCOLORS}" -ge 8; then
+        COLOR_BASE="\033[0;36m"
+        COLOR_INFO="\033[0;33m"
+        COLOR_STATUS="\033[0;32m"
+        COLOR_ERROR="\033[0;31m"
+        COLOR_NORMAL="\033[0m"
     fi
 fi
 
 # Provide custom colours
 msg_base() {
-    echo -e "${COLOUR_BASE}${1}${COLOUR_NORMAL}"
+    printf "${COLOR_BASE}${1}${COLOR_NORMAL}\n"
 }
 msg_info() {
-    echo -e "${COLOUR_INFO}${1}${COLOUR_NORMAL}"
+    printf "${COLOR_INFO}${1}${COLOR_NORMAL}\n"
 }
 msg_status() {
-    echo -e "${COLOUR_STATUS}${1}${COLOUR_NORMAL}"
+    printf "${COLOR_STATUS}${1}${COLOR_NORMAL}\n"
 }
 msg_error() {
-    echo -e "${COLOUR_ERROR}${1}${COLOUR_NORMAL}"
+    printf "${COLOR_ERROR}${1}${COLOR_NORMAL}\n"
 }
 
 ## REVERT WORD_WRAP FIX ##
@@ -53,7 +52,6 @@ RevertShasumFix() {
         mv -f "${TMP_SHASUM}" "${DUP_SHASUM}"
     fi
 }
-
 
 ## ERROR HANDLERS ##
 trapINT() { # $1: message
@@ -75,7 +73,6 @@ trapINT() { # $1: message
     exit 1
 }
 
-
 runErr() { # $1: message
     # Declare Local Variables
     local errMessage
@@ -86,7 +83,7 @@ runErr() { # $1: message
     # Revert Word Wrap Fix
     RevertWordWrap ;
 
-    # SHow error and exit
+    # Show error and exit
     errMessage="${1:-Runtime Error ... Exiting}"
     echo ''
     msg_error "${errMessage}"
@@ -165,7 +162,7 @@ if [ ! -d "${EDK2_DIR}/BaseTools/Source/C/bin" ] || [ "${BASETOOLS_SHA_NEW}" != 
     echo '#!/usr/bin/env bash' > "${BASETOOLS_SHA_FILE}"
     echo "BASETOOLS_SHA_OLD='${BASETOOLS_SHA_NEW}'" >> "${BASETOOLS_SHA_FILE}"
 fi
-popd > /dev/null || runErr "${ErrMsg}"
+popd > /dev/null || exit 1
 
 ErrMsg="ERROR: Could not find '${WORK_DIR}'"
 pushd "${WORK_DIR}" > /dev/null || runErr "${ErrMsg}"
@@ -182,7 +179,7 @@ if [ ! -L "${EDK2_DIR}/RefindPlusPkg" ]; then
     ln -s "${WORK_DIR}" "${EDK2_DIR}/RefindPlusPkg"
 fi
 msg_status '...OK'; echo ''
-popd > /dev/null || runErr "${ErrMsg}"
+popd > /dev/null || exit 1
 
 if [ "${BUILD_TOOLS}" == 'true' ] ; then
     ErrMsg="ERROR: Could not find '${EDK2_DIR}/BaseTools/Source/C'"
@@ -190,14 +187,14 @@ if [ "${BUILD_TOOLS}" == 'true' ] ; then
     msg_base 'Make Clean...'
     make clean
     msg_status '...OK'; echo ''
-    popd > /dev/null || runErr "${ErrMsg}"
+    popd > /dev/null || exit 1
 
     ErrMsg="ERROR: Could not find '${EDK2_DIR}'"
     pushd "${EDK2_DIR}" > /dev/null || runErr "${ErrMsg}"
     msg_base 'Make BaseTools...'
     make -C BaseTools/Source/C
     msg_status '...OK'; echo ''
-    popd > /dev/null || runErr "${ErrMsg}"
+    popd > /dev/null || exit 1
 fi
 
 
@@ -206,9 +203,10 @@ clear
 msg_info "## RefindPlusBuilder - Initial Clean Up ##  :  ${BUILD_BRANCH}"
 msg_info '##--------------------------------------##'
 rm -fr "${EDK2_DIR}/Build"
-mkdir -p "${EDK2_DIR}/Build"
 rm -fr "${OUTPUT_DIR}"
+mkdir -p "${EDK2_DIR}/Build"
 mkdir -p "${OUTPUT_DIR}"
+
 
 
 # Build RELEASE version
@@ -223,7 +221,7 @@ if [ "${RUN_REL}" == 'True' ] ; then
     if [ -d "${EDK2_DIR}/Build" ] ; then
         cp "${BINARY_DIR_REL}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-REL.efi"
     fi
-    popd > /dev/null || runErr "${ErrMsg}"
+    popd > /dev/null || exit 1
     echo ''
     msg_info "Completed REL Build on '${BUILD_BRANCH}' Branch of RefindPlus"
     DONE_ONE="True"
@@ -248,7 +246,7 @@ if [ "${RUN_DBG}" == 'True' ] ; then
     if [ -d "${EDK2_DIR}/Build" ] ; then
         cp -f "${BINARY_DIR_DBG}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-DBG.efi"
     fi
-    popd > /dev/null || runErr "${ErrMsg}"
+    popd > /dev/null || exit 1
     echo ''
     msg_info "Completed DBG Build on '${BUILD_BRANCH}' Branch of RefindPlus"
     DONE_ONE="True"
@@ -273,17 +271,20 @@ if [ "${RUN_NPT}" == 'True' ] ; then
     if [ -d "${EDK2_DIR}/Build" ] ; then
         cp -f "${BINARY_DIR_NPT}/RefindPlus.efi" "${OUTPUT_DIR}/BOOTx64-NPT.efi"
     fi
-    popd > /dev/null || runErr "${ErrMsg}"
+    popd > /dev/null || exit 1
     echo ''
     msg_info "Completed NPT Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+    DONE_ONE="True"
 fi
 
 
 # Tidy up
 echo ''
 echo ''
-msg_info 'Output EFI Files...'
-msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
+msg_info 'Locate the EFI Files:'
+if [ -d "${EDK2_DIR}/Build" ] ; then
+    msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
+fi
 if [ "${RUN_NPT}" == 'True' ] ; then
     msg_status "RefindPlus EFI Files (Others - NPT) : '${XCODE_DIR_NPT}/X64'"
 fi
