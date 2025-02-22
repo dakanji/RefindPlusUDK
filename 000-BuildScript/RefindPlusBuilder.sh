@@ -149,7 +149,7 @@ if [ -f "${DUP_SHASUM}" ] ; then
     mv -f "${DUP_SHASUM}" "${TMP_SHASUM}"
     SHASUM_FIX='true'
 fi
-BASETOOLS_SHA_FILE="${EDK2_DIR}/000-BuildScript/BaseToolsSHA.txt"
+BASETOOLS_SHA_FILE="${EDK2_DIR}/000-BuildScript/RepoUpdateSHA.txt"
 # shellcheck disable=SC1090
 source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
 Get_Sha_Str="$(find . -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or -name '*.makefile' -or -name 'GNUmakefile' \) -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | cut -d ' ' -f 1)"
