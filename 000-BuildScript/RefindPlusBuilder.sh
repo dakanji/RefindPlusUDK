@@ -155,7 +155,10 @@ if [ ! -f "${BASETOOLS_SHA_FILE}" ] ; then
     echo "BASETOOLS_SHA_OLD='Default'" >> "${BASETOOLS_SHA_FILE}"
 fi
 # shellcheck disable=SC1090
-source "${BASETOOLS_SHA_FILE}" || BASETOOLS_SHA_OLD='Default'
+source "${BASETOOLS_SHA_FILE}"
+if [ -z "${BASETOOLS_SHA_OLD}" ] ; then
+    BASETOOLS_SHA_OLD='Default'
+fi
 Get_Sha_Str="$(find . -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or -name '*.makefile' -or -name 'GNUmakefile' \) -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | cut -d ' ' -f 1)"
 RevertShasumFix ;
 Get_Mac_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 | xargs )"
