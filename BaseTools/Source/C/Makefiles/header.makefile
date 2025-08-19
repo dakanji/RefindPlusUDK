@@ -40,7 +40,7 @@ ifndef HOST_ARCH
   ifneq (,$(findstring arm,$(uname_m)))
     ifeq ($(DARWIN),Darwin)
 	  # DA-TAG: Force to x64 to work around build issues
-      HOST_ARCH=X64
+      HOST_ARCH=AARCH64
     else
       HOST_ARCH=ARM
     endif
@@ -77,28 +77,47 @@ else
 $(error Bad HOST_ARCH)
 endif
 
-INCLUDE = $(TOOL_INCLUDE) -I $(MAKEROOT) -I $(MAKEROOT)/Include/Common -I $(MAKEROOT)/Include/ -I $(MAKEROOT)/Include/IndustryStandard -I $(MAKEROOT)/Common/ -I .. -I . $(ARCH_INCLUDE)
+INCLUDE = $(TOOL_INCLUDE) -I $(MAKEROOT) -I $(MAKEROOT)/Include/Common -I \
+          $(MAKEROOT)/Include/ -I $(MAKEROOT)/Include/IndustryStandard -I \
+		  $(MAKEROOT)/Common/ -I .. -I . $(ARCH_INCLUDE)
 BUILD_CPPFLAGS = $(INCLUDE) -O2
-ifeq ($(DARWIN),Darwin)
-# assume clang or clang compatible flags on OS X
-BUILD_CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -Wall -Wno-error -Wno-deprecated-declarations -Wno-unused-result -Wno-int-to-pointer-cast -Wno-self-assign -nostdlib -c -g
-else
-BUILD_CFLAGS = -MD -fshort-wchar -fno-strict-aliasing -Wall -Wno-error -Wno-deprecated-declarations -Wno-unused-result -Wno-int-to-pointer-cast -nostdlib -c -g
-endif
-BUILD_LFLAGS =
-BUILD_CXXFLAGS = -Wno-unused-result -Wno-error
 
-ifeq ($(HOST_ARCH), IA32)
-#
-# Snow Leopard  is a 32-bit and 64-bit environment. uname -m returns i386, but gcc defaults
-#  to x86_64. So make sure tools match uname -m. You can manual have a 64-bit kernal on Snow Leopard
-#  so only do this if uname -m returns i386.
-#
+###############################################################################
+# UDK2018 / RefindPlusUDK modern GCC/Clang compatibility flags
+# Force C11 for C, C++14 for C++, and disable misc warnings/errors
+###############################################################################
+CORE_FLAGS    = -Wno-unknown-warning-option -Wno-deprecated-register \
+                -Wno-deprecated-non-prototype -Wno-deprecated-declarations \
+				-Wno-pointer-to-int-cast -Wno-unused-result -Wno-error
+
+UDK_CFLAGS   := -std=c11 $(CORE_FLAGS)
+UDK_CXXFLAGS := -std=c++14 $(CORE_FLAGS)
+
+BUILD_CFLAGS  = $(UDK_CFLAGS)
+BUILD_CFLAGS += -MD -fshort-wchar -fno-strict-aliasing -Wall \
+                -Wno-int-to-pointer-cast -nostdlib -c -g
+
 ifeq ($(DARWIN),Darwin)
-  BUILD_CFLAGS   += -arch i386
-  BUILD_CPPFLAGS += -arch i386
-  BUILD_LFLAGS   += -arch i386
+  # Assume clang or clang compatible flags on Mac OS
+  BUILD_CFLAGS += -Wno-self-assign
 endif
+
+BUILD_CXXFLAGS  = $(UDK_CXXFLAGS)
+###############################################################################
+
+BUILD_LFLAGS =
+ifeq ($(HOST_ARCH), IA32)
+  #
+  # Snow Leopard is a 32-bit and 64-bit environment. uname -m returns i386,
+  #  but gcc defaults to x86_64. So make sure tools match uname -m.
+  # A 64-bit kernal can be manually defined on Snow Leopard
+  #  so only do this if uname -m returns i386.
+  #
+  ifeq ($(DARWIN),Darwin)
+    BUILD_CFLAGS   += -arch i386
+    BUILD_CPPFLAGS += -arch i386
+    BUILD_LFLAGS   += -arch i386
+  endif
 endif
 
 
