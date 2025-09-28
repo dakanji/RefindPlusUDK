@@ -18,16 +18,16 @@
 #include "BaseLibInternals.h"
 
 /**
-  Calculate the sum of all elements in a buffer in unit of UINT8. 
+  Calculate the sum of all elements in a buffer in unit of UINT8.
   During calculation, the carry bits are dropped.
 
-  This function calculates the sum of all elements in a buffer 
-  in unit of UINT8. The carry bits in result of addition are dropped. 
-  The result is returned as UINT8. If Length is Zero, then Zero is 
+  This function calculates the sum of all elements in a buffer
+  in unit of UINT8. The carry bits in result of addition are dropped.
+  The result is returned as UINT8. If Length is Zero, then Zero is
   returned.
-  
+
   If Buffer is NULL, then ASSERT().
-  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
 
   @param  Buffer			Pointer to the buffer to carry out the sum operation.
   @param  Length	    The size, in bytes, of Buffer .
@@ -51,20 +51,20 @@ CalculateSum8 (
   for (Sum = 0, Count = 0; Count < Length; Count++) {
     Sum = (UINT8) (Sum + *(Buffer + Count));
   }
-  
+
   return Sum;
 }
 
 
 /**
-  Returns the two's complement checksum of all elements in a buffer 
+  Returns the two's complement checksum of all elements in a buffer
   of 8-bit values.
 
-  This function first calculates the sum of the 8-bit values in the 
-  buffer specified by Buffer and Length.  The carry bits in the result 
-  of addition are dropped. Then, the two's complement of the sum is 
+  This function first calculates the sum of the 8-bit values in the
+  buffer specified by Buffer and Length.  The carry bits in the result
+  of addition are dropped. Then, the two's complement of the sum is
   returned.  If Length is 0, then 0 is returned.
-  
+
   If Buffer is NULL, then ASSERT().
   If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
 
@@ -84,22 +84,26 @@ CalculateCheckSum8 (
 {
   UINT8     CheckSum;
 
+  if (Length == 0) {
+    return 0;
+  }
+
   CheckSum = CalculateSum8 (Buffer, Length);
 
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT8) (0x100 - CheckSum);
+  return (UINT8) (0 - CheckSum);
 }
 
 /**
-  Returns the sum of all elements in a buffer of 16-bit values.  During 
+  Returns the sum of all elements in a buffer of 16-bit values.  During
   calculation, the carry bits are dropped.
 
-  This function calculates the sum of the 16-bit values in the buffer 
-  specified by Buffer and Length. The carry bits in result of addition are dropped. 
-  The 16-bit result is returned.  If Length is 0, then 0 is returned.  
-  
+  This function calculates the sum of the 16-bit values in the buffer
+  specified by Buffer and Length. The carry bits in result of addition are dropped.
+  The 16-bit result is returned.  If Length is 0, then 0 is returned.
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 16-bit boundary, then ASSERT().
   If Length is not aligned on a 16-bit boundary, then ASSERT().
@@ -130,24 +134,24 @@ CalculateSum16 (
   for (Sum = 0, Count = 0; Count < Length; Count++) {
     Sum = (UINT16) (Sum + *(Buffer + Count));
   }
-  
+
   return Sum;
 }
 
 
 /**
-  Returns the two's complement checksum of all elements in a buffer of 
+  Returns the two's complement checksum of all elements in a buffer of
   16-bit values.
 
-  This function first calculates the sum of the 16-bit values in the buffer 
-  specified by Buffer and Length.  The carry bits in the result of addition 
-  are dropped. Then, the two's complement of the sum is returned.  If Length 
+  This function first calculates the sum of the 16-bit values in the buffer
+  specified by Buffer and Length.  The carry bits in the result of addition
+  are dropped. Then, the two's complement of the sum is returned.  If Length
   is 0, then 0 is returned.
-  
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 16-bit boundary, then ASSERT().
   If Length is not aligned on a 16-bit boundary, then ASSERT().
-  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
 
   @param  Buffer			Pointer to the buffer to carry out the checksum operation.
   @param  Length	    The size, in bytes, of Buffer.
@@ -164,23 +168,27 @@ CalculateCheckSum16 (
 {
   UINT16     CheckSum;
 
+  if (Length == 0) {
+    return 0;
+  }
+
   CheckSum = CalculateSum16 (Buffer, Length);
 
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT16) (0x10000 - CheckSum);
+  return (UINT16) (0 - CheckSum);
 }
 
 
 /**
-  Returns the sum of all elements in a buffer of 32-bit values.  During 
+  Returns the sum of all elements in a buffer of 32-bit values.  During
   calculation, the carry bits are dropped.
 
-  This function calculates the sum of the 32-bit values in the buffer 
-  specified by Buffer and Length. The carry bits in result of addition are dropped. 
-  The 32-bit result is returned.  If Length is 0, then 0 is returned.  
-  
+  This function calculates the sum of the 32-bit values in the buffer
+  specified by Buffer and Length. The carry bits in result of addition are dropped.
+  The 32-bit result is returned.  If Length is 0, then 0 is returned.
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 32-bit boundary, then ASSERT().
   If Length is not aligned on a 32-bit boundary, then ASSERT().
@@ -211,24 +219,24 @@ CalculateSum32 (
   for (Sum = 0, Count = 0; Count < Length; Count++) {
     Sum = Sum + *(Buffer + Count);
   }
-  
+
   return Sum;
 }
 
 
 /**
-  Returns the two's complement checksum of all elements in a buffer of 
+  Returns the two's complement checksum of all elements in a buffer of
   32-bit values.
 
-  This function first calculates the sum of the 32-bit values in the buffer 
-  specified by Buffer and Length.  The carry bits in the result of addition 
-  are dropped. Then, the two's complement of the sum is returned.  If Length 
+  This function first calculates the sum of the 32-bit values in the buffer
+  specified by Buffer and Length.  The carry bits in the result of addition
+  are dropped. Then, the two's complement of the sum is returned.  If Length
   is 0, then 0 is returned.
-  
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 32-bit boundary, then ASSERT().
   If Length is not aligned on a 32-bit boundary, then ASSERT().
-  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
 
   @param  Buffer			Pointer to the buffer to carry out the checksum operation.
   @param  Length	    The size, in bytes, of Buffer.
@@ -250,18 +258,18 @@ CalculateCheckSum32 (
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT32) ((UINT32)(-1) - CheckSum + 1);
+  return (UINT32)(~CheckSum + 1);
 }
 
 
 /**
-  Returns the sum of all elements in a buffer of 64-bit values.  During 
+  Returns the sum of all elements in a buffer of 64-bit values.  During
   calculation, the carry bits are dropped.
 
-  This function calculates the sum of the 64-bit values in the buffer 
-  specified by Buffer and Length. The carry bits in result of addition are dropped. 
-  The 64-bit result is returned.  If Length is 0, then 0 is returned.  
-  
+  This function calculates the sum of the 64-bit values in the buffer
+  specified by Buffer and Length. The carry bits in result of addition are dropped.
+  The 64-bit result is returned.  If Length is 0, then 0 is returned.
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 64-bit boundary, then ASSERT().
   If Length is not aligned on a 64-bit boundary, then ASSERT().
@@ -291,24 +299,24 @@ CalculateSum64 (
   for (Sum = 0, Count = 0; Count < Length; Count++) {
     Sum = Sum + *(Buffer + Count);
   }
-  
+
   return Sum;
 }
 
 
 /**
-  Returns the two's complement checksum of all elements in a buffer of 
+  Returns the two's complement checksum of all elements in a buffer of
   64-bit values.
 
-  This function first calculates the sum of the 64-bit values in the buffer 
-  specified by Buffer and Length.  The carry bits in the result of addition 
-  are dropped. Then, the two's complement of the sum is returned.  If Length 
+  This function first calculates the sum of the 64-bit values in the buffer
+  specified by Buffer and Length.  The carry bits in the result of addition
+  are dropped. Then, the two's complement of the sum is returned.  If Length
   is 0, then 0 is returned.
-  
+
   If Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 64-bit boundary, then ASSERT().
   If Length is not aligned on a 64-bit boundary, then ASSERT().
-  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
 
   @param  Buffer			Pointer to the buffer to carry out the checksum operation.
   @param  Length	    The size, in bytes, of Buffer.
@@ -330,7 +338,5 @@ CalculateCheckSum64 (
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT64) ((UINT64)(-1) - CheckSum + 1);
+  return (UINT64)(~CheckSum + 1);
 }
-
-

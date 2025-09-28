@@ -3,6 +3,12 @@
    Distributed under MIT license.
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include "./decode.h"
 
@@ -2024,10 +2030,8 @@ BrotliDecoderResult BrotliDecoderDecompressStream(
         s->state = BROTLI_STATE_HUFFMAN_CODE_0;
         break;
       case BROTLI_STATE_UNCOMPRESSED: {
-        int bytes_copied = s->meta_block_remaining_len;
         result = CopyUncompressedBlockToOutput(
             available_out, next_out, total_out, s);
-        bytes_copied -= s->meta_block_remaining_len;
         if (result != BROTLI_DECODER_SUCCESS) {
           break;
         }

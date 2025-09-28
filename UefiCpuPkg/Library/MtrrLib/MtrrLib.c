@@ -15,6 +15,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include <Uefi.h>
 #include <Register/Cpuid.h>
@@ -1040,6 +1046,10 @@ MtrrLibSetMemoryType (
     return RETURN_ALREADY_STARTED;
   }
 
+  if (*Count == 0) {
+    return RETURN_ALREADY_STARTED;
+  }
+
   //
   // The type change may cause merging with previous range or next range.
   // Update the StartIndex, EndIndex, BaseAddress, Length so that following
@@ -1067,13 +1077,24 @@ MtrrLibSetMemoryType (
   // |+++|                     0          0        -1=0-0-2+1  5
   //
   //
-  DeltaCount = EndIndex - StartIndex - 2;
+  if ((EndIndex + StartIndex) < 3) {
+      DeltaCount = 0;
+  }
+  else {
+      DeltaCount = EndIndex - StartIndex - 2;
+  }
+
   if (LengthLeft == 0) {
     DeltaCount++;
   }
   if (LengthRight == 0) {
     DeltaCount++;
   }
+
+  if (DeltaCount > *Count) {
+    return RETURN_OUT_OF_RESOURCES;
+  }
+
   if (*Count - DeltaCount > Capacity) {
     return RETURN_OUT_OF_RESOURCES;
   }
@@ -1081,9 +1102,24 @@ MtrrLibSetMemoryType (
   //
   // Reserve (-DeltaCount) space
   //
+  if (DeltaCount > (EndIndex + 1)) {
+    return RETURN_OUT_OF_RESOURCES;
+  }
+
   /* coverity[overrun-buffer-arg: SUPPRESS] */
-  CopyMem (&Ranges[EndIndex + 1 - DeltaCount], &Ranges[EndIndex + 1], (*Count - EndIndex - 1) * sizeof (Ranges[0]));
-  *Count -= DeltaCount;
+  CopyMem (
+      &Ranges[EndIndex + 1 - DeltaCount],
+      &Ranges[EndIndex + 1],
+      (*Count - EndIndex - 1) * sizeof (Ranges[0])
+  );
+
+  if (*Count > DeltaCount) {
+      *Count -= DeltaCount;
+  }
+
+  if (DeltaCount > EndIndex) {
+    return RETURN_OUT_OF_RESOURCES;
+  }
 
   if (LengthLeft != 0) {
     Ranges[StartIndex].Length = LengthLeft;
@@ -1549,6 +1585,7 @@ MtrrLibCalculateMtrrs (
   Base0 = Ranges[0].BaseAddress;
   Base1 = Ranges[RangeCount - 1].BaseAddress + Ranges[RangeCount - 1].Length;
   MTRR_LIB_ASSERT_ALIGNED (Base0, Base1 - Base0);
+  UNUSED_VARIABLE (Base0);
 
   //
   // Count the number of vertices.

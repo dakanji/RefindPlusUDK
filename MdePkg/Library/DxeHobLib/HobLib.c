@@ -11,6 +11,12 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include <PiDxe.h>
 
@@ -53,6 +59,7 @@ GetHobList (
     Status = EfiGetSystemConfigurationTable (&gEfiHobListGuid, &mHobList);
     ASSERT_EFI_ERROR (Status);
     ASSERT (mHobList != NULL);
+    UNUSED_VARIABLE (Status);
   }
   return mHobList;
 }

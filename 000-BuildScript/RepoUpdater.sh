@@ -127,7 +127,8 @@ msg_info '## RepoUpdater ##'
 msg_info '-----------------'
 echo ''
 
-REPO_SHA_FILE="${HOME}/Documents/RefindPlus/edk2/.BuildHelp/RepoUpdateSHA.txt"
+EDK2_DIR="${HOME}/Documents/RefindPlus/edk2"
+REPO_SHA_FILE="${EDK2_DIR}/.BuildHelp/RepoUpdateSHA.txt"
 # shellcheck disable=SC1090
 source "${REPO_SHA_FILE}" || msg_info 'WARN: Could not find RepoUpdateSHA.txt'
 
@@ -144,8 +145,12 @@ msg_status 'Synced RefindPlus'
 printf "\n\n"
 
 msg_base 'Syncing RefindPlusUDK'
-BASE_DIR="${HOME}/Documents/RefindPlus/edk2"
+BASE_DIR="${EDK2_DIR}"
 pushd ${BASE_DIR} > /dev/null || ErrExit "ERROR: Could not find ${BASE_DIR} ...Exiting"
+
+PREV_SHA_FILE="${BASE_DIR}/000-BuildScript/RepoUpdateSHA.txt"
+[[ -f "${PREV_SHA_FILE}" ]] && rm -f "${PREV_SHA_FILE}"
+
 OUR_BRANCH='rudk'
 BASE_RUN='true'
 EXIT_CALL='false'

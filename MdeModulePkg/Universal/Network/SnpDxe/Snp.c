@@ -94,7 +94,7 @@ Calc8BitCksum (
     return 0;
   }
 
-  while (Length-- != 0) {
+  while (Length != 0 && Length-- != 0) {
     Cksum = (UINT8) (Cksum + *Ptr++);
   }
 

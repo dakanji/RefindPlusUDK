@@ -11,6 +11,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include <Uefi.h>
 
@@ -236,6 +242,7 @@ DevicePathCompare (
       (VOID**)&mUnicodeCollation);
 
     ASSERT_EFI_ERROR(Status);
+    UNUSED_VARIABLE (Status);
   }
 
   TextPath1 = ConvertDevicePathToText(
@@ -290,6 +297,7 @@ StringNoCaseCompare (
       (VOID**)&mUnicodeCollation);
 
     ASSERT_EFI_ERROR(Status);
+    UNUSED_VARIABLE (Status);
   }
 
   return (mUnicodeCollation->StriColl(

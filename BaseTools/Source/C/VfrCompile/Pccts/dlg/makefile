@@ -9,6 +9,12 @@
 # Micro Data Base Systems
 # Lafayette, Indiana
 #
+
+##
+#  Modified for RefindPlus
+#  2025 Dayo Akanji (sf.net/u/dakanji/profile)
+##
+
 SET=../support/set
 PCCTS_H=../h
 
@@ -112,13 +118,24 @@ PCCTS_H=../h
 #
 
 #
-#   UNIX
+#   UNIX  (default)
 #
+
+###############################################################################
+# UDK2018 / RefindPlusUDK modern GCC/Clang compatibility flags
+# Force C11 for C, C++14 for C++, and disable misc warnings/errors
+###############################################################################
+OUR_CFLAGS= -std=c11 -Wno-unknown-warning-option -Wno-error \
+            -Wno-deprecated-register -Wno-pointer-to-int-cast \
+            -Wno-deprecated-non-prototype -Wno-strict-prototypes \
+            -Wno-deprecated-declarations -Wno-unused-result
+###############################################################################
+
 BUILD_CC?=cc
 COPT=-O
 ANTLR=${BIN_DIR}/antlr
 DLG=${BIN_DIR}/dlg
-BUILD_CFLAGS= $(COPT) -I. -I$(SET) -I$(PCCTS_H) -DUSER_ZZSYN -DZZLEXBUFSIZE=65536
+BUILD_CFLAGS= $(COPT) -I. -I$(SET) -I$(PCCTS_H) -DUSER_ZZSYN -DZZLEXBUFSIZE=65536 $(OUR_CFLAGS)
 BUILD_CPPFLAGS=
 OBJ_EXT=o
 OUT_OBJ = -o
@@ -149,7 +166,7 @@ main.$(OBJ_EXT) : main.c dlg.h
 set.$(OBJ_EXT) : $(SET)/set.c
 	$(BUILD_CC) -c $(BUILD_CFLAGS) $(SET)/set.c
 
-%.o : %.c 
+%.o : %.c
 	$(BUILD_CC) -c $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) $< -o $@
 
 lint:

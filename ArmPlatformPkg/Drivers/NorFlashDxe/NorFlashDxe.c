@@ -797,7 +797,7 @@ AlignedCopyMem (
     Destination8 = DestinationBuffer;
     Source8 = SourceBuffer;
   }
-  while (Length-- != 0) {
+  while (Length != 0 && Length-- != 0) {
     *Destination8++ = *Source8++;
   }
   return DestinationBuffer;

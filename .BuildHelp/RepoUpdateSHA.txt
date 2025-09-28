@@ -4,5 +4,5 @@
 ## Do *NOT* Edit This File ##
 ##-------------------------##
 
-REFIND_UDK_SHA='aacac94fd8c9e1a2c49390c7e527d5caad8ebaf5'
-REFINDPLUS_SHA='d3ff12c17b645808493e4687100e03dc5b36adfd'
+REFIND_UDK_SHA='698e17ed62ef015564de138e902c9dc4356a1b6b'
+REFINDPLUS_SHA='9a0c324295c5077d8acdb91252da87aa6b5ccb2d'

@@ -51,13 +51,13 @@ InternalMemCopyMem (
   if (Source > Destination) {
     Destination8 = (UINT8*)Destination;
     Source8 = (CONST UINT8*)Source;
-    while (Length-- != 0) {
+    while (Length != 0 && Length-- != 0) {
       *(Destination8++) = *(Source8++);
     }
   } else if (Source < Destination) {
     Destination8 = (UINT8*)Destination + Length;
     Source8 = (CONST UINT8*)Source + Length;
-    while (Length-- != 0) {
+    while (Length != 0 && Length-- != 0) {
       *(--Destination8) = *(--Source8);
     }
   }

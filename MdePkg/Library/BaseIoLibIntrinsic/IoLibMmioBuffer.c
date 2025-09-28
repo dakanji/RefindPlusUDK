@@ -47,7 +47,7 @@ MmioReadBuffer8 (
  
   ReturnBuffer = Buffer;
   
-  while (Length-- != 0) {
+  while (Length != 0 && Length-- != 0) {
     *(Buffer++) = MmioRead8 (StartAddress++);
   }
 
@@ -241,7 +241,7 @@ MmioWriteBuffer8 (
  
   ReturnBuffer = (UINT8 *) Buffer;
   
-  while (Length-- != 0) {
+  while (Length != 0 && Length-- != 0) {
      MmioWrite8 (StartAddress++, *(Buffer++));
   }
 

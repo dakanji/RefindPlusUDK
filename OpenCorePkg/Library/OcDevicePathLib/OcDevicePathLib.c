@@ -159,7 +159,11 @@ TrailedBooterDevicePath (
           // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
           //
 
-          Size          = GetDevicePathSize (DevicePath);
+          Size = GetDevicePathSize (DevicePath);
+          if (Size == 0) {
+              return NULL;
+          }
+
           NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size + sizeof (CHAR16));
           if (NewDevicePath == NULL) {
             //

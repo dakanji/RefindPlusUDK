@@ -168,7 +168,7 @@ GetNextDeviceNodeStr (
     if (IS_LEFT_PARENTH (*Str)) {
       ParenthesesStack++;
     } else if (IS_RIGHT_PARENTH (*Str)) {
-      ParenthesesStack--;
+      if (ParenthesesStack != 0) ParenthesesStack--;
     }
 
     Str++;
@@ -2569,7 +2569,7 @@ DevPathFromTextUri (
       return NULL;
   }
 
-  while (UriLength-- != 0) {
+  while (UriLength != 0 && UriLength-- != 0) {
     Uri->Uri[UriLength] = (CHAR8) UriStr[UriLength];
   }
 

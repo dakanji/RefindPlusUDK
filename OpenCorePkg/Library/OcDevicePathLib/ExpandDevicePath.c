@@ -505,41 +505,53 @@ BmExpandMediaDevicePath (
   // Detect the the default boot file from removable Media
   //
   NextFullPath = NULL;
-  Size = GetDevicePathSize (DevicePath) - END_DEVICE_PATH_LENGTH;
-  gBS->LocateHandleBuffer (
-         ByProtocol,
-         &gEfiSimpleFileSystemProtocolGuid,
-         NULL,
-         &NumberSimpleFileSystemHandles,
-         &SimpleFileSystemHandles
-         );
-  for (Index = 0; Index < NumberSimpleFileSystemHandles; Index++) {
-    //
-    // Get the device path size of SimpleFileSystem handle
-    //
-    TempDevicePath = DevicePathFromHandle (SimpleFileSystemHandles[Index]);
-    TempSize = GetDevicePathSize (TempDevicePath) - END_DEVICE_PATH_LENGTH;
-    //
-    // Check whether the device path of boot option is part of the SimpleFileSystem handle's device path
-    //
-    if ((Size <= TempSize) && (CompareMem (TempDevicePath, DevicePath, Size) == 0)) {
-      // CHANGE: Do not append EFI boot file.
-      NextFullPath = DuplicateDevicePath (TempDevicePath);
-      if (GetNext) {
-        break;
-      } else {
-        GetNext = (BOOLEAN)(CompareMem (NextFullPath, FullPath, GetDevicePathSize (NextFullPath)) == 0);
-        FreePool (NextFullPath);
-        NextFullPath = NULL;
-      }
+  TempSize = GetDevicePathSize (DevicePath);
+  if (TempSize >= END_DEVICE_PATH_LENGTH) {
+      Size = TempSize - END_DEVICE_PATH_LENGTH;
+      gBS->LocateHandleBuffer (
+             ByProtocol,
+             &gEfiSimpleFileSystemProtocolGuid,
+             NULL,
+             &NumberSimpleFileSystemHandles,
+             &SimpleFileSystemHandles
+        );
+
+        for (Index = 0; Index < NumberSimpleFileSystemHandles; Index++) {
+          //
+          // Get the device path size of SimpleFileSystem handle
+          //
+          TempDevicePath = DevicePathFromHandle (SimpleFileSystemHandles[Index]);
+          TempSize = GetDevicePathSize (TempDevicePath);
+          if (TempSize >= END_DEVICE_PATH_LENGTH) {
+            TempSize = TempSize - END_DEVICE_PATH_LENGTH;
+
+            //
+            // Check whether the device path of boot option is part of the SimpleFileSystem handle's device path
+            //
+            if ((Size <= TempSize) && (CompareMem (TempDevicePath, DevicePath, Size) == 0)) {
+              // CHANGE: Do not append EFI boot file.
+              NextFullPath = DuplicateDevicePath (TempDevicePath);
+
+              if (GetNext) break;
+              GetNext = (BOOLEAN)(
+                  CompareMem (
+                      NextFullPath, FullPath,
+                      GetDevicePathSize (NextFullPath)
+                  ) == 0
+              );
+
+              FreePool (NextFullPath);
+              NextFullPath = NULL;
+            }
+          }
+        } // for
+
+        if (SimpleFileSystemHandles != NULL) {
+          FreePool (SimpleFileSystemHandles);
+        }
     }
-  }
 
-  if (SimpleFileSystemHandles != NULL) {
-    FreePool (SimpleFileSystemHandles);
-  }
-
-  return NextFullPath;
+    return NextFullPath;
 }
 
 /**

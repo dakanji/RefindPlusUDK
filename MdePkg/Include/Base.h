@@ -18,9 +18,21 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
+
 
 #ifndef __BASE_H__
 #define __BASE_H__
+
+// In MdePkg/Include/Base.h
+#ifndef UNUSED_VARIABLE
+#define UNUSED_VARIABLE(x) ((void)(x))
+#endif
 
 //
 // Include processor specific binding
@@ -65,8 +77,8 @@ VERIFY_SIZE_OF (CHAR16, 2);
 
 //
 // The following three enum types are used to verify that the compiler
-// configuration for enum types is compliant with Section 2.3.1 of the 
-// UEFI 2.3 Specification. These enum types and enum values are not 
+// configuration for enum types is compliant with Section 2.3.1 of the
+// UEFI 2.3 Specification. These enum types and enum values are not
 // intended to be used. A prefix of '__' is used avoid conflicts with
 // other types.
 //
@@ -745,7 +757,7 @@ typedef CHAR8 *VA_LIST;
 
   This macro initializes Dest as a copy of Start, as if the VA_START macro had been applied to Dest
   followed by the same sequence of uses of the VA_ARG macro as had previously been used to reach
-  the present state of Start. 
+  the present state of Start.
 
   @param   Dest   VA_LIST used to traverse the list of arguments.
   @param   Start  VA_LIST used to traverse the list of arguments.
@@ -1277,4 +1289,3 @@ typedef UINTN RETURN_STATUS;
 #define ARRAY_SIZE(Array) (sizeof (Array) / sizeof ((Array)[0]))
 
 #endif
-

@@ -125,20 +125,21 @@ Exec_Build() { # $1=SUFFIX (REL/DBG/NPT), $2=EDK BUILD TYPE (RELEASE/DEBUG/NOOPT
         cp -pf "${bin_folder}/RefindPlus.efi" "${boot_out}"
     fi
 
-    # Rename produced .efi files
+    # Rename produced files
+    mv -f "${bin_folder}/TOOLS_DEF.X64" "${bin_folder}/zTOOLS_DEF.X64"
     for file in "${bin_folder}"/*.efi; do
         [[ -e "${file}" ]] || continue  # Skip if no matches
 
         our_tag=$( basename "${file%.efi}" )
         if [[ "${our_tag}" == "RefindPlus" || "${our_tag}" == "gptsync" ]] ; then
-            mv -f "${file}" "${bin_folder}/x64_${our_tag}_${tag_type}.efi"
+            mv -f "${file}" "${bin_folder}/UEFI_APP---x64_${our_tag}_${tag_type}.efi"
         else
-            mv -f "${file}" "${bin_folder}/DRIVER_${tag_type}--x64_${our_tag}.efi"
+            mv -f "${file}" "${bin_folder}/DRIVER_${tag_type}---x64_${our_tag}.efi"
         fi
     done
 
     echo ''
-    msg_info "Completed ${tag_type} Build on '${BUILD_BRANCH}' Branch of RefindPlus"
+    msg_info "Completed '${tag_type}' Build of the RefindPlus '${BUILD_BRANCH}' Branch"
     PRIOR_BUILD=1
 }
 
@@ -166,6 +167,7 @@ msg_info '##--------------------------------##'
 DSC_FILE="RefindPlusPkg/RefindPlusPkg.dsc"
 
 BUILD_TYPE=$( tr '[:lower:]' '[:upper:]' <<< "${DEBUG_TYPE}" )
+[[ "${BUILD_TYPE}" == 'SOME' ]] && BUILD_TYPE='TWO'
 case "${BUILD_TYPE}" in
   "TWO") Set_Flags True  True  False ;;
   "REL") Set_Flags True  False False ;;
@@ -210,6 +212,7 @@ elif (( JOBS_ALL < 12 )) ; then
 else
     JOBS_MAX=${JOBS_MID}
 fi
+msg_raw "All CPUs = ${JOBS_ALL}"
 msg_raw "Max Jobs = ${JOBS_MAX}"
 msg_status '...OK'; echo ''
 
@@ -421,6 +424,7 @@ fi
 ## Clear Potential Leftover Legacy Items ... Remove Later - START ##
 rm -fr "${EDK2_DIR}/RefindPkg"
 rm -fr "${EDK2_DIR}/.Build-TMP"
+rm -f  "${EDK2_DIR}/000-BuildScript/RepoUpdateSHA.txt"
 ## Clear Potential Leftover Legacy Items ... Remove Later - END ##
 
 if [[ ! -L "${PLUS_DIR}" ]] ; then

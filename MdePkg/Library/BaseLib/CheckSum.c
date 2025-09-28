@@ -49,7 +49,7 @@ CalculateSum8 (
   for (Sum = 0, Count = 0; Count < Length; Count++) {
     Sum = (UINT8) (Sum + *(Buffer + Count));
   }
-  
+
   return Sum;
 }
 
@@ -81,12 +81,16 @@ CalculateCheckSum8 (
 {
   UINT8     CheckSum;
 
+  if (Length == 0) {
+    return 0;
+  }
+
   CheckSum = CalculateSum8 (Buffer, Length);
 
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT8) (0x100 - CheckSum);
+  return (UINT8) (0 - CheckSum);
 }
 
 /**
@@ -128,7 +132,7 @@ CalculateSum16 (
   for (Sum = 0, Count = 0; Count < Total; Count++) {
     Sum = (UINT16) (Sum + *(Buffer + Count));
   }
-  
+
   return Sum;
 }
 
@@ -162,12 +166,16 @@ CalculateCheckSum16 (
 {
   UINT16     CheckSum;
 
+  if (Length == 0) {
+    return 0;
+  }
+
   CheckSum = CalculateSum16 (Buffer, Length);
 
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT16) (0x10000 - CheckSum);
+  return (UINT16) (0 - CheckSum);
 }
 
 
@@ -210,7 +218,7 @@ CalculateSum32 (
   for (Sum = 0, Count = 0; Count < Total; Count++) {
     Sum = Sum + *(Buffer + Count);
   }
-  
+
   return Sum;
 }
 
@@ -249,7 +257,7 @@ CalculateCheckSum32 (
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT32) ((UINT32)(-1) - CheckSum + 1);
+  return (UINT32)(~CheckSum + 1);
 }
 
 
@@ -292,7 +300,7 @@ CalculateSum64 (
   for (Sum = 0, Count = 0; Count < Total; Count++) {
     Sum = Sum + *(Buffer + Count);
   }
-  
+
   return Sum;
 }
 
@@ -331,7 +339,7 @@ CalculateCheckSum64 (
   //
   // Return the checksum based on 2's complement.
   //
-  return (UINT64) ((UINT64)(-1) - CheckSum + 1);
+  return (UINT64)(~CheckSum + 1);
 }
 
 GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT32  mCrcTable[256] = {

@@ -39,7 +39,7 @@ ifndef HOST_ARCH
   endif
   ifneq (,$(findstring arm,$(uname_m)))
     ifeq ($(DARWIN),Darwin)
-	  # DA-TAG: Force to x64 to work around build issues
+	  # DA-TAG: Adjust for Apple Silicon
       HOST_ARCH=AARCH64
     else
       HOST_ARCH=ARM
@@ -110,8 +110,8 @@ ifeq ($(HOST_ARCH), IA32)
   #
   # Snow Leopard is a 32-bit and 64-bit environment. uname -m returns i386,
   #  but gcc defaults to x86_64. So make sure tools match uname -m.
-  # A 64-bit kernal can be manually defined on Snow Leopard
-  #  so only do this if uname -m returns i386.
+  # A 64-bit kernel can be manually defined for Snow Leopard,
+  #  so only proceed here if uname -m returns i386.
   #
   ifeq ($(DARWIN),Darwin)
     BUILD_CFLAGS   += -arch i386

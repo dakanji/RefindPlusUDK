@@ -11,6 +11,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include "InternalHiiLib.h"
 
@@ -274,6 +280,7 @@ HiiRemovePackages (
   ASSERT (HiiHandle != NULL);
   Status = gHiiDatabase->RemovePackageList (gHiiDatabase, HiiHandle);
   ASSERT_EFI_ERROR (Status);
+  UNUSED_VARIABLE (Status);
 }
 
 

@@ -13,6 +13,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+/**
+ *  Modified for RefindPlus
+ *  Copyright (c) 2025 Dayo Akanji (sf.net/u/dakanji/profile)
+ *
+ *  Modifications distributed under the preceding terms.
+**/
 
 #include "UefiHandleParsingLib.h"
 #include "IndustryStandard/Acpi10.h"
@@ -801,6 +807,7 @@ DriverEfiVersionProtocolDumpInformation(
     (VOID**)&DriverEfiVersion);
 
   ASSERT_EFI_ERROR(Status);
+  UNUSED_VARIABLE (Status);
 
   RetVal = AllocateZeroPool(VersionStringSize);
   if (RetVal != NULL) {

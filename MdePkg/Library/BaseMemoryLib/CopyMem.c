@@ -65,7 +65,7 @@ InternalMemCopyMem (
       // Finish if there are still some bytes to copy
       Destination8 = (UINT8*)Destination64;
       Source8 = (CONST UINT8*)Source64;
-      while (Length-- != 0) {
+      while (Length != 0 && Length-- != 0) {
         *(Destination8++) = *(Source8++);
       }
     } else if (SourceBuffer < DestinationBuffer) {
@@ -106,7 +106,7 @@ InternalMemCopyMem (
       // Finish if there are still some bytes to copy
       Destination8 = (UINT8*)Destination32;
       Source8 = (CONST UINT8*)Source32;
-      while (Length-- != 0) {
+      while (Length != 0 && Length-- != 0) {
         *(Destination8++) = *(Source8++);
       }
     } else if (SourceBuffer < DestinationBuffer) {
@@ -139,13 +139,13 @@ InternalMemCopyMem (
     if (SourceBuffer > DestinationBuffer) {
       Destination8 = (UINT8*)DestinationBuffer;
       Source8 = (CONST UINT8*)SourceBuffer;
-      while (Length-- != 0) {
+      while (Length != 0 && Length-- != 0) {
         *(Destination8++) = *(Source8++);
       }
     } else if (SourceBuffer < DestinationBuffer) {
       Destination8 = (UINT8*)DestinationBuffer + (Length - 1);
       Source8 = (CONST UINT8*)SourceBuffer + (Length - 1);
-      while (Length-- != 0) {
+      while (Length != 0 && Length-- != 0) {
         *(Destination8--) = *(Source8--);
       }
     }

@@ -1519,6 +1519,8 @@ static const size_t MAX_SUPPORTED_DEFLATE_LENGTH = 258;
 /*search the index in the array, that has the largest value smaller than or equal to the given value,
 given array must be sorted (if no value is smaller, it returns the size of the given array)*/
 static size_t searchCodeIndex(const unsigned* array, size_t array_size, size_t value) {
+  if (array_size == 0) return 0;  // Prevent undefined access and underflow
+
   /*binary search (only small gain over linear). TODO: use CPU log2 instruction for getting symbols instead*/
   size_t left = 1;
   size_t right = array_size - 1;
@@ -1528,7 +1530,12 @@ static size_t searchCodeIndex(const unsigned* array, size_t array_size, size_t v
     if(array[mid] >= value) right = mid - 1;
     else left = mid + 1;
   }
-  if(left >= array_size || array[left] > value) left--;
+
+  if (left >= array_size || array[left] > value) {
+    if (left > 0) left--;
+    else return array_size; // No valid entry found
+  }
+
   return left;
 }
 
