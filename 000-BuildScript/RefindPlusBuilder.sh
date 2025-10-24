@@ -180,7 +180,7 @@ esac
 msg_base 'Check OS Type...'
 Kern_OS="$( uname )"
 if [[ "${Kern_OS}" == 'Darwin' ]] ; then
-    OS_NAME="MacOS"
+    OS_NAME="macOS"
 elif [[ "${Kern_OS}" == 'Linux' ]] ; then
     OS_NAME="Linux"
 else
@@ -217,7 +217,7 @@ msg_raw "Max Jobs = ${JOBS_MAX}"
 msg_status '...OK'; echo ''
 
 msg_base 'Confirm Build Utilities...'
-if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+if [[ "${OS_NAME}" == 'macOS' ]] ; then
     HINT_NASM="brew install nasm"
     HINT_IASL="brew install acpica"
 else
@@ -275,7 +275,7 @@ if [[ "${OS_NAME}" == 'Linux' ]] ; then
 fi
 msg_status '...OK'; echo ''
 
-if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+if [[ "${OS_NAME}" == 'macOS' ]] ; then
     DOCS_DIR="${HOME}/Documents"
     TOOLCHAIN="XCODE5"
 else
@@ -334,7 +334,7 @@ else
 fi
 
 OUR_SHASUM='NO-OP'
-if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+if [[ "${OS_NAME}" == 'macOS' ]] ; then
     command -v shasum >/dev/null && OUR_SHASUM="shasum"
 else
     for tool in shasum sha1sum md5sum; do
@@ -350,15 +350,16 @@ else
       -name '*.txt' -or -name '*.template' -or -name '*.makefile' -or -name 'GNUmakefile' \) \
       -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | awk '{print $1}' )"
 
-    if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+    if [[ "${OS_NAME}" == 'macOS' ]] ; then
         Get_OS_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 | xargs )"
     else
         Get_Distro="$( grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2- | tr -d '"' )"
         Get_Kernel="$( uname -r | cut -d '-' -f 1 )"
         Get_OS_Ver="${Get_Distro}_${Get_Kernel}"
     fi
+    Get_OS_ARCH="$( uname -m )"
 
-    BASETOOLS_SHA_NEW="${Get_Sha_Str}:${Get_OS_Ver}"
+    BASETOOLS_SHA_NEW="${Get_Sha_Str}:${Get_OS_Ver}:${Get_OS_ARCH}"
     if [[ ! -d "${BASESOURCE_DIR}/bin" ]] || \
        [[ "${BASETOOLS_SHA_NEW}" != "${BASETOOLS_SHA_OLD}" ]] ; then
         BUILD_TOOLS=1
@@ -397,7 +398,7 @@ fi
 if (( NO_PYTHON )) ; then
     msg_info "Python 2 Instance Not Found"
     echo ''
-    if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+    if [[ "${OS_NAME}" == 'macOS' ]] ; then
         # Unable to proceed without Python 2
         # Default Error Exit
         TrapERR
@@ -480,7 +481,7 @@ if (( BUILD_TOOLS )) ; then
 
     OurArch="$( uname -m )"
     if [[ "${OurArch}" == *"arm"* ]] ; then
-        if [[ "${OS_NAME}" == 'MacOS' ]] ; then
+        if [[ "${OS_NAME}" == 'macOS' ]] ; then
             msg_base 'Create Temp BaseTools BaseType for Apple Silicon...'
             if [[ -f "${BASETYPE_KEPT}" ]] ; then
                 cp -pf "${BASETYPE_KEPT}" "${BASETYPE_MAIN}"
@@ -539,7 +540,7 @@ if ! grep -q '__REFIT_SBAT_' "${MAINFILE_MAIN}"; then
     # Not found ... Continue
     msg_status '...OK'; echo ''
 else
-    if [[ "${OS_NAME}" != 'MacOS' ]] ; then
+    if [[ "${OS_NAME}" != 'macOS' ]] ; then
         msg_base 'Skip MTOC Sync...'
         # Not Mac OS ... Continue
         msg_status '...OK'; echo ''

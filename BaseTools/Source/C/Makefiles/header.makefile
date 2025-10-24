@@ -38,11 +38,9 @@ ifndef HOST_ARCH
     HOST_ARCH=AARCH64
   endif
   ifneq (,$(findstring arm,$(uname_m)))
-    ifeq ($(DARWIN),Darwin)
-	  # DA-TAG: Adjust for Apple Silicon
+    HOST_ARCH=ARM
+    ifneq (,$(findstring arm64,$(uname_m)))
       HOST_ARCH=AARCH64
-    else
-      HOST_ARCH=ARM
     endif
   endif
   ifndef HOST_ARCH
