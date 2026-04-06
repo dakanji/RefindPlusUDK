@@ -915,7 +915,9 @@ if [[ -f "${MAINFILE_MAIN}" ]]; then
             fi
             msg_status '...OK'; printf '\n'
 
+            msg_status '...............01'; printf '\n'
             if (( BLOB_OCMTOC )); then
+                msg_status '...............01A'; printf '\n'
                 if grep -Eq '^\*_XCODE5_\*_MTOC_PATH[[:space:]]*=[[:space:]]*mtoc' "${TOOLSDEF_MAIN}"; then
                     # Path to bundled ocmtoc ... File name is 'mtoc'
                     BUNDLED_OCMTOC="${BLOB_DIR}/mtoc"
@@ -948,7 +950,9 @@ if [[ -f "${MAINFILE_MAIN}" ]]; then
             fi
         fi
 
+        msg_status '...............02'; printf '\n'
         if [[ -f "${EXTEND_TWEAKS}" ]]; then
+            msg_status '...............02A'; printf '\n'
             if ! source "${EXTEND_TWEAKS}"; then
                 TrapERR "Could Not Source:- '${EXTEND_TWEAKS}'"
             else
@@ -984,16 +988,17 @@ if [[ -f "${MAINFILE_MAIN}" ]]; then
     fi
 fi
 
-if [[ -z "${END_NOTICE}" ]]; then
-    # Execute Version Build
-    ErrMsg="Could Not Find '${EDK2_DIR}' ... Exiting"
-    pushd "${EDK2_DIR}" > /dev/null || TrapERR "${ErrMsg}"
-    [[ "${RUN_REL}" == 'True' ]] && Exec_Build "REL" "RELEASE" "${BINARY_DIR_REL}"
-    [[ "${RUN_DBG}" == 'True' ]] && Exec_Build "DBG" "DEBUG"   "${BINARY_DIR_DBG}"
-    [[ "${RUN_NPT}" == 'True' ]] && Exec_Build "NPT" "NOOPT"   "${BINARY_DIR_NPT}"
-    popd > /dev/null || true
-    printf '\n\n'
+msg_status '...............03'; printf '\n'
+# Execute Version Build
+ErrMsg="Could Not Find '${EDK2_DIR}' ... Exiting"
+pushd "${EDK2_DIR}" > /dev/null || TrapERR "${ErrMsg}"
+[[ "${RUN_REL}" == 'True' ]] && Exec_Build "REL" "RELEASE" "${BINARY_DIR_REL}" || true
+[[ "${RUN_DBG}" == 'True' ]] && Exec_Build "DBG" "DEBUG"   "${BINARY_DIR_DBG}" || true
+[[ "${RUN_NPT}" == 'True' ]] && Exec_Build "NPT" "NOOPT"   "${BINARY_DIR_NPT}" || true
+popd > /dev/null || true
+printf '\n\n'
 
+if [[ -z "${END_NOTICE}" ]]; then
     # Tidy up
     msg_info 'Locate the EFI Files:'
     [[ -d "${EDK2_DIR}/Build" ]] && msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
@@ -1008,4 +1013,5 @@ if [[ -z "${END_NOTICE}" ]]; then
     msg_raw "It is anticipated the metadata will be removed before use."
 fi
 
+msg_status '...............04'; printf '\n'
 printf '\n\n'
