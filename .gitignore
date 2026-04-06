@@ -3,14 +3,15 @@
 !/Python/build/*
 cov-int/
 infer-out/
-compile_commands.json
-000-BOOTx64-Files/
-RefindPlusPkg
 000-Releases/
+000-BOOTx64-Files/
+compile_commands.json
 BaseToolsSHA.txt
 ExtendTweaks.txt
+RefindPlusPkg
 
-# OS generated files #
+
+# OS Generated Files #
 ######################
 .DS_Store
 .DS_Store?

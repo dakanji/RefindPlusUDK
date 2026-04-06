@@ -9,7 +9,15 @@
 #
 # THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 # WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+##
+
+##
+#  Modified for RefindPlus
+#  Copyright (c) 2026 Dayo Akanji (sf.net/u/dakanji/profile)
 #
+#  Modifications distributed under the preceding terms.
+##
+
 
 DEPFILES = $(OBJECTS:%.o=%.d)
 
@@ -20,11 +28,11 @@ $(MAKEROOT)/libs-$(HOST_ARCH):
 install: $(MAKEROOT)/libs-$(HOST_ARCH) $(LIBRARY)
 	cp $(LIBRARY) $(MAKEROOT)/libs-$(HOST_ARCH)
 
-$(LIBRARY): $(OBJECTS) 
+$(LIBRARY): $(OBJECTS)
 	$(BUILD_AR) crs $@ $^
 
-%.o : %.c 
-	$(BUILD_CC)  -c $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) $< -o $@
+%.o : %.c
+	$(BUILD_CC) -c $(BUILD_CFLAGS) $(BUILD_CPPFLAGS) $< -o $@
 
 %.o : %.cpp
 	$(BUILD_CXX) -c $(BUILD_CPPFLAGS) $(BUILD_CXXFLAGS) $< -o $@
