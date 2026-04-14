@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 ###
-# RefindPlusBuilder.sh
-# A script to build RefindPlus
-#
-# Copyright (c) 2020-2026 Dayo Akanji
+# The RefindPlus Build Script
+# Copyright 2020-2026 Dayo Akanji
+# sf.net/u/dakanji/profile
 # MIT-0 License
 ###
 
@@ -14,7 +13,7 @@ COLOR_ERROR=""
 COLOR_NORMAL=""
 
 if test -t 1; then
-    NCOLORS=$(tput colors)
+    NCOLORS=$( tput colors 2>/dev/null || echo 0 )
     if test -n "${NCOLORS}" && test "${NCOLORS}" -ge 8; then
         COLOR_BASE="\033[0;36m"
         COLOR_INFO="\033[0;33m"
@@ -27,34 +26,36 @@ fi
 # Provide Custom Colours
 msg_raw() {
     printf "%s\n" "${1}"
-}
+} # msg_raw()
 msg_base() {
     printf "%b%s%b\n" "${COLOR_BASE}" "${1}" "${COLOR_NORMAL}"
-}
+} # msg_base()
 msg_info() {
     printf "%b%s%b\n" "${COLOR_INFO}" "${1}" "${COLOR_NORMAL}"
-}
+} # msg_info()
 msg_status() {
     printf "%b%s%b\n" "${COLOR_STATUS}" "${1}" "${COLOR_NORMAL}"
-}
+} # msg_status()
 msg_error() {
     printf "%b%s%b\n" "${COLOR_ERROR}" "${1}" "${COLOR_NORMAL}"
-}
+} # msg_error()
 
 ## REVERT MISC CHANGES ##
 #  - Always triggered on exit
 #  - This includes crashes
 #
 # shellcheck disable=SC2329
-TrapOUT() {
+trapOUT() {
     # Restore PATH
     export PATH="${ORIG_PATH}"; hash -r
 
     # Clear Build/Compiler Variables
-    unset CC CXX CLANG38_BIN
+    unset CC CXX CLANG38_BIN 2>/dev/null || true
 
-    # Reset Misc
-    [[ -n "${TMP_BIN}" && "${TMP_BIN}" == "${RP_TMP_DIR}".* ]] && rm -fr "${TMP_BIN}"
+    # Reset Misc ... *DO NOT* Quote 'RP_TMP_DIR' Below
+    if [[ -n "${TMP_BIN}" && "${TMP_BIN}" == ${RP_TMP_DIR}.* && -d "${TMP_BIN}" ]]; then
+        rm -rf -- "${TMP_BIN}"
+    fi
 
     # Restore Misc Amended Files
     [[ -f "${BASETYPE_KEPT}" ]] && mv -f "${BASETYPE_KEPT}" "${BASETYPE_MAIN}"
@@ -70,62 +71,60 @@ TrapOUT() {
             tput smam
         fi
     fi
-}
+} # trapOUT()
 
 ## ERROR HANDLERS ##
-TrapINT() { # $1: message
+trapINT() { # $1: message
     # Declare Local Variables
     local errMessage
 
-    # Show error and exit
+    # Show Error and Exit
     errMessage="${1:-Force Quit ... Exiting}"
-    printf '\n'
+    printf '\n\n'
     msg_error "${errMessage}"
     printf '\n\n'
     exit 1
-}
-TrapERR() { # $1: message
+} # trapINT()
+trapERR() { # $1: message
     # Declare Local Variables
     local errMessage
 
-    # Show error and exit
+    # Show Error and Exit
     errMessage="${1:-Runtime Error ... Exiting}"
-    printf '\n'
+    printf '\n\n'
     msg_error "${errMessage}"
     printf '\n\n'
     exit 1
-}
+} # trapERR()
 
 ## HELPER FOR RUN FLAGS ##
-Set_Flags() {
+set_flags() {
     RUN_REL="${1}"
     RUN_DBG="${2}"
     RUN_NPT="${3}"
-}
+} # set_flags()
 
-Get_Abs_Path() {
+get_abs_path() {
     local target="${1}"
     local base_dir
     local file_name
 
     if [[ -d "${target}" ]]; then
-        (cd "${target}" && pwd)
+        printf "%s\n" "$(cd "${target}" && pwd)"
     elif [[ -f "${target}" ]]; then
-        base_dir=$(cd "$(dirname "${target}")" && pwd)
-        file_name=$(basename "${target}")
+        base_dir=$( cd "$(dirname "${target}")" && pwd )
+        file_name=$( basename "${target}" )
         printf "%s/%s\n" "${base_dir}" "${file_name}"
+    else
+        return 1
     fi
-}
+} # get_abs_path()
 
-Exec_Build() { # $1=SUFFIX (REL/DBG/NPT), $2=EDK BUILD TYPE (RELEASE/DEBUG/NOOPT), $3=BINARY_DIR
+exec_build() {
     local tag_type="${1}"
     local edk_build="${2}"
-    local bin_folder="${3}"
-    local boot_out
-    local our_tag
-    local file
 
-    # Add spacer if at least one version built before
+    # Add Spacer if at Least One Version Built Before
     if (( PRIOR_BUILD )); then
         msg_info "Preparing ${tag_type} Build..."
         printf '\n'
@@ -134,51 +133,96 @@ Exec_Build() { # $1=SUFFIX (REL/DBG/NPT), $2=EDK BUILD TYPE (RELEASE/DEBUG/NOOPT
     printf '\n'
     msg_info "## RefindPlusBuilder - Building ${tag_type} Version ##  :  ${BUILD_BRANCH}"
     msg_info '##------------------------------------------##'
-    source edksetup.sh BaseTools
-    build -n "${JOBS_MAX}" -a X64 -b "${edk_build}" -t "${TOOLCHAIN}" -p "${DSC_FILE}"
-
-    # Copy BOOTx64
-    if [[ -d "${EDK2_DIR}/Build" ]]; then
-        boot_out="${OUTPUT_DIR}/APP_xx_000---BOOTx64-${tag_type}.efi"
-        cp -pf "${bin_folder}/RefindPlus.efi" "${boot_out}"
+    if ! source edksetup.sh BaseTools; then
+        trapERR "Failed to source 'edksetup.sh' for '${tag_type}' Build ... Exiting"
     fi
+    if ! build -n "${JOBS_MAX}" -a X64 -b "${edk_build}" -t "${TOOLCHAIN}" -p "${DSC_FILE}"; then
+        trapERR "Failed to Build '${tag_type}' Version ... Exiting"
+    fi
+} # exec_build()
 
-    # Rename produced files
+process_binaries() {
+    local tag_type="${1}"
+    local bin_folder="${2}"
+    local meta_tag
+    local our_tag
+    local file
+
+    # Handle Files Produced
+    # Only if Files Exist
+    shopt -s nullglob
     for file in "${bin_folder}"/*.efi ; do
-        [[ -e "${file}" ]] || continue  # Skip if no matches
-
         our_tag=$( basename "${file%.efi}" )
         if [[ "${our_tag}" == "RefindPlus" ]]; then
-            mv -f "${file}" "${bin_folder}/APP_xx_000---x64_${our_tag}_${tag_type}.efi"
+            meta_tag='APP_xx_000'
+            cp -pf "${file}" "${OUTPUT_DIR}/${meta_tag}---BOOTx64-${tag_type}.efi" || true
+            mv -f  "${file}" "${bin_folder}/${meta_tag}---x64_${our_tag}_${tag_type}.efi" || true
         elif [[ "${our_tag}" == "gptsync" ]]; then
-            mv -f "${file}" "${bin_folder}/APP_xx_${tag_type}---x64_${our_tag}.efi"
+            meta_tag="APP_xx_${tag_type}"
+            mv -f "${file}" "${bin_folder}/${meta_tag}---x64_${our_tag}.efi" || true
         else
-            mv -f "${file}" "${bin_folder}/DRV_xx_${tag_type}---x64_${our_tag}.efi"
+            meta_tag="DRV_xx_${tag_type}"
+            mv -f "${file}" "${bin_folder}/${meta_tag}---x64_${our_tag}.efi" || true
         fi
     done
+    shopt -u nullglob
+} # process_binaries()
 
-    # Add binary blobs
-    for blob_bin in shell memtest86 gdisk CleanNvram ipxe; do
-      blob_file="${BLOB_DIR}/x64_${blob_bin}.efi"
+copy_blobs() {
+    local tag_type="${1}"
+    local bin_folder="${2}"
+    local meta_tag="BLB_xx_${tag_type}"
+    local blob_file
+    local blob_bin
 
-      if [[ -f "${blob_file}" ]]; then
-        cp -f "${blob_file}" "${bin_folder}/BLB_xx_${tag_type}---x64_${blob_bin}.efi" || true
+    # Add Binary Blobs
+    for blob_bin in shell memtest86p gdisk CleanNvram ipxe; do
+      blob_file="x64_${blob_bin}.efi"
+      if [[ -f "${BLOB_DIR}/${blob_file}" ]]; then
+          cp -pf "${BLOB_DIR}/${blob_file}" "${bin_folder}/${meta_tag}---${blob_file}" || true
       fi
     done
+} # copy_blobs()
 
+copy_licenses() {
+    local bin_folder="${1}"
+    local meta_tag='000_xx_000'
+    local lic_name
+    local lic_orig
+    local lic_file
+    local lic_boot
 
-    # Add licenses
+    # Add License Data
     for lic_name in INFO LICENSE; do
-      lic_file="000_xx_000---${lic_name}.txt"
-      cp -pf "${PLUS_DIR}/${lic_name}.txt" "${bin_folder}/${lic_file}" || true
-      cp -pf "${PLUS_DIR}/${lic_name}.txt" "${OUTPUT_DIR}/${lic_file}" || true
-    done
+        lic_orig="${PLUS_DIR}/${lic_name}.txt"
+        lic_file="${meta_tag}---${lic_name}.txt"
+        lic_boot="${OUTPUT_DIR}/${lic_file}"
 
+        if [[ -f "${lic_orig}" ]]; then
+            cp -pf "${lic_orig}" "${bin_folder}/${lic_file}" || true
+
+            if [[ ! -f "${lic_boot}" ]]; then
+                cp -pf "${lic_orig}" "${lic_boot}" || true
+            fi
+        fi
+    done
+} # copy_licenses()
+
+dispatcher() { # $1=SUFFIX (REL/DBG/NPT), $2=EDK BUILD TYPE (RELEASE/DEBUG/NOOPT), $3=BINARY_DIR
+    local tag_type="${1}"
+    local edk_build="${2}"
+    local bin_folder="${3}"
+
+    exec_build "${tag_type}" "${edk_build}"
+    process_binaries "${tag_type}" "${bin_folder}"
+    copy_blobs "${tag_type}" "${bin_folder}"
+    copy_licenses "${bin_folder}"
 
     printf '\n'
     msg_info "Completed '${tag_type}' Build of the RefindPlus '${BUILD_BRANCH}' Branch"
     PRIOR_BUILD=1
-}
+} # dispatcher()
+
 
 
 ##########################
@@ -186,19 +230,25 @@ Exec_Build() { # $1=SUFFIX (REL/DBG/NPT), $2=EDK BUILD TYPE (RELEASE/DEBUG/NOOPT
 ##########################
 
 # Set Event Traps
-trap TrapERR ERR
-trap TrapOUT EXIT
-trap TrapINT SIGINT
+trap trapERR ERR
+trap trapOUT EXIT
+trap trapINT SIGINT
 
 # Set Temp Binary Dir
-RP_TMP_DIR="/tmp/refindplus_dir"
+RP_TMP_DIR='/tmp/refindplus_dir'
 TMP_BIN="$( mktemp -d "${RP_TMP_DIR}".XXXXXX )"
-[[ -d "${TMP_BIN}" ]] || TrapERR "Failed to Create 'TMP_BIN' ... Exiting"
+[[ -d "${TMP_BIN}" ]] || trapERR "Failed to Create 'TMP_BIN' ... Exiting"
 
 # Set Basic Params
 PRIOR_BUILD=0
 LINEWRAP_FIX=0
 ORIG_PATH="${PATH}"
+if [[ -z "${IS_REMOTE}" && -z "${END_NOTICE}" ]]; then
+    IS_LOCAL=1
+else
+    IS_LOCAL=0
+fi
+
 
 # ============================== #
 #       Parameter Handling       #
@@ -211,12 +261,7 @@ BUILD_TYPE="TWO"
 BUILD_ENV=1
 NO_WRAP=1
 
-# --- Track State ---
-seen_specific=0
-seen_arranged=0
-pos_index=1
-
-# --- Parse Params ---
+# --- Parse for 'help' Param ---
 show_help=0
 for arg in "$@"; do
     case "${arg}" in
@@ -226,150 +271,166 @@ for arg in "$@"; do
         ;;
     esac
 done
+
+# Closing 'fi' for 'if show_help' is after 'cat' block
 if (( show_help )); then
-    clear
-    cat <<EOF
+    (( IS_LOCAL )) && clear
+
+cat <<EOF
 
 The RefindPlus Build Script
-Copyright (c) Dayo Akanji
+Copyright Dayo Akanji
 MIT-0 License
 
 Usage:
   * Optional Arranged Parameters (Deprecated):
     RefindPlusBuilder.sh [ build-branch ] [ build-type ] [ build-env ] [ no-wrap ]
 
-  * Optional Specific Parameters (Preferred):
+  * Optional Specific Parameters:
     RefindPlusBuilder.sh [ --build-branch=ABC ]
                          [ --build-type=XYZ ]
                          [ --build-env=0|1 ]
                          [ --no-wrap=0|1 ]
 
-
 Parameter Details:
   * [build-branch]
-      Name of local git branch to build.
-      Default: "HEAD" (checked out branch)
+      Name of Local Git Branch to Build.
+      Default: "HEAD" (Checked Out Branch)
                - Default works without git.
 
   * [build-type]
-      Controls build type(s) to generate:
-        TWO - RELEASE and DEBUG builds (default)
-        REL - RELEASE build only
-        DBG - DEBUG build only
-        NPT - NOOPT build only
-        ALL - All build types
+      Build Type(s) to Generate:
+        TWO  - RELEASE and DEBUG Builds (Default)
+        REL  - RELEASE Build Only
+        DBG  - DEBUG Build Only
+        NPT  - NOOPT Build Only
+        ALL  - All Build Types
 
   * [build-env]
-      Controls Linux build environment checks:
-        1 - Verify Debian Linux build environment (default)
-        0 - Do not verify Linux build environment (any)
+      Linux Build Environment Checks:
+        1  - Verify Debian Linux Build Environment (Default)
+        0  - Do Not Verify Linux Build Environment
 
   * [no-wrap]
-      Controls terminal line wrapping:
-        1 - Terminal line wrapping is disabled (default)
-        0 - Terminal line wrapping is preserved
-
+      Line Wrapping in Terminal:
+        1  - Line Wrapping is Disabled (Default)
+        0  - Line Wrapping is Preserved
 
 Rules:
   * Use EITHER Arranged OR Specific Parameters (Not Both)
-  * Use '--flag=value' syntax for the specific parameters
+  * Use The '--flag=value' Syntax For Specific Parameters
 
 EOF
 
     exit 0
 fi
 
+
+# --- Parse Other Params ---
+seen_specific=0
+seen_arranged=0
+pos_index=0
+
 for arg in "$@"; do
+    pos_index=$(( pos_index + 1 ))
     case "${arg}" in
         --build-branch=*)
             seen_specific=1
             BUILD_BRANCH=${arg#*=}
-            [[ -n "${BUILD_BRANCH}" ]] || TrapERR "--build-branch requires a value ... Exiting"
+            [[ -n "${BUILD_BRANCH}" ]] || trapERR "'--build-branch' requires a value ... Exiting"
         ;;
         --build-type=*)
             seen_specific=1
             BUILD_TYPE=${arg#*=}
-            [[ -n "${BUILD_TYPE}" ]] || TrapERR "--build-type requires a value ... Exiting"
+            [[ -n "${BUILD_TYPE}" ]] || trapERR "'--build-type' requires a value ... Exiting"
         ;;
         --build-env=*)
             seen_specific=1
             BUILD_ENV=${arg#*=}
-            [[ -n "${BUILD_ENV}" ]] || TrapERR "--build-env requires a value ... Exiting"
+            [[ -n "${BUILD_ENV}" ]] || trapERR "'--build-env' requires a value ... Exiting"
         ;;
         --no-wrap=*)
             seen_specific=1
             NO_WRAP=${arg#*=}
-            [[ -n "${NO_WRAP}" ]] || TrapERR "--no-wrap requires a value ... Exiting"
+            [[ -n "${NO_WRAP}" ]] || trapERR "'--no-wrap' requires a value ... Exiting"
         ;;
 
-        # Catch misc malformed parameters
+        # Catch Misc Malformed Parameters
         --build-branch|--build-type|--build-env|--no-wrap)
-            TrapERR "Parameter '${arg}' is missing the '=' sign (use --flag=value) ... Exiting"
-        ;;
-        --*=)
-            TrapERR "Parameter '${arg}' requires a value ... Exiting"
+            trapERR "Parameter '${arg}' is missing the '=' sign (use --flag=value) ... Exiting"
         ;;
         --*)
-            TrapERR "Unknown Parameter: '${arg}' ... Exiting"
+            trapERR "Unknown Parameter: '${arg}' ... Exiting"
+        ;;
+        --*=)
+            trapERR "Parameter '${arg}' requires a value ... Exiting"
         ;;
         -*)
-            TrapERR "Invalid Parameter: '${arg}' (use --flag=value) ... Exiting"
+            trapERR "Invalid Parameter: '${arg}' (use --flag=value) ... Exiting"
         ;;
         *)
             seen_arranged=1
-            [ "${pos_index}" -gt 4 ] && TrapERR "Too many parameters detected ... Exiting"
+            [ "${pos_index}" -gt 4 ] && trapERR "Too Many Parameters Specified ... Exiting"
             case "${pos_index}" in
                 1) BUILD_BRANCH="${arg}" ;;
                 2) BUILD_TYPE="${arg}"   ;;
                 3) BUILD_ENV="${arg}"    ;;
                 4) NO_WRAP="${arg}"      ;;
             esac
-            pos_index=$((pos_index + 1))
         ;;
     esac
 done
 
-if [[ -z "${END_NOTICE}" ]]; then
-    # --- Reject Mixing ---
-    if [ "${seen_arranged}" -eq 1 ]; then
-        if [ "${seen_specific}" -eq 1 ]; then
-            TrapERR "Mixing specific with arranged parameters is not allowed ... Exiting"
-        fi
+if [ "${seen_arranged}" -eq 1 ]; then
+    if [ "${seen_specific}" -eq 1 ]; then
+        # --- Reject Mixed Param Types ---
+        trapERR "Mixed Specific/Arranged Parameters NOT Allowed ... Exiting"
+    fi
 
+    if (( IS_LOCAL )); then
         clear
         printf '\n\n'
         msg_info "WARN: Old 'Arranged' parameters are deprecated"
         msg_base "      New '--flag=value' parameters now preferred"
         msg_base "      Run 'RefindPlusBuilder.sh --help' for details"
-        msg_info "      This script will continue after 9 Seconds"
-        sleep 9
+        printf '\n'
+
+        read -p "Continue with Arranged Parameters? [y/N]: " -n 1 -r response
+        printf '\n'
+        [[ "${response}" =~ ^[Nn]?$ ]] && {
+            printf '\n'
+            msg_raw 'Exiting RefindPlus Build'
+            printf '\n\n'
+            exit 0
+        }
         printf '\n\n'
     fi
 fi
 
 # --- Validate Input ---
-# Allow deprecated 'SOME' setting for 'BUILD_TYPE' ... Handle later
+# Preserve Remote Line Wrap
+(( IS_LOCAL )) || NO_WRAP=0
+
+# Handles Deprecated 'SOME' Setting For 'BUILD_TYPE'
 BLD_TYP_TMP=$( tr '[:lower:]' '[:upper:]' <<< "${BUILD_TYPE}" )
-[[ "${BUILD_BRANCH}" =~ ^[a-zA-Z0-9/_-]+$ ]]            || TrapERR "Invalid Git Build Branch  : Exiting ... CurrentValue='${BUILD_BRANCH}'"
-[[ "${BLD_TYP_TMP}"  =~ ^(TWO|REL|DBG|NPT|ALL|SOME)$ ]] || TrapERR "Invalid Build Type Flag   : Exiting ... CurrentValue='${BUILD_TYPE}'"
-[[ "${BUILD_ENV}"    =~ ^(0|1)$ ]]                      || TrapERR "Invalid Build Check Flag  : Exiting ... CurrentValue='${BUILD_ENV}'"
-[[ "${NO_WRAP}"      =~ ^(0|1)$ ]]                      || TrapERR "Invalid Terminal Wrap Flag: Exiting ... CurrentValue='${NO_WRAP}'"
-BUILD_TYPE="${BLD_TYP_TMP}"
+[[ "${BUILD_BRANCH}" =~ ^[A-Za-z0-9._/-]+$ ]]           || trapERR "Invalid Build Branch   : Exiting ... CurrentValue='${BUILD_BRANCH}'"
+[[ "${BLD_TYP_TMP}"  =~ ^(TWO|REL|DBG|NPT|ALL|SOME)$ ]] || trapERR "Invalid Build Typ Flag : Exiting ... CurrentValue='${BUILD_TYPE}'"
+[[ "${BUILD_ENV}"    =~ ^(0|1)$ ]]                      || trapERR "Invalid Build Env Flag : Exiting ... CurrentValue='${BUILD_ENV}'"
+[[ "${NO_WRAP}"      =~ ^(0|1)$ ]]                      || trapERR "Invalid Line Wrap Flag : Exiting ... CurrentValue='${NO_WRAP}'"
+[[ "${BLD_TYP_TMP}"  == 'SOME' ]]   && BUILD_TYPE='TWO' || BUILD_TYPE="${BLD_TYP_TMP}"
 
-
-# Set things up for build
+# Set Things Up For Build
 msg_info "## RefindPlusBuilder - Setting Up ##  :  ${BUILD_BRANCH}"
 msg_info '##--------------------------------##'
 DSC_FILE="RefindPlusPkg/RefindPlusPkg.dsc"
 
-# Handle deprecated 'SOME' setting
-[[ "${BUILD_TYPE}" == 'SOME' ]] && BUILD_TYPE='TWO'
+# Set Final Build Type
 case "${BUILD_TYPE}" in
-  "TWO") Set_Flags True  True  False ;;
-  "REL") Set_Flags True  False False ;;
-  "DBG") Set_Flags False True  False ;;
-  "NPT") Set_Flags False False True  ;;
-  "ALL") Set_Flags True  True  True  ;;
+  "TWO") set_flags True  True  False ;;
+  "REL") set_flags True  False False ;;
+  "DBG") set_flags False True  False ;;
+  "NPT") set_flags False False True  ;;
+  "ALL") set_flags True  True  True  ;;
 esac
 
 msg_base 'Check OS Type...'
@@ -379,42 +440,49 @@ if [[ "${Kern_OS}" == 'Darwin' ]]; then
 elif [[ "${Kern_OS}" == 'Linux' ]]; then
     OS_NAME="Linux"
 else
-    TrapERR "Unsupported OS: '${Kern_OS}' ... Exiting"
+    trapERR "Unsupported OS: '${Kern_OS}' ... Exiting"
 fi
 msg_raw "Detected OS:- '${OS_NAME}'"
 msg_status '...OK'; printf '\n'
 
 msg_base 'Sync CPU Threads...'
-# Set 'JOBS_MAX' value
+CPUS_ALL=$(
+  sysctl -n hw.ncpu 2>/dev/null \
+  || nproc 2>/dev/null \
+  || getconf _NPROCESSORS_ONLN 2>/dev/null \
+  || echo 'Core Count Failed'
+)
+if [[ ! "${CPUS_ALL}" =~ ^[0-9]+$ ]]; then
+    CPUS_ALL=1
+    msg_raw "Core Count Retrieval Failure ... Using Default"
+fi
+
+# Set 'JOBS_MAX' Value
 #  - For Default   : Use 1
 #  - For <7 CPUs   : Use All
 #  - For 07-12 CPUs: Use Half + 3
 #  - For 13-24 CPUs: Use Half + 2
 #  - For 25-48 CPUs: Use Half + 1
 #  - For 49+ CPUs  : Use Half + 0
-JOBS_ALL=$(getconf _NPROCESSORS_ONLN 2>/dev/null)
-if [[ ! "${JOBS_ALL}" =~ ^[0-9]+$ ]]; then
-    JOBS_ALL=1
-    msg_raw "Core Count Retrieval Failure ... Using Default"
-fi
-if (( JOBS_ALL < 2 )); then
-    JOBS_MID=${JOBS_ALL}
+if (( CPUS_ALL < 2 )); then
+    CPUS_MID=${CPUS_ALL}
 else
-    JOBS_MID=$(( JOBS_ALL / 2 ))
+    CPUS_MID=$(( CPUS_ALL / 2 ))
 fi
-if (( JOBS_ALL < 7 )); then
-    JOBS_MAX=${JOBS_ALL}
-elif (( JOBS_ALL < 13 )); then
-    JOBS_MAX=$(( JOBS_MID + 3 ))
-elif (( JOBS_ALL < 25 )); then
-    JOBS_MAX=$(( JOBS_MID + 2 ))
-elif (( JOBS_ALL < 49 )); then
-    JOBS_MAX=$(( JOBS_MID + 1 ))
+if (( CPUS_ALL < 7 )); then
+    JOBS_MAX=${CPUS_ALL}
+elif (( CPUS_ALL < 13 )); then
+    JOBS_MAX=$(( CPUS_MID + 3 ))
+elif (( CPUS_ALL < 25 )); then
+    JOBS_MAX=$(( CPUS_MID + 2 ))
+elif (( CPUS_ALL < 49 )); then
+    JOBS_MAX=$(( CPUS_MID + 1 ))
 else
-    JOBS_MAX=${JOBS_MID}
+    JOBS_MAX=${CPUS_MID}
 fi
-(( JOBS_MAX < 1 )) && JOBS_MAX=1
-msg_raw "All CPUs = ${JOBS_ALL}"
+(( JOBS_MAX < 1 )) && JOBS_MAX=1 || true
+
+msg_raw "All CPUs = ${CPUS_ALL}"
 msg_raw "Max Jobs = ${JOBS_MAX}"
 msg_status '...OK'; printf '\n'
 
@@ -435,6 +503,7 @@ if (( BUILD_ENV )); then
         fi
     done
 
+    Kit_Missing=0
     if [[ "${OS_NAME}" == 'Linux' ]]; then
         # Linux Dependency Checks
         Add_Build_Essential=1
@@ -452,7 +521,14 @@ if (( BUILD_ENV )); then
             fi
         done
 
-        if command -v gcc >/dev/null 2>&1; then
+        if command -v clang >/dev/null 2>&1; then
+            OUR_CC='clang'
+        else
+            OUR_CC='gcc'
+        fi
+        if ! command -v "${OUR_CC}" >/dev/null 2>&1; then
+            Kit_Missing=1
+        else
             for header in uuid/uuid.h openssl/ssl.h zlib.h ffi.h; do
                 pkg=""
                 case "${header}" in
@@ -461,7 +537,7 @@ if (( BUILD_ENV )); then
                     zlib.h)        pkg="zlib1g-dev" ;;
                     ffi.h)         pkg="libffi-dev" ;;
                 esac
-                if ! echo "#include <${header}>" | gcc -E - >/dev/null 2>&1; then
+                if ! "${OUR_CC}" -E - <<< "#include <${header}>" >/dev/null 2>&1; then
                     MISSING_UTILS+=("${pkg}")
                 fi
             done
@@ -476,75 +552,147 @@ if (( BUILD_ENV )); then
         unset IFS
 
         if (( ${#UNIQUE_MISSING[@]} > 1 )); then
-            msg_raw "The following items are missing:"
+            plural_type='are'
+            plural_item='items'
         else
-            msg_raw "The following item is missing:"
+            plural_item='item'
+            plural_type='is'
         fi
+        msg_raw "The following ${plural_item} ${plural_type} missing:"
 
         for item in "${UNIQUE_MISSING[@]}"; do
             msg_raw "  - ${item}"
         done
 
-        BASE_LIST=$(printf "%s " "${UNIQUE_MISSING[@]}" | sed 's/([^)]*)//g' | xargs)
+        BASE_LIST=$( printf "%s " "${UNIQUE_MISSING[@]}" | sed 's/([^)]*)//g' | xargs )
         if [[ "${OS_NAME}" == 'macOS' ]]; then
-            INSTALL_LIST=$(echo " ${BASE_LIST} " | sed 's/ iasl / acpica /g' | xargs)
+            INSTALL_LIST=$( echo " ${BASE_LIST} " | sed 's/ iasl / acpica /g' | xargs )
             msg_info "Suggested fix: brew install ${INSTALL_LIST}"
             msg_info "Alternate fix: sudo port install ${INSTALL_LIST}"
             msg_info "             : Requires 'HomeBrew' or 'MacPorts'"
-            msg_info "             : Do NOT use 'sudo' with HomeBrew"
+        elif command -v apt >/dev/null 2>&1; then
+            INSTALL_LIST=$( echo " ${BASE_LIST} " | sed 's/ iasl / acpica-tools /g' | xargs )
+            msg_info "Suggested fix: sudo apt update && sudo apt install -y ${INSTALL_LIST}"
         else
-            if ! command -v apt &> /dev/null; then
-                msg_info "Suggested fix: Rerun RefindPlusBuilder and set '--build-env=0' to skip Debian Linux specific checks"
-                msg_info "               Use your package manager to install missing items if identified in a build failure"
-            else
-                INSTALL_LIST=$(echo " ${BASE_LIST} " | sed 's/ iasl / acpica-tools /g' | xargs)
-                msg_info "Suggested fix: sudo apt update && sudo apt install -y ${INSTALL_LIST}"
-            fi
+            msg_info "Suggested fix: Rerun RefindPlusBuilder and set '--build-env=0' to skip Debian Linux specific checks."
+            msg_info "               Use your package manager to install missing items identified in build failure notices."
         fi
 
-        TrapERR "Build Environment Check Failure ... Exiting"
+        if (( Kit_Missing )); then
+            # Some item detection requires clang/gcc
+            printf '\n'
+            msg_base "More missing items may be revealed on rerun after installing the listed ${plural_item}"
+        fi
+
+        trapERR "Build Environment Check Failure ... Exiting"
     fi
     msg_status '...OK'; printf '\n'
 fi
 
-# Confirm git branch name validity
+# Confirm Git Branch Name Validity
 # 'HEAD' is an accepted reserved word
 CHECKOUT_FLAG=$( tr '[:lower:]' '[:upper:]' <<< "${BUILD_BRANCH}" )
 if [[ "${CHECKOUT_FLAG}" != 'HEAD' ]]; then
-    # 'git check-ref-format' can be run outside a git repo folder
+    # 'git check-ref-format' Can Run Outside a Git Folder
     if ! git check-ref-format --branch "${BUILD_BRANCH}" >/dev/null 2>&1; then
-        TrapERR "Invalid Script Parameter: '${BUILD_BRANCH}' is not a valid git branch name ... Exiting"
+        trapERR "Invalid Script Parameter: '${BUILD_BRANCH}' is not a valid git branch name ... Exiting"
     fi
 fi
 
 DOCS_DIR="${HOME}/Documents"
+if [[ "${OS_NAME}" == 'Linux' ]]; then
+    if command -v xdg-user-dir >/dev/null 2>&1; then
+        chk_dir="$( xdg-user-dir DOCUMENTS )"
+        if [[ -n "${chk_dir}" ]]; then
+            DOCS_DIR="${chk_dir}"
+        fi
+    fi
+fi
+[[ -d "$DOCS_DIR" ]] || trapERR "Could Not Locate '${DOCS_DIR}' ... Exiting"
+
+BASE_DIR="${DOCS_DIR}/RefindPlus"
+[[ -d "$BASE_DIR" ]] || trapERR "Could Not Locate '${BASE_DIR}' ... Exiting"
+
+WORK_DIR="${BASE_DIR}/Working"
+[[ -d "${WORK_DIR}" ]] || trapERR "Could Not Locate '${WORK_DIR}' ... Exiting"
+
+EDK2_DIR="${BASE_DIR}/edk2"
+[[ -d "${EDK2_DIR}" ]] || trapERR "Could Not Locate '${EDK2_DIR}' ... Exiting"
+
+HELP_DIR="${EDK2_DIR}/.BuildHelp"
+mkdir -p "${HELP_DIR}"
+EXTEND_TWEAKS="${HELP_DIR}/ExtendTweaks.txt"
+
+PLUS_DIR="${EDK2_DIR}/RefindPlusPkg"
+if [[ ! -L "${PLUS_DIR}" ]] || [[ ! -e "${PLUS_DIR}" ]]; then
+    [[ -n "${PLUS_DIR}" && -d "${PLUS_DIR}" ]] && rm -rf -- "${PLUS_DIR}"
+    ln -sf "${WORK_DIR}" "${PLUS_DIR}"
+fi
+
+OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
+
+CONF_DIR="${EDK2_DIR}/Conf"
+BLOB_DIR="${CONF_DIR}/Blobs"
+BASETOOLS_DIR="${EDK2_DIR}/BaseTools"
+BASESOURCE_DIR="${BASETOOLS_DIR}/Source/C"
+
 if [[ "${OS_NAME}" == 'macOS' ]]; then
     TOOLCHAIN="XCODE5"
 else
     TOOLCHAIN="CLANG38"
-    if command -v xdg-user-dir >/dev/null 2>&1; then
-        DOCS_DIR="$( xdg-user-dir DOCUMENTS )"
-    fi
 
     export CC=clang
     export CXX=clang++
-    export CLANG38_BIN=/usr/bin
+    CLANG_PATH="$(command -v clang || true)"
+    if [[ -n "${CLANG_PATH}" ]]; then
+        export CLANG38_BIN="$(dirname "${CLANG_PATH}")"
+    fi
+fi
+BUILD_DIR_REL="${EDK2_DIR}/Build/RefindPlus/RELEASE_${TOOLCHAIN}"
+BUILD_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_${TOOLCHAIN}"
+BUILD_DIR_NPT="${EDK2_DIR}/Build/RefindPlus/NOOPT_${TOOLCHAIN}"
+BINARY_DIR_REL="${BUILD_DIR_REL}/X64"
+BINARY_DIR_DBG="${BUILD_DIR_DBG}/X64"
+BINARY_DIR_NPT="${BUILD_DIR_NPT}/X64"
+
+# Handle Misc Core Folder Renaming
+if [[ -d "${PLUS_DIR}/Main" ]]; then
+    MAIN_DIR="${PLUS_DIR}/Main"
+elif [[ -d "${PLUS_DIR}/BootMaster" ]]; then
+    MAIN_DIR="${PLUS_DIR}/BootMaster"
+elif [[ -d "${PLUS_DIR}/MainLoader" ]]; then
+    MAIN_DIR="${PLUS_DIR}/MainLoader"
+elif [[ -d "${PLUS_DIR}/MainRP" ]]; then
+    MAIN_DIR="${PLUS_DIR}/MainRP"
+elif [[ -d "${PLUS_DIR}/refind" ]]; then
+    MAIN_DIR="${PLUS_DIR}/refind"
+else
+    trapERR "Could Not Locate Core Files ... Exiting"
+fi
+[[ -d "${MAIN_DIR}" ]] || trapERR "Could Not Locate '${MAIN_DIR}' ... Exiting"
+
+MAINFILE_MAIN="${MAIN_DIR}/main.c"
+MAINFILE_KEPT="${MAIN_DIR}/main-kept.c"
+if [[ ! -f "${MAINFILE_MAIN}" ]]; then
+    trapERR "Could Not Locate Main File ... Exiting"
 fi
 
-BASE_DIR="${DOCS_DIR}/RefindPlus"
-[[ -d "$BASE_DIR" ]] || TrapERR "Could Not Locate '${BASE_DIR}' ... Exiting"
+TOOLSDEF_MAIN="${CONF_DIR}/tools_def.txt"
+TOOLSDEF_KEPT="${CONF_DIR}/tools_def-kept.txt"
+SYNCFILE_MAIN="${PLUS_DIR}/gptsync/gptsync.c"
+SYNCFILE_KEPT="${PLUS_DIR}/gptsync/gptsync-kept.c"
+BASETYPE_MAIN="${BASESOURCE_DIR}/Include/Common/BaseTypes.h"
+BASETYPE_KEPT="${BASESOURCE_DIR}/Include/Common/BaseTypes-kept.h"
 
-WORK_DIR="${BASE_DIR}/Working"
-[[ -d "${WORK_DIR}" ]] || TrapERR "Could Not Locate '${WORK_DIR}' ... Exiting"
 if [[ "${CHECKOUT_FLAG}" == 'HEAD' ]]; then
-    # Get actual branch name if available
+    # Get Actual Branch Name If Available
     ENTERED_WORK_DIR=1
     pushd "${WORK_DIR}" > /dev/null || {
         ENTERED_WORK_DIR=0
     }
     if (( ENTERED_WORK_DIR )); then
         if [[ -d ".git" ]]; then
-            # 'git rev-parse' must be run within a git repo folder
+            # 'git rev-parse' Must Be Within a Git Folder
             current_branch="$( git rev-parse --abbrev-ref HEAD )"
             if [[ -n "${current_branch}" ]]; then
                 BUILD_BRANCH="${current_branch}"
@@ -554,57 +702,19 @@ if [[ "${CHECKOUT_FLAG}" == 'HEAD' ]]; then
     fi
 fi
 
-EDK2_DIR="${BASE_DIR}/edk2"
-[[ -d "${EDK2_DIR}" ]] || TrapERR "Could Not Locate '${EDK2_DIR}' ... Exiting"
-
-PLUS_DIR="${EDK2_DIR}/RefindPlusPkg"
-
-HELP_DIR="${EDK2_DIR}/.BuildHelp"
-mkdir -p "${HELP_DIR}"
-
-CONF_DIR="${EDK2_DIR}/Conf"
-BLOB_DIR="${CONF_DIR}/Blobs"
-
-BUILD_DIR_REL="${EDK2_DIR}/Build/RefindPlus/RELEASE_${TOOLCHAIN}"
-BUILD_DIR_DBG="${EDK2_DIR}/Build/RefindPlus/DEBUG_${TOOLCHAIN}"
-BUILD_DIR_NPT="${EDK2_DIR}/Build/RefindPlus/NOOPT_${TOOLCHAIN}"
-BINARY_DIR_REL="${BUILD_DIR_REL}/X64"
-BINARY_DIR_DBG="${BUILD_DIR_DBG}/X64"
-BINARY_DIR_NPT="${BUILD_DIR_NPT}/X64"
-OUTPUT_DIR="${EDK2_DIR}/000-BOOTx64-Files"
-
-BASETOOLS_DIR="${EDK2_DIR}/BaseTools"
-BASESOURCE_DIR="${BASETOOLS_DIR}/Source/C"
-
-BASETYPE_MAIN="${BASESOURCE_DIR}/Include/Common/BaseTypes.h"
-BASETYPE_KEPT="${BASESOURCE_DIR}/Include/Common/BaseTypes-kept.h"
-TOOLSDEF_MAIN="${CONF_DIR}/tools_def.txt"
-TOOLSDEF_KEPT="${CONF_DIR}/tools_def-kept.txt"
-
-if [[ -d "${PLUS_DIR}/Main" ]]; then
-    MAIN_DIR="${PLUS_DIR}/Main"
-else
-    MAIN_DIR="${PLUS_DIR}/BootMaster"
-fi
-MAINFILE_MAIN="${MAIN_DIR}/main.c"
-MAINFILE_KEPT="${MAIN_DIR}/main-kept.c"
-
-SYNCFILE_MAIN="${PLUS_DIR}/gptsync/gptsync.c"
-SYNCFILE_KEPT="${PLUS_DIR}/gptsync/gptsync-kept.c"
-EXTEND_TWEAKS="${HELP_DIR}/ExtendTweaks.txt"
-
 
 ####
 ## Clear Potential Leftover Legacy Items ... Remove Later - START ##
 rm -fr "${EDK2_DIR}/RefindPkg"
 rm -fr "${EDK2_DIR}/.Build-TMP"
 rm -f  "${EDK2_DIR}/000-BuildScript/RepoUpdateSHA.txt"
-## Clear Potential Leftover Legacy Items ... Remove Later - END ##
+## Clear Potential Leftover Legacy Items ... Remove Later - CLOSE ##
 ####
 
 
+# Sync BaseTools
 ErrMsg="Could Not Find '${BASETOOLS_DIR}' ... Exiting"
-pushd "${BASETOOLS_DIR}" > /dev/null || TrapERR "${ErrMsg}"
+pushd "${BASETOOLS_DIR}" > /dev/null || trapERR "${ErrMsg}"
 
 BASETOOLS_SHA_FILE="${HELP_DIR}/BaseToolsSHA.txt"
 if [[ ! -f "${BASETOOLS_SHA_FILE}" ]]; then
@@ -632,13 +742,13 @@ else
     Get_Sha_Str="$( find "${BASETOOLS_DIR}" "${CONF_DIR}" \
       -type f \( -name '*.c' -or -name '*.cpp' -or -name '*.h' -or -name '*.py' -or \
       -name '*.txt' -or -name '*.template' -or -name '*.makefile' -or -name 'GNUmakefile' \) \
-      -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | awk '{print $1}' )"
+      -print0 | sort -z | xargs -0 ${OUR_SHASUM} | ${OUR_SHASUM} | awk '{print $1}' || true)"
 
     if [[ "${OS_NAME}" == 'macOS' ]]; then
-        Get_OS_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 | xargs )"
+        Get_OS_Ver="$( sysctl kern.osrelease | cut -d ':' -f 2 | xargs )" || true
     else
-        Get_Distro="$( grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2- | tr -d '"' )"
-        Get_Kernel="$( uname -r | cut -d '-' -f 1 )"
+        Get_Distro="$( grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2- | tr -d '"' )" || true
+        Get_Kernel="$( uname -r | cut -d '-' -f 1 )" || true
         Get_OS_Ver="${Get_Distro}_${Get_Kernel}"
     fi
     Get_OS_ARCH="$( uname -m )"
@@ -657,18 +767,17 @@ fi
 popd > /dev/null || true
 
 msg_base 'Export Temp "PATH"...'
-if [[ "${OS_NAME}" == 'macOS' ]]; then
-    export PATH="/usr/bin:/opt/local/bin:/opt/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:${PATH}"
-fi
-export PATH="${TMP_BIN}:${PATH}"
+[[ "${OS_NAME}" != 'macOS' ]] && ADD_PATH=''
+[[ "${OS_NAME}" == 'macOS' ]] && ADD_PATH=':/usr/bin:/opt/local/bin:/opt/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin'
+export PATH="${TMP_BIN}${ADD_PATH}:${ORIG_PATH}"; hash -r
 msg_status '...OK'; printf '\n'
 
-# Python 2 is a hard requirement for RefindPlusUDK
-# Assume it is missing, verify, and provide if so
+# Python 2 is a Hard Requirement for RefindPlusUDK
+# Assume Missing, Verify, then Provide if Required
 NO_PYTHON=1
 
 if python2 --version 2>&1 | grep -q "Python 2"; then
-    ALT_PYTHON="$(command -v python2)"
+    ALT_PYTHON="$(command -v python2 || true)"
     if [[ -n "${ALT_PYTHON}" ]]; then
         msg_base 'Check Python 2...'
         msg_raw "Use Command:- 'python2'"
@@ -683,7 +792,7 @@ if python2 --version 2>&1 | grep -q "Python 2"; then
 fi
 if (( NO_PYTHON )); then
     if python --version 2>&1 | grep -q "Python 2"; then
-        ALT_PYTHON="$(command -v python)"
+        ALT_PYTHON="$(command -v python || true)"
         if [[ -n "${ALT_PYTHON}" ]]; then
             msg_base 'Locate Python 2...'
             msg_raw "Use Command:- 'python'"
@@ -700,34 +809,77 @@ fi
 if (( NO_PYTHON )); then
     msg_info "Python 2 Instance Not Found"
     if [[ "${OS_NAME}" == 'macOS' ]]; then
-        TrapERR "Unable to proceed without Python 2 ... Exiting"
+        trapERR "Unable to proceed without Python 2 ... Exiting"
     else
-        # Try bundled AppImage
+        # Try Bundled AppImage for Linux
         PYTHON2_APPIMAGE="${BLOB_DIR}/Python2_x86_64.AppImage"
         if [[ ! -f "${PYTHON2_APPIMAGE}" ]]; then
-            TrapERR "Python 2 is NOT available ... Exiting"
+            trapERR "Python 2 is NOT available ... Exiting"
         else
             msg_base 'Attempt Bundled AppImage...'
             rm -f "${TMP_BIN}/python"
             rm -f "${TMP_BIN}/python2"
 
-            chmod +x "${PYTHON2_APPIMAGE}"
-
-            ABS_APPIMAGE=$(Get_Abs_Path "${PYTHON2_APPIMAGE}")
+            ABS_APPIMAGE=$( get_abs_path "${PYTHON2_APPIMAGE}" )
             if [[ -z "${ABS_APPIMAGE}" ]]; then
-                # Should not be possible given earlier check
-                TrapERR "Invalid AppImage Path ... Exiting"
+                # Should Not Be Possible Given Earlier Check
+                trapERR "Invalid AppImage Path ... Exiting"
             fi
 
-            ln -sf "${ABS_APPIMAGE}" "${TMP_BIN}/python"
-            ln -sf "${ABS_APPIMAGE}" "${TMP_BIN}/python2"
+            chmod a+x "${PYTHON2_APPIMAGE}"
+            if "${PYTHON2_APPIMAGE}" --version >/dev/null 2>&1; then
+                msg_raw 'Unit appears set up for AppImages ... Proceeding'
+                ln -sf "${PYTHON2_APPIMAGE}" "${TMP_BIN}/python"
+                ln -sf "${PYTHON2_APPIMAGE}" "${TMP_BIN}/python2"
+            else
+                if (( IS_LOCAL )); then
+                    printf '\n'
+                    msg_raw 'NOTE TO USER: Consider installing Python 2 or libfuse2'
+                    msg_raw '              Installing Python 2 allows build support:- Native'
+                    msg_raw '              Installing libfuse2 allows build support:- AppImages'
+                    msg_raw '              This script will try to work around current limitations'
+                    msg_raw '              Python will run slower than with Native/AppImage support'
+                    msg_raw '              Native Python 2 support, when possible, is typically best'
+                    printf '\n'
 
-            export PATH="${TMP_BIN}:${ORIG_PATH}"
+                    read -p "Continue with Workaround? [Y/n]: " -n 1 -r response
+                    printf '\n'
+                    [[ "${response}" =~ ^[Nn]$ ]] && {
+                        printf '\n'
+                        msg_error 'Aborted RefindPlus Build'
+                        printf '\n\n'
+                        exit 0
+                    }
+                fi
+
+
+####
+## Create AppImage Wrapper - START ##
+msg_raw 'Unit not set up for AppImages ... Create Wrapper'
+APPIMAGE_WRAPPER="${TMP_BIN}/python2_appimage_wrapper"
+cat > "${APPIMAGE_WRAPPER}" <<'EOF'
+#!/usr/bin/env bash
+set -e
+exec "_x_APPIMAGE_x_" --appimage-extract-and-run "$@"
+EOF
+sed -i "s|_x_APPIMAGE_x_|${ABS_APPIMAGE}|" "${APPIMAGE_WRAPPER}"
+## Create AppImage Wrapper - CLOSE ##
+####
+
+
+                chmod a+x "${APPIMAGE_WRAPPER}"
+                if ! "${APPIMAGE_WRAPPER}" --version >/dev/null 2>&1; then
+                    trapERR "Failed to Execute AppImage Wrapper ... Exiting"
+                fi
+
+                ln -sf "${APPIMAGE_WRAPPER}" "${TMP_BIN}/python"
+                ln -sf "${APPIMAGE_WRAPPER}" "${TMP_BIN}/python2"
+            fi
 
             if ! python2 --version 2>&1 | grep -q "Python 2"; then
                 if ! python --version 2>&1 | grep -q "Python 2"; then
-                    # Unable to proceed ... Python 2 still unavailable
-                    TrapERR "Invalid AppImage ... Exiting"
+                    # Unable to Proceed ... Python 2 Still Unavailable
+                    trapERR "Invalid AppImage or Other Failure ... Exiting"
                 fi
             fi
             msg_status '...OK'; printf '\n'
@@ -735,34 +887,28 @@ if (( NO_PYTHON )); then
     fi
 fi
 
-if [[ ! -L "${PLUS_DIR}" ]]; then
-    msg_base 'Update RefindPlusPkg...'
-    rm -fr "${PLUS_DIR}"
-    ln -sf "${WORK_DIR}" "${PLUS_DIR}"
-    msg_status '...OK'; printf '\n'
-fi
-
 if [[ "${CHECKOUT_FLAG}" != 'HEAD' ]]; then
-    # Use 'cd' for symlink ... 'pushd/popd' fails
+    # Use 'cd' for Symlink ... 'pushd/popd' Fails
     CUR_PATH="${PWD}"
     ErrMsg="Could Not Find '${PLUS_DIR}' ... Exiting"
-    cd "${PLUS_DIR}" || TrapERR "${ErrMsg}"
+    cd "${PLUS_DIR}" || trapERR "${ErrMsg}"
+
+    # 'git checkout' Must be Run Within a Git Folder
     if [[ ! -d ".git" ]]; then
-        TrapERR "Not Valid Git Folder: '${PLUS_DIR}' ... Exiting"
+        trapERR "Invalid Git Folder: '${PLUS_DIR}' ... Exiting"
     else
-        # 'git checkout' must be run within a git repo folder
         msg_base "Checkout '${BUILD_BRANCH}' branch..."
         git checkout "${BUILD_BRANCH}" || {
-            TrapERR "'${BUILD_BRANCH}' Git Branch Not Available Under '${PLUS_DIR}' ... Exiting"
+            trapERR "'${BUILD_BRANCH}' Git Branch Not Found Under '${PLUS_DIR}' ... Exiting"
         }
-        msg_status '...OK'; echo ''
+        msg_status '...OK'; printf '\n'
     fi
     cd "${CUR_PATH}" || true
 fi
 
 # Enter EDK2 Dir - START #
 ErrMsg="Could Not Access '${EDK2_DIR}' ... Exiting"
-pushd "${EDK2_DIR}" > /dev/null || TrapERR "${ErrMsg}"
+pushd "${EDK2_DIR}" > /dev/null || trapERR "${ErrMsg}"
 
 # Recreate 'Build' Dir
 # UDK is RefindPlus Specific
@@ -777,25 +923,20 @@ msg_status '...OK'; printf '\n'
 if (( NO_WRAP )); then
     if tput rmam >/dev/null 2>&1; then
         # Disable Line Wrap
-        msg_base 'Sync Terminal Line Wrapping...'
+        msg_base 'Sync Line Wrapping...'
         tput rmam
         LINEWRAP_FIX=1
         msg_status '...OK'; printf '\n'
     fi
 fi
 
-
-# Reset PATH Hashes
-hash -r
-
-
 if (( BUILD_TOOLS )); then
     ErrMsg="Could Not Access '${BASESOURCE_DIR}' ... Exiting"
-    pushd "${BASESOURCE_DIR}" > /dev/null || TrapERR "${ErrMsg}"
+    pushd "${BASESOURCE_DIR}" > /dev/null || trapERR "${ErrMsg}"
 
     if [[ -f "${CONF_DIR}/BuildEnv.sh" ]]; then
         msg_base 'Nuke Prev BaseTools Env...'
-        unset EDK_TOOLS_PATH
+        [[ -z "${EDK_TOOLS_PATH}" ]] || unset EDK_TOOLS_PATH
         rm -fr "${CONF_DIR}/.cache"
         rm -f  "${CONF_DIR}/BuildEnv.sh"
         msg_status '...OK'; printf '\n'
@@ -804,17 +945,19 @@ if (( BUILD_TOOLS )); then
     OurArch="$( uname -m )"
     if [[ "${OurArch}" == *"arm"* ]]; then
         if [[ "${OS_NAME}" == 'macOS' ]]; then
-            msg_base 'Create Temp BaseTools BaseType for Apple Silicon...'
+            msg_base 'Temp BaseTools BaseType for Apple Silicon...'
             if [[ -f "${BASETYPE_KEPT}" ]]; then
                 cp -pf "${BASETYPE_KEPT}" "${BASETYPE_MAIN}"
-            else
+            elif [[ -f "${BASETYPE_MAIN}" ]]; then
                 cp -pf "${BASETYPE_MAIN}" "${BASETYPE_KEPT}"
+            else
+                trapERR "Could *NOT* Find Required File:- '${BASETYPE_MAIN}'"
             fi
 
-            # Apply patch if required
+            # Apply Patch if Required
             if grep -q '#include <ProcessorBind.h>' "${BASETYPE_MAIN}"; then
                 ErrMsg="Could Not Create 'BASETYPE tmpfile' ... Exiting"
-                tmpfile="$( mktemp "${TMP_BIN}"/basetype.XXXXXX )" || TrapERR "${ErrMsg}"
+                tmpfile="$( mktemp "${TMP_BIN}"/basetype.XXXXXX )" || trapERR "${ErrMsg}"
                 sed 's|#include <ProcessorBind.h>|#include "../AArch64/ProcessorBind.h"|' \
                     "${BASETYPE_MAIN}" > "${tmpfile}" && mv -f "${tmpfile}" "${BASETYPE_MAIN}" || rm -f "${tmpfile}"
             fi
@@ -823,11 +966,11 @@ if (( BUILD_TOOLS )); then
     fi
 
     if [[ "${OS_NAME}" == 'Linux' ]]; then
-        PYTHON_COMMAND="$(command -v python2)"
+        PYTHON_COMMAND="$(command -v python2 || true)"
         if [[ -z "${PYTHON_COMMAND}" ]] || ! ${PYTHON_COMMAND} --version 2>&1 | grep -q "2.7"; then
-            PYTHON_COMMAND="$(command -v python)"
+            PYTHON_COMMAND="$(command -v python || true)"
             if [[ -z "${PYTHON_COMMAND}" ]] || ! ${PYTHON_COMMAND} --version 2>&1 | grep -q "2.7"; then
-                TrapERR "Python command is absent or does not point to Python 2.7"
+                trapERR "Python command is absent or does not point to Python 2.7 ... Exiting"
             fi
         fi
     fi
@@ -838,7 +981,7 @@ if (( BUILD_TOOLS )); then
     popd > /dev/null || true
 
     msg_base 'BaseTools Make...'
-    make -j"${JOBS_MAX}" -C BaseTools/Source/C
+    make -j"${JOBS_MAX}" -C "BaseTools/Source/C"
     msg_status '...OK'; printf '\n'
 
     msg_base 'Update BaseTools SHA...'
@@ -859,142 +1002,151 @@ if (( BUILD_TOOLS )); then
     fi
 fi
 popd > /dev/null || true
-# Enter EDK2 Dir - END #
+# Enter EDK2 Dir - CLOSE #
 
 # Basic clean up
 printf '\n'
 msg_info "## RefindPlusBuilder - Misc Checks ##  :  ${BUILD_BRANCH}"
 msg_info '##---------------------------------##'
-if [[ -f "${MAINFILE_MAIN}" ]]; then
-    if ! grep -q '__REFIT_SBAT_' "${MAINFILE_MAIN}"; then
-        msg_base "Skip 'SBAT' Tweaks..."
-        # Not found ... Continue
-        msg_status '...OK'; printf '\n'
-    else
-        if [[ "${OS_NAME}" != 'macOS' ]]; then
-            msg_base 'Skip MTOC Sync...'
-            # Not Mac OS ... Continue
-            msg_status '...OK'; printf '\n'
-        else
-            msg_base 'Sync MTOC Type...'
-            # Default to bundled ocmtoc (v1.0.4+)
-            BLOB_OCMTOC=1
-            if command -v mtoc >/dev/null 2>&1; then
-                # mtoc or ocmtoc found ... Check if ocmtoc 1.0.4/newer
-                # - Both variants share the same binary name
-                # - ocmtoc >= v1.0.4 accepts '--fullversion'
-                if mtoc --fullversion 2>/dev/null | grep -qi 'Acidanthera ocmtoc'; then
-                    # ocmtoc >= v1.0.4 found ... Use system instance
-                    BLOB_OCMTOC=0
-                fi
-            fi
-            if (( BLOB_OCMTOC )); then
-                msg_raw "Target MTOC:- 'Bundled'"
-            else
-                msg_raw "Target MTOC:- 'System'"
-            fi
-            msg_status '...OK'; printf '\n'
-
-            msg_base "Prep 'Tools_Def' file..."
-            # Locate and Prep 'Tools_Def'
-            # Fix any previous leftovers
-            # Must be after 'BLOB_OCMTOC' is set
-            if [[ -f "${TOOLSDEF_KEPT}" ]]; then
-                if (( BLOB_OCMTOC )); then
-                    cp -pf "${TOOLSDEF_KEPT}" "${TOOLSDEF_MAIN}"
-                else
-                    mv -f "${TOOLSDEF_KEPT}" "${TOOLSDEF_MAIN}"
-                fi
-            elif [[ -f "${TOOLSDEF_MAIN}" ]]; then
-                if (( BLOB_OCMTOC )); then
-                    cp -pf "${TOOLSDEF_MAIN}" "${TOOLSDEF_KEPT}"
-                fi
-            else
-                # Unable to proceed ... 'Tools_Def' not found
-                TrapERR "Could Not Locate 'Tools_Def' file ... Exiting"
-            fi
-            msg_status '...OK'; printf '\n'
-
-            if (( BLOB_OCMTOC )); then
-                if grep -Eq '^\*_XCODE5_\*_MTOC_PATH[[:space:]]*=[[:space:]]*mtoc' "${TOOLSDEF_MAIN}"; then
-                    # Path to bundled ocmtoc ... File name is 'mtoc'
-                    BUNDLED_OCMTOC="${BLOB_DIR}/mtoc"
-
-                    if [[ ! -f "${BUNDLED_OCMTOC}" ]]; then
-                        TrapERR 'Could Not Locate Bundled MTOC ... Exiting'
-                    else
-                        msg_base 'Prep Bundled MTOC...'
-                        # Remove quarantine attribute if present
-                        if command -v xattr >/dev/null 2>&1; then
-                            if xattr -p  com.apple.quarantine "${BUNDLED_OCMTOC}" >/dev/null 2>&1; then
-                                xattr -d com.apple.quarantine "${BUNDLED_OCMTOC}"
-                            fi
-                        fi
-
-                        chmod +x "${BUNDLED_OCMTOC}"
-                        if ! "${BUNDLED_OCMTOC}" --fullversion 2>/dev/null | grep -qi 'Acidanthera ocmtoc'; then
-                            TrapERR "Invalid Bundled MTOC ... Exiting"
-                        fi
-                        msg_status '...OK'; printf '\n'
-
-                        msg_base 'Create Temp Tools_Def...'
-                        ErrMsg="Could Not Create 'TOOLSDEF tmpfile' ... Exiting"
-                        tmpfile="$( mktemp "${TMP_BIN}"/toolsdef.XXXXXX )" || TrapERR "${ErrMsg}"
-                        sed -E "s|^\*_XCODE5_\*_MTOC_PATH[[:space:]]*=.*|*_XCODE5_*_MTOC_PATH = ${BUNDLED_OCMTOC}|" \
-                            "${TOOLSDEF_MAIN}" > "${tmpfile}" && mv -f "${tmpfile}" "${TOOLSDEF_MAIN}" || rm -f "${tmpfile}"
-                        msg_status '...OK'; printf '\n'
-                    fi
-                fi
-            fi
+if [[ "${OS_NAME}" != 'macOS' ]]; then
+    msg_base 'Skip MTOC Sync...'
+    # Not Mac OS ... Continue
+    msg_status '...OK'; printf '\n'
+else
+    msg_base 'Sync MTOC Type...'
+    # Default to Bundled ocmtoc (v1.0.4+)
+    BLOB_OCMTOC=1
+    if command -v mtoc >/dev/null 2>&1; then
+        # mtoc or ocmtoc Found ... Check if ocmtoc 1.0.4/newer
+        # - Both variants share the same binary name
+        # - ocmtoc >= v1.0.4 accepts '--fullversion'
+        if mtoc --fullversion 2>/dev/null | grep -qi 'Acidanthera ocmtoc'; then
+            # ocmtoc >= v1.0.4 Found ... Use System Instance
+            BLOB_OCMTOC=0
         fi
+    fi
+    if (( BLOB_OCMTOC )); then
+        msg_raw "Target MTOC:- 'Bundled'"
+    else
+        msg_raw "Target MTOC:- 'System'"
+    fi
+    msg_status '...OK'; printf '\n'
 
-        if [[ -f "${EXTEND_TWEAKS}" ]]; then
-            if ! source "${EXTEND_TWEAKS}"; then
-                TrapERR "Could Not Source:- '${EXTEND_TWEAKS}'"
+    msg_base "Prep 'Tools_Def' file..."
+    # Locate and Prep 'Tools_Def'
+    # Fix any previous leftovers
+    # Must be after 'BLOB_OCMTOC' is set
+    if [[ -f "${TOOLSDEF_KEPT}" ]]; then
+        if (( BLOB_OCMTOC )); then
+            cp -pf "${TOOLSDEF_KEPT}" "${TOOLSDEF_MAIN}"
+        else
+            mv -f  "${TOOLSDEF_KEPT}" "${TOOLSDEF_MAIN}"
+        fi
+    elif [[ -f "${TOOLSDEF_MAIN}" ]]; then
+        if (( BLOB_OCMTOC )); then
+            cp -pf "${TOOLSDEF_MAIN}" "${TOOLSDEF_KEPT}"
+        fi
+    else
+        # Unable to Proceed ... 'Tools_Def' Not Found
+        trapERR "Could Not Locate 'Tools_Def' file ... Exiting"
+    fi
+    msg_status '...OK'; printf '\n'
+
+    if (( BLOB_OCMTOC )); then
+        if grep -Eq '^\*_XCODE5_\*_MTOC_PATH[[:space:]]*=[[:space:]]*mtoc' "${TOOLSDEF_MAIN}"; then
+            # Path to Bundled ocmtoc ... File Name is 'mtoc'
+            BUNDLED_OCMTOC="${BLOB_DIR}/mtoc"
+
+            if [[ ! -f "${BUNDLED_OCMTOC}" ]]; then
+                trapERR 'Could Not Locate Bundled MTOC ... Exiting'
             else
-                msg_base 'Handle SBAT Tweak...'
-                if ! declare -f tweak_sbat >/dev/null; then
-                    TrapERR "Not Declared:- 'tweak_sbat'"
-                else
-                    if [[ -f "${MAINFILE_KEPT}" ]]; then
-                        cp -pf "${MAINFILE_KEPT}" "${MAINFILE_MAIN}"
-                    else
-                        cp -pf "${MAINFILE_MAIN}" "${MAINFILE_KEPT}"
+                msg_base 'Prep Bundled MTOC...'
+                # Remove Quarantine Attribute if Present
+                if command -v xattr >/dev/null 2>&1; then
+                    if xattr -p  com.apple.quarantine "${BUNDLED_OCMTOC}" >/dev/null 2>&1; then
+                        xattr -d com.apple.quarantine "${BUNDLED_OCMTOC}"
                     fi
+                fi
 
-                    if [[ -f "${SYNCFILE_KEPT}" ]]; then
-                        cp -pf "${SYNCFILE_KEPT}" "${SYNCFILE_MAIN}"
-                    else
-                        cp -pf "${SYNCFILE_MAIN}" "${SYNCFILE_KEPT}"
-                    fi
-                    tweak_sbat "${MAINFILE_MAIN}" "refindplus" || TrapERR "SBAT Tweak Failed:- 'Main'"
-                    tweak_sbat "${SYNCFILE_MAIN}" "gptsync"    || TrapERR "SBAT Tweak Failed:- 'Sync'"
+                chmod a+x "${BUNDLED_OCMTOC}"
+                if ! "${BUNDLED_OCMTOC}" --fullversion 2>/dev/null | grep -qi 'Acidanthera ocmtoc'; then
+                    trapERR "Invalid Bundled MTOC ... Exiting"
                 fi
                 msg_status '...OK'; printf '\n'
 
-                msg_base 'Handle MAIN Tweak...'
-                if ! declare -f tweak_main >/dev/null; then
-                    TrapERR "Not Declared:- 'tweak_main'"
-                else
-                    tweak_main "${MAINFILE_MAIN}"
-                fi
+                msg_base 'Create Temp Tools_Def...'
+                ErrMsg="Could Not Create 'TOOLSDEF tmpfile' ... Exiting"
+                tmpfile="$( mktemp "${TMP_BIN}"/toolsdef.XXXXXX )" || trapERR "${ErrMsg}"
+                sed -E "s|^\*_XCODE5_\*_MTOC_PATH[[:space:]]*=.*|*_XCODE5_*_MTOC_PATH = ${BUNDLED_OCMTOC}|" \
+                    "${TOOLSDEF_MAIN}" > "${tmpfile}" && mv -f "${tmpfile}" "${TOOLSDEF_MAIN}" || rm -f "${tmpfile}"
                 msg_status '...OK'; printf '\n'
             fi
         fi
     fi
 fi
 
-# Execute Version Build
+# Misc Developer Specific Items
+# Skipped on Third Party Builds
+if [[ ! -f "${EXTEND_TWEAKS}" ]]; then
+    msg_base "Misc 'Extend' Tweaks..."
+    msg_raw "Skipped"
+    msg_status '...OK'; printf '\n'
+else
+    if ! source "${EXTEND_TWEAKS}"; then
+        trapERR "Could Not Access '${EXTEND_TWEAKS}' ... Exiting"
+    else
+        if ! grep -q '__REFIT_SBAT_' "${MAINFILE_MAIN}"; then
+            msg_base "Run 'SBAT' Tweaks..."
+            msg_raw "Skipped"
+            msg_status '...OK'; printf '\n'
+        else
+            msg_base 'Handle SBAT Tweak...'
+            if ! declare -f tweak_sbat >/dev/null; then
+                trapERR "'tweak_sbat' Not Declared ... Exiting"
+            else
+                if [[ -f "${MAINFILE_KEPT}" ]]; then
+                    cp -pf "${MAINFILE_KEPT}" "${MAINFILE_MAIN}"
+                elif [[ -f "${MAINFILE_MAIN}" ]]; then
+                    cp -pf "${MAINFILE_MAIN}" "${MAINFILE_KEPT}"
+                else
+                    trapERR "Could *NOT* Find Required '${MAINFILE_MAIN}' ... Exiting"
+                fi
+
+                if [[ -f "${SYNCFILE_KEPT}" ]]; then
+                    cp -pf "${SYNCFILE_KEPT}" "${SYNCFILE_MAIN}"
+                elif [[ -f "${SYNCFILE_MAIN}" ]]; then
+                    cp -pf "${SYNCFILE_MAIN}" "${SYNCFILE_KEPT}"
+                else
+                    trapERR "Could *NOT* Find Required '${SYNCFILE_MAIN}' ... Exiting"
+                fi
+
+                tweak_sbat "${MAINFILE_MAIN}" "refindplus" || trapERR "SBAT Tweak on 'Main' Failed ... Exiting"
+                tweak_sbat "${SYNCFILE_MAIN}" "gptsync"    || trapERR "SBAT Tweak on 'Sync' Failed ... Exiting"
+            fi
+            msg_status '...OK'; printf '\n'
+        fi
+
+        msg_base 'Handle MAIN Tweak...'
+        if ! declare -f tweak_main >/dev/null; then
+            trapERR "'tweak_main' Not Declared ... Exiting"
+        else
+            tweak_main "${MAINFILE_MAIN}"
+        fi
+        msg_status '...OK'; printf '\n'
+    fi
+fi
+
+# Execute Build
 ErrMsg="Could Not Find '${EDK2_DIR}' ... Exiting"
-pushd "${EDK2_DIR}" > /dev/null || TrapERR "${ErrMsg}"
-[[ "${RUN_REL}" == 'True' ]] && Exec_Build "REL" "RELEASE" "${BINARY_DIR_REL}"
-[[ "${RUN_DBG}" == 'True' ]] && Exec_Build "DBG" "DEBUG"   "${BINARY_DIR_DBG}"
-[[ "${RUN_NPT}" == 'True' ]] && Exec_Build "NPT" "NOOPT"   "${BINARY_DIR_NPT}"
+pushd "${EDK2_DIR}" > /dev/null || trapERR "${ErrMsg}"
+[[ "${RUN_REL}" == 'True' ]] && dispatcher "REL" "RELEASE" "${BINARY_DIR_REL}"
+[[ "${RUN_DBG}" == 'True' ]] && dispatcher "DBG" "DEBUG"   "${BINARY_DIR_DBG}"
+[[ "${RUN_NPT}" == 'True' ]] && dispatcher "NPT" "NOOPT"   "${BINARY_DIR_NPT}"
 popd > /dev/null || true
 printf '\n\n'
 
-if [[ -z "${END_NOTICE}" ]]; then
-    # Tidy up
+if (( IS_LOCAL )); then
+    # FIle Locations
     msg_info 'Locate the EFI Files:'
     [[ -d "${EDK2_DIR}/Build" ]] && msg_status "RefindPlus EFI Files (BOOTx64)      : '${OUTPUT_DIR}'"
     [[ "${RUN_NPT}" == 'True' ]] && msg_status "RefindPlus EFI Files (Others - NPT) : '${BUILD_DIR_NPT}/X64'"
@@ -1002,10 +1154,22 @@ if [[ -z "${END_NOTICE}" ]]; then
     [[ "${RUN_REL}" == 'True' ]] && msg_status "RefindPlus EFI Files (Others - REL) : '${BUILD_DIR_REL}/X64'"
     printf '\n\n'
 
-    # Wrap Up Notice
-    msg_base "Recommended Action on File Names"
+    # Filename Metadata
+    msg_base "Filename Handling Recommendation"
     msg_raw "Output files have the form: '[METADATA]---[FILENAME].efi'."
-    msg_raw "It is anticipated the metadata will be removed before use."
-fi
+    msg_raw "It is anticipated the metadata will be discarded before use."
+    printf '\n\n'
 
-printf '\n\n'
+    # Binary Blobs
+    msg_base "Binary Blob Clarification"
+    msg_raw "Output files with 'BLB_xx_???' in their filename metadata ARE NOT part of RefindPlus."
+    msg_raw "These are binaries bundled with RefindPlusUDK and are provided as convenience items."
+    msg_raw "These binary blobs ARE NOT built on RefindPlus code and were separately developed."
+    msg_raw "These binary blobs are separately licensed by their actual respective developers."
+    msg_raw "- x64_shell.efi: From OpenCore (OpenShell) ... BSD 3-Clause License."
+    msg_raw "- x64_CleanNvram.efi: From OpenCore ... BSD 3-Clause License."
+    msg_raw "- x64_memtest86p.efi: From memtest.org ... GNU GPLv2 License."
+    msg_raw "- x64_gdisk.efi: From Roderick Smith ... GNU GPLv2 License."
+    msg_raw "- x64_ipxe.efi: From ipxe.org ... GNU GPLv2 License."
+    printf '\n\n'
+fi
