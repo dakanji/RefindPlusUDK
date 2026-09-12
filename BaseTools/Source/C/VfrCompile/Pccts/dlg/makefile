@@ -128,7 +128,9 @@ PCCTS_H=../h
 OUR_CFLAGS= -std=c11 -Wno-unknown-warning-option -Wno-error \
             -Wno-deprecated-register -Wno-pointer-to-int-cast \
             -Wno-deprecated-non-prototype -Wno-strict-prototypes \
-            -Wno-deprecated-declarations -Wno-unused-result
+            -Wno-deprecated-declarations -Wno-unused-result \
+            -Wno-unterminated-string-initialization \
+            -Wno-misleading-indentation
 ###############################################################################
 
 BUILD_CC?=cc

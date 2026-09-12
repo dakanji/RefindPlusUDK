@@ -84,9 +84,11 @@ BUILD_CPPFLAGS = $(INCLUDE) -O2
 # UDK2018 / RefindPlusUDK modern GCC/Clang compatibility flags
 # Force C11 for C, C++14 for C++, and disable misc warnings/errors
 ###############################################################################
-CORE_FLAGS    = -Wno-unknown-warning-option -Wno-deprecated-register \
-                -Wno-deprecated-non-prototype -Wno-deprecated-declarations \
-				-Wno-pointer-to-int-cast -Wno-unused-result -Wno-error
+CORE_FLAGS    = -Wno-unknown-warning-option -Wno-deprecated-declarations \
+                -Wno-deprecated-non-prototype -Wno-deprecated-register \
+                -Wno-unterminated-string-initialization -Wno-error \
+                -Wno-pointer-to-int-cast -Wno-unused-result \
+                -Wno-misleading-indentation
 
 UDK_CFLAGS   := -std=c11 $(CORE_FLAGS)
 UDK_CXXFLAGS := -std=c++14 $(CORE_FLAGS)
